@@ -1,0 +1,70 @@
+You are helping derive a detailed implementation plan for Module 1 of a small Android project called SwissTrainSpotting. 
+
+Project context:
+- Android app written in Java + XML (not Kotlin, not Compose)
+- One repository with:
+  - SwissTrainSpottingApp/ = Android app; this is where this Android Studio project is located
+  - model/ = Python transfer learning and ONNX export
+  - plans/ = planning documents
+- The full architecture already exists and should be respected
+- The app should stay as simple as possible
+- No backend, no authentication, no persistence
+- OCR and ONNX inference are later modules, not part of Module 1
+- This planning request is only for Module 1
+
+Please refer to ../plans/01_architecture.md for the technical details. 
+
+Current overall architecture summary:
+- Module 1: Android App UI
+- Module 2: Image Acquisition & Permissions
+- Module 3: Image Preprocessing
+- Module 4: Model Training & ONNX Export
+- Module 5: ONNX Inference
+- Module 6: OCR (optional)
+- Module 7: Testing & Validation
+
+Module 1 goal:
+Create the initial Android UI and the activity flow needed for later image classification.
+
+Additional design decisions for Module 1:
+- The UI should be as simple as possible
+- It should be usable on both phone and tablet
+- The screen should display the title: "SwissTrainSpotting"
+- Aside from the title, the UI should contain only two buttons:
+  - "Image"
+  - "Camera"
+- "Image" should later trigger image selection / upload
+- "Camera" should later trigger taking a photo with the device camera
+- For now, do not deeply design the image acquisition implementation itself; that belongs mostly to Module 2
+- The milestone for Module 1 is:
+  - the app starts,
+  - the user sees the simple main screen,
+  - tapping one of the buttons switches to an `ImageClassificationActivity`,
+  - and the selected placeholder/demo image is displayed there
+- If using a placeholder image or temporary mock image is practical for Module 1, that is acceptable
+- Keep the architecture simple and conservative
+
+Task:
+Produce a detailed implementation plan for Module 1 only.
+
+Structure the answer exactly as follows:
+
+1. Module purpose
+2. UI structure
+3. Activity structure
+4. Files to create or modify
+5. Step-by-step implementation workflow
+6. Testing strategy
+7. Risks / likely mistakes
+8. Suggested AI tool usage for this module
+9. 2–3 example prompts that could be used later for implementation
+
+Important instructions:
+- Do not write code yet
+- Do not redesign the whole project
+- Do not move into Module 2 details except where unavoidable for activity flow
+- Do not add extra screens, menus, settings, persistence, backend, or authentication
+- Keep it practical, minimal, and realistic for a short student project
+- Prefer a conservative implementation that reduces debugging effort
+
+Save the final plan at plans/module_01/implementation_plan.md

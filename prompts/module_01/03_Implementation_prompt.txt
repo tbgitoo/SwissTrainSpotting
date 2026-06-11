@@ -1,0 +1,16 @@
+Implement Module 1 exactly as planned in plans/module_01/implementation_plan.md.
+
+Constraints:
+- Do not change project structure
+- Do not introduce new frameworks (no Compose, no fragments)
+- Keep MainActivity and ImageClassificationActivity only
+- Keep XML layouts simple (LinearLayout is enough)
+- Only modify:
+  - activity_main.xml
+  - MainActivity.java
+  - AndroidManifest.xml
+- Create:
+  - ImageClassificationActivity.java
+  - activity_image_classification.xml
+- Do not implement camera or image picking yet
+- Both buttons must navigate to ImageClassificationActivity
