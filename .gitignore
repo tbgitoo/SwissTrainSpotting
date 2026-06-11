@@ -216,3 +216,67 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+
+# Dataset
+model/dataset/
+
+# OS
+.DS_Store
+
+
+# ===============================
+# Android (root-level safety)
+# ===============================
+
+# Android Studio / IntelliJ
+.idea/
+*.iml
+
+# Gradle (root-level just in case)
+.gradle/
+local.properties
+
+# Build outputs (in case of accidental nesting)
+**/build/
+
+# Native binaries / APKs
+*.apk
+*.ap_
+*.aab
+
+# ===============================
+# ONNX + ML artifacts
+# ===============================
+
+# Optional: keep if you want (comment out if you DO want to version model)
+# *.onnx
+
+# Large model checkpoints
+*.pt
+*.pth
+
+# ===============================
+# Dataset / generated data
+# ===============================
+
+model/dataset/
+model/output/
+model/checkpoints/
+
+# ===============================
+# Logs and temp files
+# ===============================
+
+*.log
+tmp/
+temp/
+
+# ===============================
+# OS / editor leftovers
+# ===============================
+
+Thumbs.db
+.vscode/
+
+
