@@ -1,0 +1,1 @@
+Produce a conservative v2 of the plan at plan/01_architecture.md with MobileNetV2, simplified preprocessing, OCR as best-effort only, and a development order that starts with UI and image acquisition.

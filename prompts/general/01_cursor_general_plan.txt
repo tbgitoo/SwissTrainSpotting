@@ -1,0 +1,79 @@
+You are helping design a small but real project called SwissTrainSpotting.
+
+Repository structure:
+- SwissTrainSpottingApp/   -> Android Studio project (Java + XML, not Kotlin, not Compose)
+- model/                   -> Python code / notebook for transfer learning and ONNX export
+- plans/                   -> planning documents
+
+Project goal:
+Build a lightweight Android app that allows the user to take a picture or select one from the device, then classify Swiss trains / locomotives / rolling stock locally on-device using an ONNX model. As a secondary feature, the app should attempt OCR-based extraction of visible train or locomotive numbers. The app should remain simple: no authentication, no backend, no cloud inference, no persistent storage. It should follow Android privacy best practices with minimal permissions and use the system photo picker where appropriate.
+
+Current intended modules:
+1. Android App UI
+2. Image Acquisition & Permissions
+3. Image Preprocessing Pipeline
+4. Model Training & ONNX Export
+5. ONNX Inference Integration
+6. OCR / Train Number Recognition
+7. Testing & Validation
+
+Constraints:
+- Android side must be Java + XML
+- The project should be feasible in a short timeframe
+- Dataset is very small (own photos, tens of images at most)
+- Transfer learning is acceptable; the goal is a working end-to-end pipeline, not high classification accuracy
+- Architecture should support sequential implementation with verifiable milestones
+- Avoid overengineering
+
+Task:
+Produce a practical architecture and implementation plan for this repository. Save it as 01_architecture.md in the plans folder.
+
+I want the answer structured as follows:
+
+A. High-level end-to-end data flow
+Describe the full flow from image acquisition to preprocessing to ONNX inference to OCR to result display.
+
+B. Per-module responsibilities
+For each module:
+- purpose
+- inputs
+- outputs
+- dependencies on earlier modules
+- what “done” looks like (milestone)
+
+C. Repository/file placement
+Propose where important files should live, including:
+- Python training/export code
+- ONNX model artifact
+- Android asset location for the ONNX model
+- class labels / metadata if needed
+- planning docs
+
+D. Interface contracts between Python and Android
+Define exactly what must match between training/export and Android inference, especially:
+- image size
+- normalization
+- channel order
+- tensor shape
+- output interpretation
+
+E. Main technical risks / likely failure points
+Especially mismatches between:
+- Python preprocessing vs Android preprocessing
+- ONNX export vs ONNX Runtime input expectations
+- OCR reliability
+- Android permissions / image URI handling
+
+F. Suggested development order
+Give a sequential build order that minimizes wasted effort and enables milestone-based testing after each step.
+
+G. Minimal testing strategy
+For each module, suggest one or two concrete verification checks that are realistic for a small app project.
+
+Important instructions:
+- Be concrete and practical, not generic
+- Optimize for simplicity and fast progress
+- Do not introduce backend/database/authentication features
+- Do not switch the Android part to Kotlin or Compose
+- Prefer one-activity Android architecture unless there is a strong reason otherwise
+- Call out any assumptions explicitly

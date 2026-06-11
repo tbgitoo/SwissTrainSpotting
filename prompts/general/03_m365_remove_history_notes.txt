@@ -1,0 +1,444 @@
+Can you remove the history notes from the architecture plan? For implementation, it is not needed to know what changed and why from version v1 to version v2. Also, please order the modules in the correct numerical order as intended. Here's the plan plan so far:
+
+# SwissTrainSpotting — Architecture & Implementation Plan (v2)
+
+**Status:** Conservative v2  
+**Target stack:** Java + XML Android app, Python transfer learning, ONNX Runtime on-device, ML Kit OCR (optional)  
+**Scope:** Local-only, no backend, no persistence, minimal permissions
+
+**Changes from v1:** MobileNetV2 backbone; direct 224×224 resize (no center-crop); OCR demoted to last-step bonus feature; development starts with UI and image acquisition.
+
+---
+
+## Assumptions (explicit)
+
+| Assumption | Rationale |
+|------------|-----------|
+| **3–10 train/loco classes** | Very small dataset (tens of photos); fewer classes keeps training and label management tractable. |
+| **Folder-per-class dataset** | `model/data/raw/<class_name>/*.jpg` — no annotation tool. |
+| **MobileNetV2 (ImageNet pretrained)** | Mature, widely documented, reliable ONNX export via torchvision; conservative choice over newer variants. |
+| **Input size 224×224 RGB** | Standard MobileNetV2 input; matches torchvision defaults. |
+| **Simplified preprocessing: stretch-resize only** | Single `Resize((224, 224))` step — no center-crop, no letterboxing. Aspect ratio may distort; acceptable for a pipeline demo and much easier to mirror on Android. |
+| **ImageNet normalization** | Required for pretrained MobileNetV2 weights; same mean/std on Python and Android. |
+| **Single activity (`MainActivity`)** | One screen; no navigation graph. |
+| **Gallery via system photo picker** | `PickVisualMedia` — no `READ_MEDIA_*` on API 33+. |
+| **Camera via `TakePicture` contract** | Cache URI; `CAMERA` permission requested only when user taps “Take photo”. |
+| **OCR is best-effort only** | Not required for project completion. No regex tuning sprint. Show raw ML Kit text or a soft “no number found” message; failures are expected and acceptable. |
+| **No model hot-swap** | One bundled ONNX + `labels.json` in `assets/`; manual copy after retrain. |
+| **minSdk 24, targetSdk 36** | Matches existing `build.gradle`. |
+
+---
+
+## A. High-level end-to-end data flow
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                              USER (MainActivity)                            │
+│  [Take Photo]  [Choose from Gallery]  [Classify]                            │
+└───────────────────────────────┬─────────────────────────────────────────────┘
+                                │
+                    Activity Result API
+                                │
+                                ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    IMAGE ACQUISITION & URI RESOLUTION                       │
+│  openInputStream(uri) → decode Bitmap (with inSampleSize if large)          │
+│  EXIF orientation fix (rotate once before preview)                          │
+│  Hold Bitmap in memory for session; show in ImageView                       │
+└───────────────────────────────┬─────────────────────────────────────────────┘
+                                │ Bitmap (ARGB_8888)
+                                ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│              IMAGE PREPROCESSING — simplified (ImagePreprocessor)           │
+│  1. Resize directly to 224×224 (bilinear; stretch to square)                │
+│  2. Extract RGB → float[1][3][224][224] in NCHW order                      │
+│  3. pixel/255, then per-channel (x - mean) / std                            │
+└───────────────┬─────────────────────────────┬───────────────────────────────┘
+                │ float[] input tensor          │ same preview Bitmap (for OCR)
+                ▼                               ▼
+┌───────────────────────────────┐   ┌─────────────────────────────────────────┐
+│  ONNX INFERENCE (required)    │   │  OCR (optional, best-effort)            │
+│  OnnxClassifier               │   │  ML Kit TextRecognizer on preview       │
+│  OrtSession.run → logits      │   │  Display first digit-like token or      │
+│  softmax → top-1 label        │   │  “No number detected” — no hard parse   │
+└───────────────┬───────────────┘   └─────────────────────────────────────────┘
+                │
+                ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         RESULT DISPLAY (UI)                                 │
+│  • Top class label + confidence %  (required)                               │
+│  • OCR line labeled “experimental” (optional; may be empty)                 │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+**Training-side flow (offline, `model/` — starts after UI/acquisition milestones):**
+
+```
+Photos in data/raw/<class>/  →  train/val split  →  fine-tune MobileNetV2
+  →  export ONNX (opset 17)  →  verify_onnx.py  →  copy to Android assets/
+```
+
+Both flows share `model_metadata.json` (Section D). Preprocessing is intentionally minimal so the Android implementation stays a short, auditable method.
+
+---
+
+## B. Per-module responsibilities
+
+### Module 1 — Android App UI
+
+| Field | Detail |
+|-------|--------|
+| **Purpose** | Single-screen UX: buttons for camera/gallery/classify; image preview; result text areas. |
+| **Inputs** | User taps; in-memory `Bitmap`; classification result strings. |
+| **Outputs** | Registers acquisition launchers; orchestrates classify on background thread. |
+| **Dependencies** | Module 2 for real images; Modules 3/5 for real labels (placeholders OK initially). |
+| **Done (milestone)** | App launches with layout: `ImageView`, “Take photo”, “Choose photo”, “Classify”, result `TextView`s. “Classify” shows placeholder text until ML is wired. **First module to implement.** |
+
+**Key files:** `MainActivity.java`, `activity_main.xml`, `strings.xml`
+
+---
+
+### Module 2 — Image Acquisition & Permissions
+
+| Field | Detail |
+|-------|--------|
+| **Purpose** | Get a displayable `Bitmap` from camera or gallery; minimal permissions. |
+| **Inputs** | Button taps; `ActivityResultLauncher` callbacks. |
+| **Outputs** | Decoded, orientation-corrected `Bitmap` in memory. |
+| **Dependencies** | Module 1 (buttons + preview `ImageView`). |
+| **Done (milestone)** | Gallery works without storage permission (API 33+ emulator); camera works with runtime `CAMERA` grant; image not sideways; no crash on cancel. **Second module to implement.** |
+
+**Key files:** `MainActivity.java`, `AndroidManifest.xml` (`CAMERA` only)
+
+---
+
+### Module 3 — Image Preprocessing Pipeline
+
+| Field | Detail |
+|-------|--------|
+| **Purpose** | Bitmap → ONNX input tensor using the simplified stretch-resize pipeline. |
+| **Inputs** | `Bitmap`; constants from `model_metadata.json`. |
+| **Outputs** | `float[1 × 3 × 224 × 224]`, NCHW, float32. |
+| **Dependencies** | Metadata contract (Section D); Module 4 `verify_onnx.py` for cross-check. |
+| **Done (milestone)** | `ImagePreprocessor.toTensor()` returns correct shape; JUnit on shared fixture matches Python within `1e-4` (relaxed vs v1 — stretch-resize tolerates minor bilinear differences). |
+
+**Key files:** `ImagePreprocessor.java`
+
+**Simplified algorithm (no crop):**
+
+```java
+Bitmap scaled = Bitmap.createScaledBitmap(bitmap, 224, 224, true);
+// loop pixels → R,G,B → /255 → normalize → NCHW flat array
+```
+
+---
+
+### Module 4 — Model Training & ONNX Export
+
+| Field | Detail |
+|-------|--------|
+| **Purpose** | Fine-tune `mobilenet_v2` pretrained on folder dataset; export ONNX + metadata. |
+| **Inputs** | `model/data/raw/<class>/*.jpg`; `config.yaml`. |
+| **Outputs** | `swiss_trains.onnx`, `labels.json`, `model_metadata.json`. |
+| **Dependencies** | Photos collected (can overlap with Module 2 manual testing). |
+| **Done (milestone)** | `train.py` + `export_onnx.py` complete; `verify_onnx.py` prints top-1 on a training image; artifacts copied to `assets/`. |
+
+**Key files:** `model/scripts/train.py`, `export_onnx.py`, `verify_onnx.py`, `config.yaml`
+
+**Conservative training defaults:** freeze backbone initially or use low LR (`1e-4`), 10–20 epochs, basic augmentation only (`RandomHorizontalFlip`), 80/20 split. Accept low val accuracy.
+
+---
+
+### Module 5 — ONNX Inference Integration
+
+| Field | Detail |
+|-------|--------|
+| **Purpose** | Load bundled model; single forward pass; map index → label. |
+| **Inputs** | Preprocessed `float[]`; assets ONNX + `labels.json`. |
+| **Outputs** | `ClassificationResult` (top-1 label + confidence). Top-3 optional, not required. |
+| **Dependencies** | Modules 3, 4. |
+| **Done (milestone)** | Classify in-memory preview bitmap returns non-null label; log confirms output shape `[1, num_classes]`. |
+
+**Key files:** `OnnxClassifier.java`, `ClassificationResult.java`
+
+---
+
+### Module 6 — OCR / Train Number Recognition (best-effort only)
+
+| Field | Detail |
+|-------|--------|
+| **Purpose** | Optionally surface visible digits; **not** a reliable parser. |
+| **Inputs** | Preview `Bitmap` (not the 224×224 tensor). |
+| **Outputs** | Raw ML Kit string or simple “contains digits” snippet; often empty. |
+| **Dependencies** | Module 2. Independent of classification quality. |
+| **Done (milestone)** | Calling OCR on a bitmap does not crash; UI shows result under an “Experimental” label; empty result is normal. **Last feature before polish; skip if time-constrained.** |
+
+**Scope limits (intentional):** No custom regex library, no second OCR engine, no ROI cropping, no confidence-based gating. Display `textRecognizer.process(image).getText()` trimmed, or hide section if blank.
+
+**Key files:** `TrainNumberOcr.java`
+
+---
+
+### Module 7 — Testing & Validation
+
+| Field | Detail |
+|-------|--------|
+| **Purpose** | Smoke checks per milestone; one end-to-end manual pass. |
+| **Inputs** | Fixtures; 3–5 photos; device/emulator. |
+| **Outputs** | Green unit test for preprocessor; manual checklist pass. |
+| **Dependencies** | Modules 1–5 for core “done”; Module 6 optional. |
+| **Done (milestone)** | Pick photo → Classify → label shown. OCR line may be empty. No crash on rotation or permission denial. |
+
+---
+
+## C. Repository / file placement
+
+```
+SwissTrainSpotting/
+├── plans/
+│   └── 01_architecture.md          ← this document (v2)
+│
+├── model/
+│   ├── requirements.txt
+│   ├── config.yaml                 # backbone: mobilenet_v2, image_size: 224
+│   ├── README.md
+│   ├── data/
+│   │   ├── raw/<class_slug>/*.jpg
+│   │   └── test_fixture.jpg        # one image for verify_onnx + JUnit
+│   ├── scripts/
+│   │   ├── train.py
+│   │   ├── export_onnx.py
+│   │   └── verify_onnx.py
+│   └── export/
+│       ├── swiss_trains.onnx
+│       ├── labels.json
+│       └── model_metadata.json
+│
+└── SwissTrainSpottingApp/
+    └── app/src/main/
+        ├── assets/
+        │   ├── swiss_trains.onnx
+        │   ├── labels.json
+        │   └── model_metadata.json
+        └── java/com/tb/swisstrainspotting/
+            ├── MainActivity.java
+            ├── ImagePreprocessor.java
+            ├── OnnxClassifier.java
+            ├── TrainNumberOcr.java      # optional; last
+            └── ClassificationResult.java
+```
+
+### Copy workflow
+
+```bash
+cp model/export/{swiss_trains.onnx,labels.json,model_metadata.json} \
+   SwissTrainSpottingApp/app/src/main/assets/
+```
+
+### `model_metadata.json` (v2 — simplified preprocessing)
+
+```json
+{
+  "version": 2,
+  "backbone": "mobilenet_v2",
+  "input_name": "input",
+  "output_name": "output",
+  "input_shape": [1, 3, 224, 224],
+  "input_dtype": "float32",
+  "layout": "NCHW",
+  "color_order": "RGB",
+  "crop": "none",
+  "resize": { "width": 224, "height": 224, "method": "bilinear_stretch" },
+  "normalize": {
+    "scale_to_0_1": true,
+    "mean": [0.485, 0.456, 0.406],
+    "std": [0.229, 0.224, 0.225]
+  },
+  "softmax": "applied_in_app",
+  "opset_version": 17
+}
+```
+
+### `labels.json`
+
+```json
+{
+  "version": 1,
+  "classes": [
+    { "index": 0, "id": "re_460", "display_name": "SBB Re 460" }
+  ]
+}
+```
+
+Indices must match `class_to_idx` order from `ImageFolder` at export time.
+
+---
+
+## D. Interface contracts (Python ↔ Android)
+
+Fixed for v2 unless `model_metadata.json` is regenerated.
+
+| Contract item | Value | Python | Android |
+|---------------|-------|--------|---------|
+| **Backbone** | MobileNetV2 | `models.mobilenet_v2(weights=...)` | N/A (ONNX only) |
+| **Spatial size** | 224 × 224 | `Resize((224, 224))` | `createScaledBitmap(224, 224, true)` |
+| **Crop** | None | No `CenterCrop` | No crop step |
+| **Color** | RGB | PIL/torchvision RGB | Extract R, G, B from ARGB |
+| **Layout** | NCHW | `(1, 3, 224, 224)` | Flat `float[]`: all C0, then C1, then C2 |
+| **Scale** | ÷ 255 → [0, 1] | `ToTensor()` | `pixel / 255.0f` |
+| **Normalize** | ImageNet mean/std | `Normalize(mean, std)` | `(v - mean[c]) / std[c]` |
+| **Dtype** | float32 | `torch.float32` | `OnnxTensor` float32 |
+| **Input name** | `"input"` | `input_names=["input"]` | `session.run(Map.of("input", t))` |
+| **Output name** | `"output"` | `output_names=["output"]` | Named or first output |
+| **Output shape** | `[1, N]` | N = class count | Logits; softmax in Java |
+| **Batch** | 1 | Fixed at export | Always 1 |
+| **ONNX opset** | 17 | `opset_version=17` | `onnxruntime-android` 1.16+ |
+
+### Python transforms (canonical — copy into `train.py` and `verify_onnx.py`)
+
+```python
+transforms.Compose([
+    transforms.Resize((224, 224)),   # stretch; no crop
+    transforms.ToTensor(),
+    transforms.Normalize(
+        mean=[0.485, 0.456, 0.406],
+        std=[0.229, 0.224, 0.225],
+    ),
+])
+```
+
+### Export snippet
+
+```python
+model = models.mobilenet_v2(weights=None)
+model.classifier[1] = nn.Linear(model.last_channel, num_classes)
+# ... load fine-tuned weights ...
+model.eval()
+dummy = torch.randn(1, 3, 224, 224)
+torch.onnx.export(
+    model, dummy, path,
+    input_names=["input"], output_names=["output"],
+    opset_version=17,
+    dynamic_axes=None,
+)
+```
+
+### Verification gate
+
+`verify_onnx.py` must:
+
+1. Preprocess `test_fixture.jpg` with the same `Compose` above.
+2. Run ONNX; print top-1 and output shape.
+3. Write `test_fixture_tensor_head.json` (first 20 floats + shape) for Android JUnit.
+
+No separate crop/resize code paths — one function used by train, verify, and documented for Android.
+
+---
+
+## E. Main technical risks / likely failure points
+
+### 1. Preprocessing mismatch (reduced but not zero)
+
+| Risk | Mitigation |
+|------|------------|
+| Android vs PyTorch bilinear slight drift | v2 uses one resize step; compare mean tensor value in verify script vs JUnit; tolerance `1e-4`. |
+| Stretch distorts trains oddly | Document in UI as demo limitation; user can retake closer to square. |
+| NCHW index order wrong | Log `tensor[0]`, `tensor[224*224]`, `tensor[2*224*224]` on both sides. |
+| RGB vs BGR | Never use OpenCV BGR on Android; explicit channel extract. |
+
+### 2. ONNX export vs ONNX Runtime
+
+| Risk | Mitigation |
+|------|------------|
+| Unsupported ops | MobileNetV2 + opset 17 is well-trodden; run ORT on desktop before copying to assets. |
+| Wrong input/output names | Read from `model_metadata.json` in Java. |
+| APK size (~14 MB model) | Acceptable; no quantization in v2. |
+| Double softmax | Export logits; softmax once in `OnnxClassifier`. |
+
+### 3. OCR (deprioritized)
+
+| Risk | Mitigation |
+|------|------------|
+| Usually returns nothing useful | Expected; label UI “Experimental”; not in core definition of done. |
+| ML Kit first-run download | Accept one-time network; document in README. |
+| OCR slows classify | Run OCR **after** classification or on separate tap; or fire-and-forget with timeout. |
+| User treats OCR as authoritative | Copy in `strings.xml`: “Number detection is best-effort only.” |
+
+### 4. Permissions / URI handling
+
+| Risk | Mitigation |
+|------|------------|
+| OOM on 12 MP photos | `inSampleSize` decode; max long edge ~1536 for preview. |
+| EXIF rotation | Fix in Module 2 before preview; preprocess the same corrected bitmap. |
+| Camera permission denied | Toast + disable camera button. |
+| Lost bitmap on rotation | `onSaveInstanceState` not required (no persistence); retain bitmap in memory if config change handled, or accept re-pick (simplest: document “rotation clears image” for v2). |
+
+### 5. Small dataset
+
+| Risk | Mitigation |
+|------|------------|
+| Random guessing | Show confidence; treat < 40% as “uncertain” in UI copy only. |
+| Overfitting | Basic augmentation; goal is pipeline not accuracy. |
+
+---
+
+## F. Suggested development order
+
+**Principle:** Ship a usable photo picker app first; add ML when photos and UI already work. OCR last.
+
+| Step | What | Milestone check |
+|------|------|-----------------|
+| **0** | Tiny scaffolding | `assets/` folder exists; placeholder `labels.json` with one class so app compiles later. |
+| **1** | **Module 1 — UI** | Screen with preview, three buttons, placeholder classify result. |
+| **2** | **Module 2 — Acquisition** | Real camera + gallery → preview updates. **App is demoable without ML.** |
+| **3** | Collect photos | Use the app to gather `model/data/raw/<class>/` while building Python side. |
+| **4** | **Module 4 — Train + export** | MobileNetV2 fine-tune; `verify_onnx.py` passes; copy to `assets/`. |
+| **5** | **Module 3 — Preprocessing** | `ImagePreprocessor` + JUnit vs Python fixture. |
+| **6** | **Module 5 — ONNX inference** | `OnnxClassifier` loads model; wire “Classify” button. **Core product done.** |
+| **7** | **Module 7 — Smoke test** | Manual pass on 3 photos; fix OOM/rotation if cheap. |
+| **8** | **Module 6 — OCR (optional)** | Add experimental line; skip entirely if schedule tight. |
+
+Steps 1–2 are the v2 priority shift. Steps 4–6 can pause at step 2 indefinitely — the app still demonstrates image capture.
+
+**Not in v2 scope:** CameraX, navigation component, model quantization, custom OCR rules, top-k UI, persistent history.
+
+---
+
+## G. Minimal testing strategy
+
+| Module | Checks |
+|--------|--------|
+| **1 — UI** | Manual: launch; all controls visible; placeholder text on Classify. |
+| **2 — Acquisition** | Manual: gallery without storage prompt (API 33+); camera with permission; cancel does not crash. |
+| **3 — Preprocessing** | JUnit: shape `150528` (1×3×224×224); first 20 floats ≈ Python JSON (`1e-4`). |
+| **4 — Train/export** | `verify_onnx.py` exit 0; ONNX file < 20 MB; `labels.json` class count = output dim. |
+| **5 — Inference** | Manual: Classify shows label string + numeric confidence; log output names match metadata. |
+| **6 — OCR** | Manual: does not crash on any image; blank OCR is OK. **Not required for ship.** |
+| **7 — E2E** | Pick photo → Classify → label appears within ~2 s on mid-range device. |
+
+### Definition of done (v2 — core)
+
+> User can take or pick a photo, tap Classify, and see an on-device locomotive class label with confidence. No account, no saved data. OCR is a nice-to-have shown under an “Experimental” label.
+
+---
+
+## Appendix: Gradle dependencies (add at Module 5; OCR at Module 6)
+
+```gradle
+implementation 'com.microsoft.onnxruntime:onnxruntime-android:1.19.2'
+// Module 6 only:
+implementation 'com.google.mlkit:text-recognition:16.0.1'
+```
+
+## Appendix: Classify orchestration (Module 5+)
+
+```java
+// Background thread
+Bitmap bitmap = currentPreviewBitmap;
+float[] input = ImagePreprocessor.toTensor(bitmap);
+ClassificationResult result = onnxClassifier.classify(input);
+// Main thread: update label + confidence TextViews
+// OCR (step 8 only): optional, non-blocking
+```
+
+Keep inference off the main thread; a simple progress `ProgressBar` or disabled Classify button is enough for v2.
