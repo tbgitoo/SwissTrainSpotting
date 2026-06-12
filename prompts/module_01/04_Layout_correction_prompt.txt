@@ -1,0 +1,6 @@
+Prompt 1:
+Yes, this is good. But for visibility reasons, especially on phone, can the two buttons be vertically arranged and made to fill most of the available horizontal space? May 80% of the total width? And the font should be significantly larger to improve readability on small screens.
+
+
+Prompt 2:
+Can you double the font size for each of the two buttons?
