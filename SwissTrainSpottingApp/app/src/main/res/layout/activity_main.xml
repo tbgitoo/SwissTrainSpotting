@@ -23,7 +23,7 @@
             android:id="@+id/tvTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="SwissTrainSpotting"
+            android:text="@string/screen_title"
             android:textSize="42sp"
             android:textStyle="bold"
             android:textColor="?attr/colorOnBackground"
@@ -40,7 +40,7 @@
                 android:id="@+id/btnImage"
                 android:layout_width="match_parent"
                 android:layout_height="90dp"
-                android:text="Image"
+                android:text="@string/image_button"
                 android:textSize="42sp" />
 
             <!-- Spacer between buttons -->
@@ -52,7 +52,7 @@
                 android:id="@+id/btnCamera"
                 android:layout_width="match_parent"
                 android:layout_height="90dp"
-                android:text="Camera"
+                android:text="@string/camera_button"
                 android:textSize="42sp" />
 
         </LinearLayout>

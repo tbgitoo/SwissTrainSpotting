@@ -85,6 +85,15 @@ Package: `com.tb.swisstrainspotting`. Plan reference: `../plans/01_architecture.
 
 ---
 
+## UI interaction constraints
+
+- Prefer large, easily tappable buttons
+- Do not rely on small toolbar icons for core navigation
+- Important actions (e.g., back navigation) should be represented by explicit UI buttons
+- Design for low-precision interaction (e.g. including unfavorable situations like gloves, indirect viewing)
+
+---
+
 ## Out of scope for agents
 
 - `model/` Python training pipeline (separate folder).

@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">SwissTrainSpotting</string>
+    <string name="screen_title">SwissTrainSpotting</string>
+    <string name="back_navigation">← Back</string>
+    <string name="image_button">Image</string>
+    <string name="camera_button">Camera</string>
 </resources>
