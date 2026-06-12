@@ -14,12 +14,15 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_back"
-            android:layout_width="120dp"
-            android:layout_height="48dp"
             android:text="@string/back_navigation"
-            android:textSize="16sp" />
+            app:icon="@drawable/ic_arrow_left_white"
+            android:textSize="16sp"
+            android:layout_height="48dp"
+            android:layout_width="120dp"/>
+
+
 
         <TextView
             android:id="@+id/tv_title"
