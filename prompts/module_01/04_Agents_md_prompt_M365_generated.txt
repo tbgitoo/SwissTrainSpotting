@@ -1,0 +1,26 @@
+For the Android Studio project, located in the SwissTrainSpottingApp folder, I need an AGENTS.md file. Place it at SwissTrainSpottingApp/AGENTS.md
+
+I would like that file to respect the following general guidelines:
+
+- The Android project must remain Java + XML only.
+- Do not introduce Kotlin or Jetpack Compose.
+- Keep the UI and architecture simple and conservative.
+- Avoid unnecessary Android complexity such as fragments, navigation components, custom toolbars, or advanced layout systems unless explicitly requested.
+- Prefer simple Activities and simple XML layouts.
+- User-visible strings must not be hardcoded in XML layouts or Java code.
+- All user-visible strings should go into res/values/strings.xml and be referenced from there.
+- Avoid framework drift and class mismatches between platform Android widgets and AndroidX/AppCompat widgets.
+- In particular:
+  - never use android.widget.Toolbar
+  - if a toolbar is required, always use androidx.appcompat.widget.Toolbar
+  - XML widget types and Java imports must match exactly
+  - if uncertain, prefer not introducing a custom Toolbar at all
+- Prefer minimal, milestone-based changes.
+- Avoid touching unrelated files.
+- For small XML/UI edits, prefer rewriting the full file over brittle partial patching if patching is likely to fail.
+- Keep OCR optional and out of the critical path.
+- Do not introduce backend, authentication, cloud inference, or persistent storage.
+- Do not redesign the project; only define practical agent guardrails and coding conventions.
+- The AGENTS.md file should be short, strict, and practical, not a long essay.
+
+Please draft the full AGENTS.md content for this Android project only.
