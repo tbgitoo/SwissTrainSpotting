@@ -4,3 +4,6 @@ Yes, this is good. But for visibility reasons, especially on phone, can the two 
 
 Prompt 2:
 Can you double the font size for each of the two buttons?
+
+Prompt 3:
+In the imageClassification screen, I need have a back button that allows me to navigate back to the main screen. Also, it would be nice to keep the title SwissTrainSpotting also in the image classification screen.
