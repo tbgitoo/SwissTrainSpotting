@@ -1,0 +1,133 @@
+Implement Module 2 Phase B only for SwissTrainSpottingApp.
+
+CONTEXT
+- Project: Android app in Java + XML
+- minSdk: 24
+- Existing state:
+  - Module 1 is done
+  - Module 2 Phase A is already working
+  - MainActivity and ImageClassificationActivity already exist
+  - The system photo picker path already works
+- Follow AGENTS.md strictly
+- Use the existing architecture and current codebase as baseline
+- Do not redesign architecture
+- Do not undo or rewrite the already working picker path
+
+OBJECTIVE
+Add the camera acquisition path so that the user can tap Camera in MainActivity, open the device camera, capture an image, and see the captured image in ImageClassificationActivity.
+
+IMPORTANT SCOPE LIMIT
+This task is Phase B only.
+
+Implement:
+- CAMERA permission
+- standard camera capture
+- temporary output file / cache Uri only if required
+- captured image decode + display
+
+Do NOT implement:
+- CameraX
+- custom camera preview
+- cropping UI
+- image preprocessing for ONNX
+- OCR
+- persistence
+- storage/gallery history
+- READ_MEDIA_IMAGES / READ_EXTERNAL_STORAGE / WRITE_EXTERNAL_STORAGE
+- new activities
+- fragments
+- Navigation Component
+- ViewModels
+- EXIF correction unless strictly required to make the image visible
+- unrelated refactors
+
+ARCHITECTURAL RULES
+- MainActivity remains only a navigation hub
+- MainActivity must NOT request camera permission
+- ImageClassificationActivity owns:
+  - reading acquisition mode
+  - requesting camera permission
+  - launching camera capture
+  - decoding and displaying the resulting image
+- Keep the already working GALLERY flow intact
+
+REQUIRED CHANGES
+
+1. Manifest
+- Add CAMERA permission
+- Add FileProvider only if required by the chosen standard capture path
+- If FileProvider is added, configure it minimally and correctly
+
+2. Camera launch flow
+- In ImageClassificationActivity, when acquisition mode is CAMERA:
+  - request CAMERA permission only for this path
+  - if granted, launch the simplest standard camera capture flow
+  - use a temporary cache file and Uri if required
+  - do not save permanent files beyond the current session goal
+
+3. Result handling
+- After capture, decode the resulting image conservatively for display
+- Reuse existing decode/display pipeline where sensible
+- Close all streams / file descriptors properly
+- Handle cancel and failure safely without crash
+- If permission is denied, provide simple user feedback and do not crash
+
+4. Resource hygiene
+- Any newly introduced user-visible strings must go into strings.xml
+- If FileProvider is required, add only the minimal XML needed
+- Keep layout changes minimal and only if needed
+
+FILES THAT MAY BE MODIFIED
+- app/src/main/java/com/tb/swisstrainspotting/ImageClassificationActivity.java
+- app/src/main/java/com/tb/swisstrainspotting/MainActivity.java (only if current mode passing needs a minimal adjustment)
+- app/src/main/AndroidManifest.xml
+- app/src/main/res/values/strings.xml
+- app/src/main/res/xml/file_paths.xml (only if FileProvider is required)
+- app/src/main/res/layout/activity_image_classification.xml (only if necessary)
+
+FILES / FEATURES THAT MUST NOT BE ADDED
+- no CameraX dependencies
+- no custom camera screen
+- no storage permissions
+- no persistence layer
+- no preprocessing / ONNX / OCR
+- no new activities
+- no test files in this step unless absolutely needed to fix compilation
+
+IMPLEMENTATION STYLE
+- Prefer the simplest standard Android mechanism over elegance
+- Keep the camera path intentionally minimal
+- Do not overengineer
+- Do not refactor unrelated working code
+- Do not replace the existing picker flow
+- Reuse current display logic where possible
+- Use local helper methods only if clearly justified
+
+ANTI-DRIFT RULES
+- Do not broaden Module 2 scope
+- Do not move preprocessing into this phase
+- Do not make permission handling global
+- Do not request storage permissions on the gallery path
+- Do not pass Bitmap objects through intents
+- Do not add “future-proof” abstractions unless already necessary
+
+
+SUCCESS CRITERIA
+At the end of this task:
+- app builds
+- tapping Camera in MainActivity reaches ImageClassificationActivity in CAMERA mode
+- camera permission is requested only on the camera path
+- granting permission launches camera capture
+- capturing an image returns to ImageClassificationActivity and displays the image
+- denying permission does not crash the app
+- cancelling capture does not crash the app
+- gallery path still works as before
+- no storage permission is introduced
+- no CameraX, OCR, preprocessing, persistence, or extra screens are added
+
+OUTPUT FORMAT
+- Apply the changes directly in the project
+- At the end, provide a short summary:
+  1. files changed
+  2. what was implemented
+  3. anything intentionally deferred to Phase C
