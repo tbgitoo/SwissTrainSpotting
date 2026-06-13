@@ -1,151 +1,109 @@
-You are updating an EXISTING LOCAL SKILL using a canonical upstream skill.
+You are updating an EXISTING LOCAL SKILL by merging in changes from a canonical upstream skill.
 
-INPUT CONTEXT
-- Canonical skill: ./external/android-skills/testing/testing-setup/SKILL.md
-- Local skill: ./.opencode/skills/android-testing/SKILL.md
-- External references location:
-  ../external/android-skills/testing/testing-setup/references/
+INPUTS (BOTH REQUIRED)
 
-PROJECT CONTEXT
-- Android app (Java + XML, Android Studio)
-- Minimal, execution-focused testing approach
-- JUnit + Espresso only
+1. Canonical skill:
+   ./external/android-skills/testing/testing-setup/SKILL.md
+
+2. Current LOCAL skill (PRIMARY BASELINE):
+   ./.opencode/skills/android-testing/SKILL.md
+
+---
 
 TASK
-Update the LOCAL SKILL.md by incorporating improvements from the canonical skill.
 
-IMPORTANT: This is an UPDATE, not a rewrite.
+Update the LOCAL SKILL by merging relevant improvements from the canonical skill.
 
----
+IMPORTANT:
+- The LOCAL skill is the PRIMARY document.
+- The canonical skill is only a SOURCE OF POSSIBLE IMPROVEMENTS.
 
-## MERGE RULES (CRITICAL)
-
-### 1. STRUCTURE
-- Follow the canonical skill structure as baseline
-- Preserve ordering of sections if possible
-- Do NOT duplicate sections
-- Do NOT create alternative versions of the same section
+This is NOT a rewrite.
 
 ---
 
-### 2. LOCAL CONSTRAINTS (MUST BE PRESERVED)
+## CRITICAL MERGE LOGIC
 
-The following constraints MUST remain unchanged:
+### STEP 1 — Compare first
+- Identify differences between canonical and local skill
+- Determine whether canonical introduces improvements RELEVANT to this project
 
-- Language: Java (NOT Kotlin)
-- UI: XML (NOT Compose)
-- Testing frameworks: JUnit + Espresso only
-- Minimal scope (no advanced testing topics)
-- Execution-focused (NOT setup-heavy)
+### STEP 2 — Apply selective updates only if needed
 
-If the canonical skill introduces conflicting content:
-→ REMOVE or IGNORE those parts
+Apply a change ONLY IF:
+- it improves clarity, correctness, or examples. The improvement needs to be substantial, otherwise prefer leaving the corresponding file content exactly as it is in the PRIMARY document.
+AND
+- it does NOT violate local constraints
 
----
-
-### 3. EXECUTION FOCUS
-
-The resulting skill must remain an EXECUTION SKILL:
-
-- Remove any:
-  - project analysis steps
-  - reporting steps
-  - multi-option architecture discussions
-  - heavy setup workflows
-
-- Keep:
-  - actionable checklists
-  - runnable examples
-  - minimal explanations
+If no such changes exist:
+→ DO NOT modify the file
 
 ---
 
-### 4. EXAMPLES (VERY IMPORTANT)
+## HARD CONSTRAINTS (LOCAL SKILL MUST REMAIN)
 
-- Keep examples GENERIC in the core sections:
-  - use placeholders such as:
-    * ActivityUnderTest.class
-    * TargetActivity.class
-  - do NOT hardcode MainActivity or specific app classes in core sections
+The local skill MUST stay:
 
-- Ensure all examples are:
-  - complete
-  - runnable
-  - safe (e.g., Intents.init() must use try/finally)
+- Java (NOT Kotlin)
+- XML (NOT Compose)
+- JUnit + Espresso only
+- minimal scope (NO CI, NO DI setup, NO screenshots, NO E2E frameworks)
+- execution-focused (NO analysis steps, NO setup workflows)
 
----
-
-### 5. PROJECT DEFAULTS (PROTECTED SECTION)
-
-Ensure the following section exists and is preserved:
-
-## Project Defaults (SwissTrainSpotting)
-
-- Keep all concrete app-specific details ONLY here
-- Update only if strictly necessary
-- Do NOT move these details into main sections
+If canonical contains:
+- Compose testing → REMOVE
+- DI frameworks → REMOVE
+- screenshot testing → REMOVE
+- test strategy analysis → REMOVE
 
 ---
 
-### 6. REFERENCES (PROTECTED SECTION)
+## PROTECTED SECTIONS (DO NOT REMOVE OR REWRITE)
 
-Ensure the following section exists and is preserved:
+Ensure the following sections remain intact:
 
-## References
+1. PROJECT DEFAULTS
+2. REFERENCES (with external path)
 
-This section MUST:
+You may only slightly adjust wording if strictly necessary.
+Do NOT remove or relocate them.
 
-- Point to:
-  ../external/android-skills/testing/testing-setup/references/
-- Explain that references are optional
-- State that SKILL.md constraints take precedence
+---
+
+## ANTI-DRIFT RULES
 
 DO NOT:
-- inline reference content
-- remove this section
-- duplicate reference material
+
+- replace the entire document with canonical content
+- reintroduce removed sections (analysis, DI setup, screenshot testing)
+- expand scope beyond minimal execution
+- duplicate sections
+- rewrite unchanged sections
 
 ---
 
-### 7. SCOPE CONTROL
+## IDEMPOTENCY RULE
 
-Ensure the final skill does NOT include:
+If canonical introduces no relevant improvements:
 
-- CI/CD or pipelines
-- DI frameworks (Hilt/Dagger)
-- Compose testing
-- performance testing
-- database testing (unless trivial and already present)
-- device configuration testing
-- large test suites
+→ RETURN THE LOCAL FILE UNCHANGED
 
----
-
-### 8. IDEMPOTENCY GUARANTEE
-
-The final file MUST:
-
-- not contain duplicated sections
-- not contain conflicting instructions
-- be stable under repeated application of this prompt
-- be shorter or equal in size compared to canonical (after filtering)
+(no edits, no restructuring, no formatting changes)
 
 ---
 
 ## OUTPUT
 
-- Overwrite:
-  ./.opencode/skills/android-testing/SKILL.md
+Overwrite:
+./.opencode/skills/android-testing/SKILL.md
 
-- Write the COMPLETE updated file
+with the UPDATED version
 
 ---
 
 ## FINAL STEP
 
-Perform the merge and write the file.
+Perform the merge.
 
-Do NOT:
-- ask questions
-- explain changes
-- produce intermediate output
+If nothing needs to change:
+→ write the file EXACTLY as it currently exists.
