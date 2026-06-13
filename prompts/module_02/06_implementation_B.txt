@@ -22,7 +22,7 @@ This task is Phase B only.
 Implement:
 - CAMERA permission
 - standard camera capture
-- temporary output file / cache Uri only if required
+- temporary output file / cache Uri if required
 - captured image decode + display
 
 Do NOT implement:
@@ -50,27 +50,58 @@ ARCHITECTURAL RULES
   - launching camera capture
   - decoding and displaying the resulting image
 - Keep the already working GALLERY flow intact
+- CAMERA mode must not end in a placeholder, stub, or "not available" toast
+
+REQUIRED IMPLEMENTATION DECISIONS
+Use the simplest robust standard Android mechanism for this project:
+
+1. Camera result contract
+- Use ActivityResultContracts.TakePicture() for the camera path
+- Do NOT use StartActivityForResult for camera capture
+- Do NOT rely on result.getData() for the camera image
+- On successful capture, load the image from the previously created currentCameraUri
+
+2. Temporary output file
+- Create a real temporary file in app cache using File.createTempFile(...)
+- Do NOT use only new File(...) without actually creating the file
+- Use FileProvider to obtain the Uri for that file if needed
+
+3. Provider / path compatibility
+- If FileProvider is used, ensure the manifest authority matches exactly
+- Ensure file_paths.xml exposes cache-path access if cache files are used
+- Make only the minimal provider/path corrections required
+
+4. Launcher separation
+- Keep gallery and camera launch handling separate
+- Do NOT reuse the gallery launcher callback for camera result handling
+- Gallery path may continue using its current launcher
+- Camera path must use its own dedicated launcher and success callback
 
 REQUIRED CHANGES
 
 1. Manifest
 - Add CAMERA permission
-- Add FileProvider only if required by the chosen standard capture path
+- Add FileProvider only if required by the chosen camera path
 - If FileProvider is added, configure it minimally and correctly
 
 2. Camera launch flow
 - In ImageClassificationActivity, when acquisition mode is CAMERA:
   - request CAMERA permission only for this path
-  - if granted, launch the simplest standard camera capture flow
-  - use a temporary cache file and Uri if required
+  - if granted, create a real temp file in cache
+  - derive a content Uri from FileProvider if required
+  - launch camera capture using ActivityResultContracts.TakePicture()
   - do not save permanent files beyond the current session goal
 
 3. Result handling
-- After capture, decode the resulting image conservatively for display
-- Reuse existing decode/display pipeline where sensible
-- Close all streams / file descriptors properly
-- Handle cancel and failure safely without crash
-- If permission is denied, provide simple user feedback and do not crash
+- On successful capture:
+  - load the image from currentCameraUri
+  - display it using the existing display pipeline where reasonable
+- On failed capture or cancel:
+  - do not crash
+  - keep behavior simple and safe
+- If permission is denied:
+  - provide simple user feedback
+  - do not crash
 
 4. Resource hygiene
 - Any newly introduced user-visible strings must go into strings.xml
@@ -95,7 +126,7 @@ FILES / FEATURES THAT MUST NOT BE ADDED
 - no test files in this step unless absolutely needed to fix compilation
 
 IMPLEMENTATION STYLE
-- Prefer the simplest standard Android mechanism over elegance
+- Prefer the simplest robust Android mechanism over elegance
 - Keep the camera path intentionally minimal
 - Do not overengineer
 - Do not refactor unrelated working code
@@ -110,15 +141,25 @@ ANTI-DRIFT RULES
 - Do not request storage permissions on the gallery path
 - Do not pass Bitmap objects through intents
 - Do not add “future-proof” abstractions unless already necessary
+- Do not leave behind any Phase A-style placeholder behavior in the CAMERA branch
+- Do not stop at “permission works”; the actual capture path must be reachable
+- Do not invent Android API constants; use real existing APIs only
 
+BUILD / VALIDATION RULE
+- Use Gradle build output as the final source of truth
+- If LSP/editor diagnostics disagree with source, verify with Gradle before rewriting code
+- Do not declare the task complete unless the runtime CAMERA branch no longer routes to a stub and the code path is consistent with actual image capture
 
 SUCCESS CRITERIA
 At the end of this task:
 - app builds
 - tapping Camera in MainActivity reaches ImageClassificationActivity in CAMERA mode
+- CAMERA mode no longer shows any placeholder “not available” message
 - camera permission is requested only on the camera path
-- granting permission launches camera capture
-- capturing an image returns to ImageClassificationActivity and displays the image
+- granting permission launches the real camera capture flow
+- camera capture uses ActivityResultContracts.TakePicture()
+- a real temp file is created in cache
+- successful capture loads currentCameraUri and displays the image
 - denying permission does not crash the app
 - cancelling capture does not crash the app
 - gallery path still works as before
@@ -130,4 +171,5 @@ OUTPUT FORMAT
 - At the end, provide a short summary:
   1. files changed
   2. what was implemented
-  3. anything intentionally deferred to Phase C
+  3. whether FileProvider / file_paths.xml had to be adjusted
+  4. anything intentionally deferred to Phase C

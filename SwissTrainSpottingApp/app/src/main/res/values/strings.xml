@@ -8,4 +8,7 @@
     <string name="image_classified_title">Image Classification</string>
     <string name="image_decode_failed">Cannot decode this image</string>
     <string name="image_not_found">Image file not found</string>
+    <string name="camera_capture_cancelled">Camera capture cancelled</string>
+    <string name="camera_permission_denied">Camera permission denied</string>
+    <string name="camera_temp_file_error">Could not create temp file for camera</string>
 </resources>
