@@ -1,0 +1,17 @@
+This is not a prompt but a short description of the installation of the testing skill.
+
+Google maintains an Android skill collection at https://github.com/android/skills. Here, the testing-setup skill within that collection is of interest.
+
+To obtain stable access to that skill, the following steps were taken:
+
+1) Linking of the entire https://github.com/android/skills as submodule (here, as subfolder of https://github.com/tbgitoo/SwissTrainSpotting/tree/master/SwissTrainSpottingApp/external)
+
+2) Local cloning of only the test/testing-setup folder of the remote repository
+
+3) Derivation of a restricted local SKILL.md via an initial setup prompt. The idea here is to restrict the vast skill proposed by google to the relevant aspects of the project (junit, Espresso) avoiding installation of various libraries that will not be used. The initial setup prompt is documented here, at 
+
+https://github.com/tbgitoo/SwissTrainSpotting/blob/master/SwissTrainSpottingApp/external/prompts/CREATE_android-testing_skill.md
+
+And the resulting present repository-local skill is here 
+
+4) For future maintenance, and  

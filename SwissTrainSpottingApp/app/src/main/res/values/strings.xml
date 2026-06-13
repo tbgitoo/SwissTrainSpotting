@@ -4,4 +4,8 @@
     <string name="back_navigation">Back</string>
     <string name="image_button">Image</string>
     <string name="camera_button">Camera</string>
+    <string name="selection_unavailable">Not yet available in this version</string>
+    <string name="image_classified_title">Image Classification</string>
+    <string name="image_decode_failed">Cannot decode this image</string>
+    <string name="image_not_found">Image file not found</string>
 </resources>

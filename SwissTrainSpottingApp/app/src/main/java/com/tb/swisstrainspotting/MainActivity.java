@@ -12,6 +12,8 @@ import androidx.core.view.WindowInsetsCompat;
 
 public class MainActivity extends AppCompatActivity {
 
+    public static final String EXTRA_ACQUISITION_MODE = "acquisition_mode";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -26,14 +28,18 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.btnImage).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(MainActivity.this, ImageClassificationActivity.class));
+                Intent intent = new Intent(MainActivity.this, ImageClassificationActivity.class);
+                intent.putExtra(EXTRA_ACQUISITION_MODE, AcquisitionMode.GALLERY.name());
+                startActivity(intent);
             }
         });
 
         findViewById(R.id.btnCamera).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(MainActivity.this, ImageClassificationActivity.class));
+                Intent intent = new Intent(MainActivity.this, ImageClassificationActivity.class);
+                intent.putExtra(EXTRA_ACQUISITION_MODE, AcquisitionMode.CAMERA.name());
+                startActivity(intent);
             }
         });
     }

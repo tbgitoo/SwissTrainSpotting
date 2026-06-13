@@ -1,0 +1,126 @@
+Implement Module 2 Phase A only for SwissTrainSpottingApp.
+
+CONTEXT
+- Project: Android app in Java + XML
+- minSdk: 24
+- Existing state: Module 1 is done, with MainActivity and ImageClassificationActivity already present as a two-activity UI shell
+- Follow AGENTS.md strictly
+- Use the local Android testing skill only if needed for later validation, not for adding tests now
+- Do not redesign architecture
+
+OBJECTIVE
+Implement the first working image acquisition milestone using the system photo picker only.
+
+GOAL OF THIS PHASE
+From MainActivity, the user taps either:
+- Image
+- Camera
+
+Both buttons must open ImageClassificationActivity with an acquisition mode extra, but in this phase only the GALLERY / picker path is implemented functionally.
+
+If ImageClassificationActivity is opened in GALLERY mode:
+- launch the system photo picker
+- obtain the returned Uri
+- decode the image conservatively for display
+- show the image in the existing preview area
+
+If the picker is cancelled or decoding fails:
+- do not crash
+- keep placeholder behavior reasonable
+- show simple user feedback only if already appropriate in the current UI
+
+IMPORTANT SCOPE LIMIT
+This phase ends at:
+- image selected
+- decoded
+- displayed in ImageClassificationActivity
+
+Do NOT implement:
+- camera capture
+- CAMERA permission
+- FileProvider
+- storage permissions
+- image preprocessing for ONNX
+- OCR
+- persistence
+- ViewModels / Navigation Component / fragments
+- new activities
+- CameraX
+- cropping
+- EXIF correction unless absolutely necessary for compilation (it should not be)
+
+REQUIRED CHANGES
+
+1. Add an acquisition mode mechanism
+- Create AcquisitionMode.java
+- Support at least:
+  - GALLERY
+  - CAMERA
+
+2. Update MainActivity
+- Keep MainActivity as a simple navigation hub
+- The Image button must open ImageClassificationActivity with GALLERY mode
+- The Camera button must open ImageClassificationActivity with CAMERA mode
+- Do not implement camera behavior yet
+- Do not request permissions here
+
+3. Update ImageClassificationActivity
+- Read the acquisition mode from the intent
+- Register the photo picker launcher
+- If opened in GALLERY mode, launch the system photo picker
+- Decode the returned Uri to a Bitmap conservatively for display
+- Display the image in the current preview ImageView
+- Handle cancel safely
+- Handle decode failure safely
+- Keep everything in-memory for the current session only
+
+4. Resource hygiene
+- Ensure any newly used user-visible strings are in strings.xml
+- Ensure referenced placeholder resources / IDs really exist before finishing
+- Modify layout only if necessary to connect the preview/placeholder correctly
+
+5. Decoding requirements
+- Decode conservatively for display to reduce memory risk on large images
+- Close streams / descriptors properly after decode
+- Keep implementation simple and local to this module
+- Only introduce a helper method or helper class if clearly necessary
+
+FILES THAT MAY BE MODIFIED
+- app/src/main/java/com/tb/swisstrainspotting/AcquisitionMode.java
+- app/src/main/java/com/tb/swisstrainspotting/MainActivity.java
+- app/src/main/java/com/tb/swisstrainspotting/ImageClassificationActivity.java
+- app/src/main/res/values/strings.xml
+- app/src/main/res/layout/activity_image_classification.xml
+- app/src/main/AndroidManifest.xml only if strictly required for picker-related declarations
+
+FILES THAT MUST NOT BE ADDED IN THIS PHASE
+- no FileProvider XML
+- no camera-related classes
+- no new activities
+- no persistence/storage layer
+- no testing files unless absolutely needed to fix compilation
+
+IMPLEMENTATION STYLE
+- Prefer the simplest standard Android solution
+- Keep changes minimal and readable
+- Do not overengineer
+- Do not perform unrelated cleanup
+- Do not refactor unrelated code
+- Do not introduce abstractions “for later” unless duplication already exists
+
+SUCCESS CRITERIA
+At the end of this task:
+- app builds
+- tapping Image in MainActivity leads to a visible selected image in ImageClassificationActivity
+- tapping Camera still reaches ImageClassificationActivity with CAMERA mode passed, but no camera implementation is added yet
+- cancelling picker does not crash
+- no storage permission is introduced
+- no camera permission is introduced
+- no preprocessing, ONNX, OCR, persistence, or extra navigation is added
+
+OUTPUT FORMAT
+- Apply the changes directly in the project
+- At the end, provide a short summary:
+  1. files changed
+  2. what was implemented
+  3. anything intentionally deferred to Phase B
