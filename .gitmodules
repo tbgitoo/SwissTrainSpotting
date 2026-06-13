@@ -1,0 +1,3 @@
+[submodule "SwissTrainSpottingApp/external/android-skills"]
+	path = SwissTrainSpottingApp/external/android-skills
+	url = https://github.com/android/skills
