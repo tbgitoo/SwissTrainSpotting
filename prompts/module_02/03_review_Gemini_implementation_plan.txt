@@ -1,0 +1,49 @@
+Please review the implementation plan for Module 2 of my Android project from an Android-specific realism perspective.
+
+Context:
+- Repository root as seen by you is the project root
+- The Module 2 plan is located at:
+  plans/module_02/implementation_plan.md
+- The project-level agent constraints are defined in:
+  ../AGENTS.md
+
+Project context:
+- Android app written in Java + XML
+- The project is intentionally simple
+- No backend, no authentication, no persistent storage
+- ONNX inference and OCR belong to later modules
+- This review is only about Module 2: Image Acquisition & Permissions
+
+Your task:
+Read the Module 2 implementation plan and review it conservatively from the perspective of real Android development.
+
+Focus specifically on:
+1. whether the proposed Android approach is realistic
+2. whether the scope boundaries are good
+3. whether the picker / camera / permission strategy is appropriate
+4. whether anything is overengineered for this module
+5. whether anything important is missing
+6. whether the prioritization of actions is sensible
+7. whether any step is likely to create unnecessary implementation risk
+8. whether the plan stays compatible with later ONNX-based image processing
+
+Important instructions:
+- Do NOT rewrite the whole plan
+- Do NOT redesign the project
+- Do NOT add new features
+- Do NOT suggest Kotlin, Compose, CameraX, storage systems, or architectural frameworks
+- Do NOT expand scope
+- Prefer simplification over complexity
+- Respect the constraints in ../AGENTS.md
+- Treat this as a review of a working implementation plan, not an exam write-up
+
+Output format:
+Please structure your answer exactly like this:
+
+1. Overall assessment
+2. What is strongly correct and should be kept
+3. What should be simplified or deprioritized
+4. What is missing or risky
+5. Final recommendation
+
+Be concrete, critical, and practical.

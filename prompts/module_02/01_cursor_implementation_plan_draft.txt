@@ -1,0 +1,59 @@
+Using the existing SwissTrainSpotting project architecture, derive a detailed implementation plan for Module 2 only: Image Acquisition & Permissions.
+
+Project context:
+- Android app in Java + XML (not Kotlin, not Compose)
+- Android Studio project is in SwissTrainSpottingApp/
+- Global project architecture is already defined and must not be redesigned (plan at plans/01_architecture.md)
+- Module 1 already established a basic two-activity UI structure (current state of Android Studio project in SwissTrainSpottingApp)
+- Module 2 should remain simple, practical, and milestone-compatible
+- No backend, no authentication, no persistence
+- OCR and ONNX inference belong to later modules and must not be implemented or planned in detail here
+
+Module 2 goal:
+Allow the user to acquire an image either from:
+1. the system photo picker
+2. the device camera
+
+The resulting image should then be displayed in the app.
+
+Important scope boundaries:
+- Photo picker is required
+- Camera is included, but must remain simple
+- Do not introduce CameraX
+- Do not introduce persistent storage
+- Do not introduce complex file management unless strictly necessary
+- Do not move preprocessing, resizing, normalization, ONNX, or OCR logic into this module
+- The output of this module should simply be a displayable image (Bitmap and/or URI depending on the chosen approach)
+- Keep permissions minimal
+- Prefer the simplest realistic Android approach
+- Do not plan any changes outside the Android Studio project in folder SwissTrainSpottingApp
+- Do not redesign the current activity structure unless absolutely necessary
+
+Planning priorities:
+- reliability over elegance
+- minimal implementation risk
+- compatibility with later ONNX inference
+- milestone-based testability
+
+I want the answer structured exactly as follows:
+
+1. Module purpose
+2. Scope boundaries
+3. Recommended acquisition strategy
+4. Activity responsibilities
+5. Permissions strategy
+6. Files to create or modify
+7. Step-by-step implementation workflow
+8. Testing strategy
+9. Risks / likely mistakes
+10. 2–3 example prompts for later implementation
+
+Important instructions:
+- Do not write code yet
+- Do not redesign the project
+- Do not introduce advanced Android architecture
+- Do not add storage, caching, history, settings, or backend features
+- Keep the module realistic for a short end-to-end app
+- Explicitly state what should be deferred to Module 3 or later
+
+Write the output plan to SwissTrainSpottingApp/plans/module_02/implementation_plan.md
