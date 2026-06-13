@@ -1,0 +1,66 @@
+You are reviewing a LOCAL SKILL.md used by an agent system (OpenCode-style).
+
+The file to review is at ./.opencode/skills/android-testing/SKILL.md
+
+CONTEXT
+- This is a derived local skill from a canonical Android testing skill
+- Stack: Android (Java + XML), Android Studio
+- Purpose: clarity, minimalism, correctness
+- This skill will be reused as the app evolves
+
+REVIEW GOAL
+Evaluate whether this SKILL.md is:
+- reusable
+- minimal
+- correctly abstracted
+- agent-safe (no drift, no overreach)
+
+REVIEW CRITERIA (VERY IMPORTANT)
+
+1. ABSTRACTION QUALITY
+- Is the core skill independent of specific classes (e.g., MainActivity)?
+- Are concrete examples limited to a clearly separated "Project Defaults" section?
+- Would this skill still work if the app had 5+ activities?
+
+2. EXECUTION vs SETUP
+- Does the skill focus on writing and running tests (good)?
+- Or does it drift into:
+  - project analysis
+  - dependency management
+  - setup workflows (bad)?
+
+3. ESPRESSO REALISM
+- Are UI test examples valid and minimal?
+- Are they safe (no async complexity, no flaky patterns)?
+- Do they reflect correct modern usage (ActivityScenario, onView, matches, etc.)?
+
+4. SCOPE DISCIPLINE
+- Is the scope minimal and exam-appropriate?
+- Any unnecessary sections (DB testing, device configs, E2E, etc.)?
+- Any hidden overengineering?
+
+5. AGENT USABILITY
+- Can an agent use this file directly to write tests?
+- Are instructions:
+  - actionable
+  - deterministic
+  - not vague or overly theoretical?
+
+6. PROJECT DEFAULTS QUALITY
+- Is the section present?
+- Does it provide helpful examples?
+- Does it stay clearly separated from core logic?
+
+OUTPUT FORMAT (STRICT)
+
+Return:
+
+1. ✅ Strengths (short, concrete)
+2. ❌ Issues (only real problems, no nitpicking)
+3. 🔧 Minimal Fixes (surgical, do not rewrite whole document)
+4. ✅ Final Verdict (one sentence: usable / needs fix / excellent)
+
+IMPORTANT
+- DO NOT rewrite the SKILL.md
+- DO NOT expand scope
+- Keep feedback precise and practical
