@@ -11,4 +11,5 @@
     <string name="camera_capture_cancelled">Camera capture cancelled</string>
     <string name="camera_permission_denied">Camera permission denied</string>
     <string name="camera_temp_file_error">Could not create temp file for camera</string>
+    <string name="placeholder_image_content_description">Placeholder image</string>
 </resources>

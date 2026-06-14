@@ -43,7 +43,7 @@
         android:layout_height="0dp"
         android:scaleType="centerCrop"
         android:src="@android:drawable/ic_menu_gallery"
-        android:contentDescription="Placeholder image"
+        android:contentDescription="@string/placeholder_image_content_description"
         app:layout_constraintTop_toBottomOf="@+id/header_bar"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

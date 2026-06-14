@@ -1,7 +1,5 @@
 Implement Module 2 — Phase C (Hardening) for the SwissTrainSpotting Android app.
 
-Use the skill: safe-java-edit
-
 Follow AGENTS.md strictly.
 
 This is a hardening / cleanup pass only, not feature work.
@@ -9,8 +7,6 @@ This is a hardening / cleanup pass only, not feature work.
 ==================================================
 EDIT SAFETY RULES (MANDATORY)
 ==================================================
-
-For Java edits, apply the safe-java-edit skill strictly.
 
 For ImageClassificationActivity.java:
 - Use FULL-FILE REWRITE mode
@@ -24,6 +20,13 @@ For XML edits:
 - If an XML file is modified, return the complete file contents
 - Do NOT redesign layouts
 - Do NOT rename IDs unless strictly necessary to replace hardcoded text references
+
+For Gradle edits:
+- Modify app/build.gradle ONLY if required because ExifInterface is unresolved
+- Keep the change minimal and local
+- Do NOT upgrade unrelated dependencies
+- Do NOT change plugin configuration
+- Do NOT modernize the build script beyond what is required
 
 Before returning Java output, self-check:
 - balanced braces
@@ -45,6 +48,7 @@ PROJECT CONTEXT
   - Camera path works
   - Images are decoded and displayed in ImageClassificationActivity
 - This task is strictly a hardening / cleanup pass
+- Testing is deferred to a later phase; this prompt is implementation only
 
 ==================================================
 SCOPE (ONLY WHAT IS LISTED BELOW)
@@ -65,15 +69,22 @@ SCOPE (ONLY WHAT IS LISTED BELOW)
 - Use try-with-resources where possible
 - Do NOT change decoding strategy unless required for safety
 
-3) Add minimal EXIF orientation correction (only if needed)
-- Only apply correction when decoding from a Uri or file where EXIF is available
-- Use ExifInterface
-- Rotate Bitmap only if orientation is not normal
+3) Add minimal EXIF orientation correction
+- Read EXIF metadata using ExifInterface where EXIF is available
+- If orientation is not ORIENTATION_NORMAL, rotate the decoded Bitmap accordingly
+- Apply correction only for sources where EXIF metadata is available
 - Keep implementation minimal
-- Do NOT introduce new dependencies
 - Do NOT add abstraction layers
+- Do NOT introduce helper classes
 
-4) Lightweight rotation persistence (only if simple)
+Dependency rule for EXIF:
+- Use import:
+  androidx.exifinterface.media.ExifInterface
+- If that class is unresolved, modify app/build.gradle and add the AndroidX ExifInterface dependency using the current project-compatible stable version
+- Do NOT guess unrelated Android packages
+- Do NOT use android.util.ExifInterface
+
+4) Lightweight rotation persistence
 - Preserve the currently displayed image across configuration change
 - Prefer storing Uri rather than Bitmap
 - Re-decode on restore
@@ -83,7 +94,7 @@ SCOPE (ONLY WHAT IS LISTED BELOW)
 5) Keep code structure minimal
 - Do NOT refactor into helper classes
 - Do NOT redesign Activity responsibilities
-- Do NOT touch MainActivity unless required for moving user-visible strings into resources
+- Do NOT touch MainActivity unless required for moving existing user-visible strings into resources
 
 ==================================================
 OUT OF SCOPE (DO NOT DO)
@@ -102,6 +113,7 @@ OUT OF SCOPE (DO NOT DO)
 - No additional permissions
 - No speculative cleanup
 - No unrelated refactors
+- No automated tests in this prompt
 
 ==================================================
 FILES YOU MAY MODIFY
@@ -110,7 +122,8 @@ FILES YOU MAY MODIFY
 - ImageClassificationActivity.java
 - res/values/strings.xml
 - layout XML files only if needed to replace hardcoded user-visible text
-- MainActivity.java only if required for moving existing user-visible text into resources
+- MainActivity.java only if required for moving existing user-visible strings into resources
+- app/build.gradle only if required for AndroidX ExifInterface
 
 Do not modify any other files.
 
@@ -120,10 +133,11 @@ ACCEPTANCE CRITERIA
 
 - No user-visible hardcoded strings remain in modified files
 - No resource leaks remain in image decode paths
-- Images display correctly after EXIF rotation when needed
-- Image remains visible after device rotation using a simple persistence approach
+- Images display correctly after EXIF-based rotation when metadata requires it
+- Image remains visible after device rotation using simple Uri-based persistence
 - No regressions in photo picker or camera flow
 - No new features added
+- If ExifInterface was unresolved before the change, the project now resolves it correctly
 
 ==================================================
 IMPLEMENTATION STYLE
@@ -133,6 +147,7 @@ IMPLEMENTATION STYLE
 - Prefer clarity over abstraction
 - Preserve existing behavior unless fixing a clear issue
 - Do not introduce speculative improvements
+- If a complete file rewrite is safer than an in-place patch, rewrite the whole file cleanly
 
 ==================================================
 OUTPUT CONTRACT
