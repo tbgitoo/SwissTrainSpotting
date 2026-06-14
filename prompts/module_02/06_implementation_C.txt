@@ -1,0 +1,104 @@
+Implement **Module 2 — Phase C (Hardening)** for the SwissTrainSpotting Android app.
+
+Context:
+- Project uses Java + XML, minSdk 24
+- Module 2 (image acquisition) is already implemented and working:
+  - Photo picker path works
+  - Camera path works
+  - Images are decoded and displayed in ImageClassificationActivity
+- This task is strictly a **hardening / cleanup pass**, NOT feature work
+
+Follow AGENTS.md strictly.
+
+========================================
+SCOPE (ONLY WHAT IS LISTED BELOW)
+========================================
+
+1) Move user-visible strings to resources
+- Identify ALL user-visible text currently hardcoded in Java or XML
+- Move them into res/values/strings.xml
+- Replace usages with R.string.*
+- Do NOT rename existing IDs unless necessary
+- Do NOT introduce new UI text
+
+----------------------------------------
+
+2) Ensure safe image decoding resource handling
+- Review all decode paths (gallery + camera)
+- Ensure:
+  - InputStreams are always closed
+  - File descriptors (if used) are closed
+- Use try-with-resources where possible
+- Do NOT change decoding strategy unless required for safety
+
+----------------------------------------
+
+3) Add minimal EXIF orientation correction (ONLY if needed)
+- Only apply correction when decoding from a Uri/file where EXIF is available
+- Use ExifInterface
+- Rotate Bitmap only if orientation != normal
+- Keep implementation minimal (no abstraction layer yet)
+- Do NOT introduce new dependencies
+
+----------------------------------------
+
+4) Lightweight rotation persistence (ONLY if simple)
+- Preserve currently displayed image across configuration change (rotation)
+- Prefer:
+  - storing Uri instead of Bitmap
+  - re-decoding on restore
+- Use onSaveInstanceState / onCreate
+- Do NOT introduce ViewModel, retained fragments, or architecture components
+
+----------------------------------------
+
+5) Keep code structure minimal
+- DO NOT refactor into helper classes unless duplication is obvious and already present
+- DO NOT redesign Activity responsibilities
+- DO NOT touch MainActivity unless required for strings
+
+========================================
+OUT OF SCOPE (DO NOT DO)
+========================================
+
+- NO preprocessing for ML (resizing to tensor, normalization, etc.)
+- NO ONNX / inference integration
+- NO OCR
+- NO persistent storage or caching
+- NO CameraX migration
+- NO new Activities, Fragments, or architecture layers
+- NO UI redesign
+- NO passing Bitmaps between Activities
+- NO additional permissions
+
+========================================
+FILES YOU MAY MODIFY
+========================================
+
+- ImageClassificationActivity.java
+- strings.xml
+- (optionally) layout XMLs ONLY for replacing hardcoded text
+
+========================================
+ACCEPTANCE CRITERIA
+========================================
+
+- No user-visible hardcoded strings remain
+- No resource leaks in image decode paths
+- Images display correctly after EXIF rotation when needed
+- Image remains visible after device rotation (simple persistence)
+- No regressions in Phase A or Phase B flows
+- No new features added
+
+========================================
+IMPLEMENTATION STYLE
+========================================
+
+- Keep changes minimal and surgical
+- Prefer clarity over abstraction
+- Do not introduce speculative improvements
+- Preserve existing behavior unless fixing a clear issue
+
+Return:
+- Modified files only (full file contents)
+- No explanations
