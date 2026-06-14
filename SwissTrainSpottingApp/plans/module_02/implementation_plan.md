@@ -251,6 +251,18 @@ Testing is split between milestone checks during implementation and a dedicated 
 - For automated validation, proving that a 90° EXIF case is handled is sufficient for this phase; 180° remains a manual sanity check.
 - This module should output a displayable image only; model-facing preparation must remain in Module 3.
 
+### Special Notice — Deterministic test seam for Phase D
+
+Phase D automated tests must inject a controlled image `Uri` through a predefined in-app seam.
+
+This seam is the app boundary corresponding to “picker result received” and must route the test image through the same decode / EXIF / display path used in normal runtime behavior.
+
+The automated test must not invent a new launch contract or guess hidden extras.
+
+If the existing app already has a deterministic way to pass a selected image `Uri` into `ImageClassificationActivity`, use that seam.
+
+If no such seam exists, add one minimal, local seam specifically for deterministic testing, while preserving normal runtime behavior.
+
 ---
 
 ## 10. Definition of done

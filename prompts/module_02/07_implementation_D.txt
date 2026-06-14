@@ -2,32 +2,164 @@ Implement Module 2 — Phase D (Validation / Automated Testing) for the SwissTra
 
 Follow AGENTS.md strictly.
 
+Apply the skill: android-dependency-closure
+
+The authoritative implementation plan for Module 2 is:
+./plans/module_02/implementation_plan.md
+
+That plan is authoritative.
+For Phase D, implement the plan exactly as written there.
+Do not reinterpret or replace it with a different test architecture.
+
 This is a testing / validation pass only.
 Do NOT redesign production code.
-Do NOT introduce new features.
-If a tiny production-code change is absolutely required to make deterministic testing possible, keep it minimal, local, and explicitly justified by the test need.
+Do NOT introduce new user-facing features.
+If a tiny production-code change is absolutely required to make deterministic testing possible, keep it minimal, local, and explicitly justified by the Phase D test seam requirement.
 
 ==================================================
-EDIT SAFETY RULES (MANDATORY)
+AUTHORITATIVE SOURCES (MANDATORY)
+==================================================
+
+You must respect all three of the following, in this order:
+
+1. The authoritative Module 2 plan:
+   ./plans/module_02/implementation_plan.md
+
+2. AGENTS.md
+
+3. The skill:
+   android-dependency-closure
+
+If there is tension between your own preferred solution and the plan, the plan wins.
+
+==================================================
+PHASE D MISSION
+==================================================
+
+Implement the Phase D validation/testing behavior defined in the Module 2 plan.
+
+This includes:
+
+- focused instrumentation tests for Phase C behavior
+- deterministic automated validation inside the app process
+- repository-controlled EXIF fixtures
+- no dependence on emulator gallery state for automated tests
+- no dependence on adb push / is_pending hacks for automated tests
+- one manual sanity pass remains outside this prompt and is NOT to be implemented here
+
+==================================================
+MANDATORY FIXTURE MODEL
+==================================================
+
+Automated Phase D tests must use the authoritative repository-controlled fixtures already defined by the plan:
+
+- app/src/androidTest/assets/Landscape_0.jpg
+- app/src/androidTest/assets/Landscape_1.jpg
+
+Rules:
+- Do NOT assume images exist in emulator gallery / MediaStore
+- Do NOT discover arbitrary device images
+- Do NOT generate substitute JPEG fixtures in test code unless the plan explicitly allows it
+- Do NOT use adb push as part of the automated testing implementation
+- If the assets are missing from the repository, add them in the expected location and then use them from there
+
+Interpretation:
+- Landscape_0.jpg = baseline fixture
+- Landscape_1.jpg = 90° EXIF validation fixture
+
+Automated Phase D only needs to prove that the 90° EXIF case is handled.
+180° EXIF remains a manual sanity check and is not required as an automated assertion.
+
+==================================================
+MANDATORY TEST SEAM
+==================================================
+
+The plan defines that automated Phase D tests must feed one fixture at a time into the image display machinery through a deterministic in-app path representing the picker result boundary.
+
+This means:
+
+- Do NOT automate the real external picker UI
+- Do NOT invent a random hidden launch contract unless you explicitly create a minimal, local seam for it
+- If the current app already has a deterministic seam for supplying a selected image Uri into ImageClassificationActivity, use it
+- If such a seam does NOT already exist, create one minimal, local seam in ImageClassificationActivity
+
+Definition of acceptable seam:
+- it must inject a controlled image Uri at the same app boundary that corresponds to “picker result received”
+- it must route the Uri through the same decode / EXIF / display path used in normal runtime behavior
+- it must not redesign architecture
+- it must not add a broad test-only subsystem
+- it must preserve normal runtime behavior
+
+Unacceptable seam choices:
+- external picker UI automation
+- emulator gallery dependence
+- adb-based provisioning
+- bypassing the real decode / EXIF / display logic
+- inventing undocumented extras without implementing and using them consistently
+
+==================================================
+MANDATORY SKILL APPLICATION
+==================================================
+
+Apply android-dependency-closure strictly.
+
+This means:
+- Do not leave unresolved symbols introduced by your own changes
+- If you introduce any non-standard AndroidX / test / external symbol, you must:
+  - add the correct import
+  - add or reuse the required version-catalog entry in gradle/libs.versions.toml
+  - reference it from app/build.gradle with the correct scope
+  - compile the relevant target before stopping
+
+If the repository uses a version catalog, do NOT pin raw Maven coordinates in app/build.gradle when catalog ownership applies.
+
+Do NOT stop with:
+- unresolved imports
+- unresolved symbols
+- missing androidTest dependencies
+- partially wired test code
+
+==================================================
+IMPLEMENTATION STRATEGY (IN ORDER)
+==================================================
+
+Preferred strategy order:
+
+A. First preference
+- use an already existing deterministic seam to pass a controlled Uri into ImageClassificationActivity
+
+B. Second preference
+- create a minimal, local seam in ImageClassificationActivity specifically to allow deterministic Phase D injection of a selected-image Uri through the same decode / EXIF / display path
+
+C. Third preference only if A and B are clearly worse
+- use Espresso-Intents to stub the picker boundary
+
+If Espresso-Intents is chosen:
+- you must fully satisfy android-dependency-closure
+- you must add the required dependencies correctly
+- you must compile the androidTest target before stopping
+
+==================================================
+EDIT SAFETY RULES
 ==================================================
 
 For production Java files:
 - Prefer NO production changes unless strictly necessary
 - If a production Java file must be changed, use FULL-FILE REWRITE mode for that file
 - Do NOT perform fragile partial class patching
-- Preserve package declaration, class name, behavior, and structure unless a minimal testability hook is required
+- Preserve package declaration, class name, behavior, and structure unless the minimal deterministic seam requires a local change
 
 For test files:
 - Create or rewrite complete test files cleanly
 - Keep tests deterministic
 - Do NOT add broad testing infrastructure beyond this phase
 
-For Gradle edits:
-- Modify app/build.gradle only if required for androidTest dependencies
-- If the project uses a version catalog, add new test dependencies through the catalog rather than pinning raw versions directly in app/build.gradle
-- Keep dependency changes minimal and limited to Android test support needed for this phase
+For Gradle / catalog edits:
+- Modify gradle/libs.versions.toml if required for androidTest dependencies
+- Modify app/build.gradle only as needed to reference the required catalog aliases
+- Keep dependency changes minimal and limited to Phase D test support
 - Do NOT upgrade unrelated dependencies
-- Do NOT change plugin configuration unless required for instrumentation testing
+- Do NOT change plugin configuration unless strictly required for instrumentation testing
 
 Before returning Java output, self-check:
 - balanced braces
@@ -37,6 +169,11 @@ Before returning Java output, self-check:
 - no duplicated or orphaned methods
 - no accidental changes outside the requested scope
 
+Before stopping, self-check:
+- relevant androidTest symbols resolve
+- the androidTest dependency chain is closed
+- the androidTest target compiles
+
 ==================================================
 PROJECT CONTEXT
 ==================================================
@@ -44,38 +181,19 @@ PROJECT CONTEXT
 - Android app
 - Java + XML
 - minSdk 24
-- Module 2 Phases A, B, and C are already implemented and working:
-  - photo picker path works
-  - camera path works
-  - images decode and display in ImageClassificationActivity
-  - Phase C hardening is already in place (strings, safe decode handling, EXIF correction, lightweight Uri-based state restore)
-- Controlled EXIF test images are already available on emulator/device (for example Landscape_0.jpg, Landscape_1.jpg)
-- This phase is about automated validation of app behavior
+- Module 2 Phases A, B, and C are already implemented and working
+- Phase C hardening is already in place:
+  - strings
+  - safe decode handling
+  - EXIF correction
+  - lightweight Uri-based state restoration
+- Phase D now validates those hardening changes
+- Previous attempts failed because:
+  - fixture handling was underspecified
+  - test seam was underspecified
+  - test dependencies/imports were left unresolved
 
-==================================================
-PHASE D GOALS
-==================================================
-
-Add focused instrumentation tests that validate the following:
-
-1) Preview image is displayed after loading
-- Verify the ImageView in ImageClassificationActivity contains a drawable after a successful image load
-
-2) EXIF correction is validated in an automated way
-- Use controlled EXIF test images
-- For EXIF cases where rotation should change aspect (for example 90°/270° cases), assert that the final displayed drawable/bitmap dimensions reflect the corrected orientation
-- Do NOT rely only on visual judgment in automated tests
-
-3) Activity recreation restores the image
-- Recreate the activity during the test
-- Verify that the previously displayed image is restored after recreation
-
-4) Keep external UI out of the core automation path
-- Do NOT try to fully automate the real external photo picker UI
-- Prefer one of these approaches:
-  - stub the outgoing intent/result with Espresso-Intents, OR
-  - launch ImageClassificationActivity in a controlled way with a known test Uri if the app structure allows it cleanly
-- Keep one final manual sanity pass for full picker/camera integration outside this implementation prompt
+Avoid repeating those mistakes.
 
 ==================================================
 IMPLEMENTATION REQUIREMENTS
@@ -84,19 +202,26 @@ IMPLEMENTATION REQUIREMENTS
 Testing approach:
 - Use Android instrumentation tests under app/src/androidTest
 - Use Espresso for UI assertions inside the app process
-- Use Espresso-Intents if needed to intercept / stub the external picker flow
 - Use ActivityScenario (or ActivityScenarioRule) for activity lifecycle control and recreation testing
+- Use Espresso-Intents only if truly necessary after considering the deterministic seam first
 
 Determinism:
-- Tests must be deterministic and not depend on tapping through external system UIs
+- Tests must be deterministic
+- Tests must not depend on tapping through external system UIs
 - Do not add sleeps or timing hacks unless absolutely unavoidable
-- Prefer assertions on actual drawable presence and measurable image properties
+- Prefer assertions on actual drawable presence and measurable rendered image properties
+
+Assertion rules:
+- Verify the preview ImageView contains a drawable after loading
+- For the 90° EXIF case, assert a deterministic rendered-image property such as swapped bitmap/drawable dimensions when orientation correction should change aspect
+- Do NOT use the ImageView layout size itself as proof of EXIF handling
+- Recreate the activity and verify the image remains displayed after restore
 
 Production code policy:
 - Do NOT redesign ImageClassificationActivity
 - Do NOT add architecture layers
 - Do NOT refactor just for elegance
-- If a tiny testability hook is needed, keep it minimal and local
+- If a tiny deterministic seam is needed, keep it minimal and local
 - Avoid exposing broad internal APIs just for tests
 
 ==================================================
@@ -115,6 +240,8 @@ OUT OF SCOPE (DO NOT DO)
 - No unrelated cleanup
 - No flaky automation of the external picker UI
 - No manual test descriptions; implement actual automated tests only
+- No fixture generation strategy that bypasses the plan’s repository-controlled assets
+- No dependency additions that are not required by the chosen deterministic test approach
 
 ==================================================
 FILES YOU MAY MODIFY
@@ -122,8 +249,10 @@ FILES YOU MAY MODIFY
 
 Primary expected files:
 - app/src/androidTest/java/... (new or modified instrumentation test files)
-- app/build.gradle only if required for androidTest dependencies
-- gradle/libs.versions.toml only if the project uses a version catalog and new androidTest dependencies must be added there
+- app/src/androidTest/assets/Landscape_0.jpg
+- app/src/androidTest/assets/Landscape_1.jpg
+- gradle/libs.versions.toml only if required for androidTest dependencies
+- app/build.gradle only if required to reference needed androidTest catalog aliases
 
 Production files only if strictly necessary for deterministic testing:
 - ImageClassificationActivity.java
@@ -134,12 +263,33 @@ Do not modify unrelated files.
 ACCEPTANCE CRITERIA
 ==================================================
 
-- There is at least one automated instrumentation test that verifies the preview ImageView contains a drawable after loading a controlled image
-- There is at least one automated instrumentation test that validates EXIF-corrected orientation using a deterministic assertion on final displayed dimensions for a suitable rotated test image
+- There is at least one automated instrumentation test that verifies the preview ImageView contains a drawable after loading a controlled fixture image
+- There is at least one automated instrumentation test that validates 90° EXIF-corrected orientation using a deterministic assertion on the rendered drawable/bitmap for Landscape_1.jpg
 - There is at least one automated instrumentation test that recreates the activity and verifies the image remains displayed after restore
 - Tests do not depend on manually driving the real external picker UI
-- Production behavior is unchanged except for any minimal testability adjustment strictly required for the tests
+- Tests do not depend on emulator gallery state
+- Production behavior is unchanged except for any minimal deterministic seam strictly required for Phase D
 - No unrelated refactors or feature additions
+- If any new test libraries are introduced, android-dependency-closure is fully satisfied
+- Before completion, the relevant androidTest target compiles successfully
+
+==================================================
+MANDATORY VERIFICATION BEFORE COMPLETION
+==================================================
+
+Before declaring the task complete:
+
+1. Compile the relevant androidTest target
+2. Fix any unresolved symbol / dependency / import issues introduced by your changes
+3. Ensure no introduced symbol remains unresolved
+
+Minimum requirement:
+- the relevant androidTest target compiles successfully
+
+If a connected emulator/device is already available, you may also run the instrumentation tests.
+If no device is available, do NOT block completion on launching or managing the emulator; compile closure is still mandatory.
+
+Do NOT stop after merely writing test code.
 
 ==================================================
 IMPLEMENTATION STYLE
@@ -148,8 +298,9 @@ IMPLEMENTATION STYLE
 - Keep changes minimal and surgical
 - Prefer clarity over abstraction
 - Prefer stable instrumentation patterns over cleverness
-- If the app already has enough structure to inject a controlled Uri cleanly, use that instead of building complicated intent stubs
-- If Espresso-Intents is the cleaner option in the current codebase, use it
+- Prefer the simpler deterministic seam over a more complicated picker-stubbing strategy
+- If the app does not already expose the seam, add the smallest explicit one needed
+- If Espresso-Intents is chosen, fully wire the dependency chain and compile before stopping
 
 ==================================================
 OUTPUT CONTRACT
