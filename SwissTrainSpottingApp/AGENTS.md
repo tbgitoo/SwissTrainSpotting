@@ -94,6 +94,18 @@ Package: `com.tb.swisstrainspotting`. Plan reference: `../plans/01_architecture.
 
 ---
 
+## Dependency closure (Android)
+If you introduce a new AndroidX, test, or other non-project symbol, you must ensure dependency closure:
+- add required imports
+- add the required dependency in the project’s dependency management mechanism
+- if the project uses `gradle/libs.versions.toml`, prefer adding dependencies there over pinning raw versions in module build files
+- use the correct dependency scope (`implementation`, `androidTestImplementation`, `testImplementation`, etc.)
+- do not leave unresolved symbols introduced by your own changes
+- compile the relevant target before declaring completion
+
+
+---
+
 ## Out of scope for agents
 
 - `model/` Python training pipeline (separate folder).

@@ -1,4 +1,4 @@
-This is not a prompt but a short description of the installation of the testing skill.
+This is not a prompt but a short description of the installation of the testing skill in OpenCode.
 
 Google maintains an Android skill collection at https://github.com/android/skills. Here, the testing-setup skill within that collection is of interest.
 

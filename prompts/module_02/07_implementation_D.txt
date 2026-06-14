@@ -1,32 +1,33 @@
-Implement Module 2 — Phase C (Hardening) for the SwissTrainSpotting Android app.
+Implement Module 2 — Phase D (Validation / Automated Testing) for the SwissTrainSpotting Android app.
 
 Follow AGENTS.md strictly.
 
-This is a hardening / cleanup pass only, not feature work.
+This is a testing / validation pass only.
+Do NOT redesign production code.
+Do NOT introduce new features.
+If a tiny production-code change is absolutely required to make deterministic testing possible, keep it minimal, local, and explicitly justified by the test need.
 
 ==================================================
 EDIT SAFETY RULES (MANDATORY)
 ==================================================
 
-For ImageClassificationActivity.java:
-- Use FULL-FILE REWRITE mode
-- Do NOT perform a partial in-place patch of the class
-- Regenerate the complete file as valid Java source
-- Preserve the existing package declaration and class name
-- Preserve existing behavior unless a listed hardening change requires modification
+For production Java files:
+- Prefer NO production changes unless strictly necessary
+- If a production Java file must be changed, use FULL-FILE REWRITE mode for that file
+- Do NOT perform fragile partial class patching
+- Preserve package declaration, class name, behavior, and structure unless a minimal testability hook is required
 
-For XML edits:
-- Modify only files explicitly allowed below
-- If an XML file is modified, return the complete file contents
-- Do NOT redesign layouts
-- Do NOT rename IDs unless strictly necessary to replace hardcoded text references
+For test files:
+- Create or rewrite complete test files cleanly
+- Keep tests deterministic
+- Do NOT add broad testing infrastructure beyond this phase
 
 For Gradle edits:
-- Modify app/build.gradle ONLY if required because ExifInterface is unresolved
-- Keep the change minimal and local
+- Modify app/build.gradle only if required for androidTest dependencies
+- If the project uses a version catalog, add new test dependencies through the catalog rather than pinning raw versions directly in app/build.gradle
+- Keep dependency changes minimal and limited to Android test support needed for this phase
 - Do NOT upgrade unrelated dependencies
-- Do NOT change plugin configuration
-- Do NOT modernize the build script beyond what is required
+- Do NOT change plugin configuration unless required for instrumentation testing
 
 Before returning Java output, self-check:
 - balanced braces
@@ -43,101 +44,102 @@ PROJECT CONTEXT
 - Android app
 - Java + XML
 - minSdk 24
-- Module 2 (image acquisition) is already implemented and working:
-  - Photo picker path works
-  - Camera path works
-  - Images are decoded and displayed in ImageClassificationActivity
-- This task is strictly a hardening / cleanup pass
-- Testing is deferred to a later phase; this prompt is implementation only
+- Module 2 Phases A, B, and C are already implemented and working:
+  - photo picker path works
+  - camera path works
+  - images decode and display in ImageClassificationActivity
+  - Phase C hardening is already in place (strings, safe decode handling, EXIF correction, lightweight Uri-based state restore)
+- Controlled EXIF test images are already available on emulator/device (for example Landscape_0.jpg, Landscape_1.jpg)
+- This phase is about automated validation of app behavior
 
 ==================================================
-SCOPE (ONLY WHAT IS LISTED BELOW)
+PHASE D GOALS
 ==================================================
 
-1) Move user-visible strings to resources
-- Identify all user-visible text currently hardcoded in Java or XML
-- Move them into res/values/strings.xml
-- Replace usages with string resources
-- Do NOT introduce new UI text
-- Do NOT rename existing IDs unless necessary
+Add focused instrumentation tests that validate the following:
 
-2) Ensure safe image decoding resource handling
-- Review all decode paths (gallery + camera)
-- Ensure:
-  - InputStreams are always closed
-  - file descriptors, if used, are always closed
-- Use try-with-resources where possible
-- Do NOT change decoding strategy unless required for safety
+1) Preview image is displayed after loading
+- Verify the ImageView in ImageClassificationActivity contains a drawable after a successful image load
 
-3) Add minimal EXIF orientation correction
-- Read EXIF metadata using ExifInterface where EXIF is available
-- If orientation is not ORIENTATION_NORMAL, rotate the decoded Bitmap accordingly
-- Apply correction only for sources where EXIF metadata is available
-- Keep implementation minimal
-- Do NOT add abstraction layers
-- Do NOT introduce helper classes
+2) EXIF correction is validated in an automated way
+- Use controlled EXIF test images
+- For EXIF cases where rotation should change aspect (for example 90°/270° cases), assert that the final displayed drawable/bitmap dimensions reflect the corrected orientation
+- Do NOT rely only on visual judgment in automated tests
 
-Dependency rule for EXIF:
-- Use import:
-  androidx.exifinterface.media.ExifInterface
-- If that class is unresolved, modify app/build.gradle and add the AndroidX ExifInterface dependency using the current project-compatible stable version
-- Do NOT guess unrelated Android packages
-- Do NOT use android.util.ExifInterface
+3) Activity recreation restores the image
+- Recreate the activity during the test
+- Verify that the previously displayed image is restored after recreation
 
-4) Lightweight rotation persistence
-- Preserve the currently displayed image across configuration change
-- Prefer storing Uri rather than Bitmap
-- Re-decode on restore
-- Use onSaveInstanceState / onCreate
-- Do NOT introduce ViewModel, retained fragments, or architecture components
+4) Keep external UI out of the core automation path
+- Do NOT try to fully automate the real external photo picker UI
+- Prefer one of these approaches:
+  - stub the outgoing intent/result with Espresso-Intents, OR
+  - launch ImageClassificationActivity in a controlled way with a known test Uri if the app structure allows it cleanly
+- Keep one final manual sanity pass for full picker/camera integration outside this implementation prompt
 
-5) Keep code structure minimal
-- Do NOT refactor into helper classes
-- Do NOT redesign Activity responsibilities
-- Do NOT touch MainActivity unless required for moving existing user-visible strings into resources
+==================================================
+IMPLEMENTATION REQUIREMENTS
+==================================================
+
+Testing approach:
+- Use Android instrumentation tests under app/src/androidTest
+- Use Espresso for UI assertions inside the app process
+- Use Espresso-Intents if needed to intercept / stub the external picker flow
+- Use ActivityScenario (or ActivityScenarioRule) for activity lifecycle control and recreation testing
+
+Determinism:
+- Tests must be deterministic and not depend on tapping through external system UIs
+- Do not add sleeps or timing hacks unless absolutely unavoidable
+- Prefer assertions on actual drawable presence and measurable image properties
+
+Production code policy:
+- Do NOT redesign ImageClassificationActivity
+- Do NOT add architecture layers
+- Do NOT refactor just for elegance
+- If a tiny testability hook is needed, keep it minimal and local
+- Avoid exposing broad internal APIs just for tests
 
 ==================================================
 OUT OF SCOPE (DO NOT DO)
 ==================================================
 
-- No ML preprocessing
-- No ONNX / inference integration
-- No OCR
-- No persistent storage or caching
-- No CameraX migration
+- No UI redesign
 - No new Activities
 - No new Fragments
+- No CameraX migration
 - No new architecture layers
-- No UI redesign
-- No passing Bitmaps between Activities
-- No additional permissions
-- No speculative cleanup
-- No unrelated refactors
-- No automated tests in this prompt
+- No ONNX / inference work
+- No OCR
+- No persistent storage
+- No broad test framework expansion
+- No unrelated cleanup
+- No flaky automation of the external picker UI
+- No manual test descriptions; implement actual automated tests only
 
 ==================================================
 FILES YOU MAY MODIFY
 ==================================================
 
-- ImageClassificationActivity.java
-- res/values/strings.xml
-- layout XML files only if needed to replace hardcoded user-visible text
-- MainActivity.java only if required for moving existing user-visible strings into resources
-- app/build.gradle only if required for AndroidX ExifInterface
+Primary expected files:
+- app/src/androidTest/java/... (new or modified instrumentation test files)
+- app/build.gradle only if required for androidTest dependencies
+- gradle/libs.versions.toml only if the project uses a version catalog and new androidTest dependencies must be added there
 
-Do not modify any other files.
+Production files only if strictly necessary for deterministic testing:
+- ImageClassificationActivity.java
+
+Do not modify unrelated files.
 
 ==================================================
 ACCEPTANCE CRITERIA
 ==================================================
 
-- No user-visible hardcoded strings remain in modified files
-- No resource leaks remain in image decode paths
-- Images display correctly after EXIF-based rotation when metadata requires it
-- Image remains visible after device rotation using simple Uri-based persistence
-- No regressions in photo picker or camera flow
-- No new features added
-- If ExifInterface was unresolved before the change, the project now resolves it correctly
+- There is at least one automated instrumentation test that verifies the preview ImageView contains a drawable after loading a controlled image
+- There is at least one automated instrumentation test that validates EXIF-corrected orientation using a deterministic assertion on final displayed dimensions for a suitable rotated test image
+- There is at least one automated instrumentation test that recreates the activity and verifies the image remains displayed after restore
+- Tests do not depend on manually driving the real external picker UI
+- Production behavior is unchanged except for any minimal testability adjustment strictly required for the tests
+- No unrelated refactors or feature additions
 
 ==================================================
 IMPLEMENTATION STYLE
@@ -145,9 +147,9 @@ IMPLEMENTATION STYLE
 
 - Keep changes minimal and surgical
 - Prefer clarity over abstraction
-- Preserve existing behavior unless fixing a clear issue
-- Do not introduce speculative improvements
-- If a complete file rewrite is safer than an in-place patch, rewrite the whole file cleanly
+- Prefer stable instrumentation patterns over cleverness
+- If the app already has enough structure to inject a controlled Uri cleanly, use that instead of building complicated intent stubs
+- If Espresso-Intents is the cleaner option in the current codebase, use it
 
 ==================================================
 OUTPUT CONTRACT
