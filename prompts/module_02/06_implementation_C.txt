@@ -1,104 +1,151 @@
-Implement **Module 2 — Phase C (Hardening)** for the SwissTrainSpotting Android app.
+Implement Module 2 — Phase C (Hardening) for the SwissTrainSpotting Android app.
 
-Context:
-- Project uses Java + XML, minSdk 24
+Use the skill: safe-java-edit
+
+Follow AGENTS.md strictly.
+
+This is a hardening / cleanup pass only, not feature work.
+
+==================================================
+EDIT SAFETY RULES (MANDATORY)
+==================================================
+
+For Java edits, apply the safe-java-edit skill strictly.
+
+For ImageClassificationActivity.java:
+- Use FULL-FILE REWRITE mode
+- Do NOT perform a partial in-place patch of the class
+- Regenerate the complete file as valid Java source
+- Preserve the existing package declaration and class name
+- Preserve existing behavior unless a listed hardening change requires modification
+
+For XML edits:
+- Modify only files explicitly allowed below
+- If an XML file is modified, return the complete file contents
+- Do NOT redesign layouts
+- Do NOT rename IDs unless strictly necessary to replace hardcoded text references
+
+Before returning Java output, self-check:
+- balanced braces
+- valid Java syntax
+- imports consistent with usage
+- no truncated identifiers
+- no duplicated or orphaned methods
+- no accidental changes outside the requested scope
+
+==================================================
+PROJECT CONTEXT
+==================================================
+
+- Android app
+- Java + XML
+- minSdk 24
 - Module 2 (image acquisition) is already implemented and working:
   - Photo picker path works
   - Camera path works
   - Images are decoded and displayed in ImageClassificationActivity
-- This task is strictly a **hardening / cleanup pass**, NOT feature work
+- This task is strictly a hardening / cleanup pass
 
-Follow AGENTS.md strictly.
-
-========================================
+==================================================
 SCOPE (ONLY WHAT IS LISTED BELOW)
-========================================
+==================================================
 
 1) Move user-visible strings to resources
-- Identify ALL user-visible text currently hardcoded in Java or XML
+- Identify all user-visible text currently hardcoded in Java or XML
 - Move them into res/values/strings.xml
-- Replace usages with R.string.*
-- Do NOT rename existing IDs unless necessary
+- Replace usages with string resources
 - Do NOT introduce new UI text
-
-----------------------------------------
+- Do NOT rename existing IDs unless necessary
 
 2) Ensure safe image decoding resource handling
 - Review all decode paths (gallery + camera)
 - Ensure:
   - InputStreams are always closed
-  - File descriptors (if used) are closed
+  - file descriptors, if used, are always closed
 - Use try-with-resources where possible
 - Do NOT change decoding strategy unless required for safety
 
-----------------------------------------
-
-3) Add minimal EXIF orientation correction (ONLY if needed)
-- Only apply correction when decoding from a Uri/file where EXIF is available
+3) Add minimal EXIF orientation correction (only if needed)
+- Only apply correction when decoding from a Uri or file where EXIF is available
 - Use ExifInterface
-- Rotate Bitmap only if orientation != normal
-- Keep implementation minimal (no abstraction layer yet)
+- Rotate Bitmap only if orientation is not normal
+- Keep implementation minimal
 - Do NOT introduce new dependencies
+- Do NOT add abstraction layers
 
-----------------------------------------
-
-4) Lightweight rotation persistence (ONLY if simple)
-- Preserve currently displayed image across configuration change (rotation)
-- Prefer:
-  - storing Uri instead of Bitmap
-  - re-decoding on restore
+4) Lightweight rotation persistence (only if simple)
+- Preserve the currently displayed image across configuration change
+- Prefer storing Uri rather than Bitmap
+- Re-decode on restore
 - Use onSaveInstanceState / onCreate
 - Do NOT introduce ViewModel, retained fragments, or architecture components
 
-----------------------------------------
-
 5) Keep code structure minimal
-- DO NOT refactor into helper classes unless duplication is obvious and already present
-- DO NOT redesign Activity responsibilities
-- DO NOT touch MainActivity unless required for strings
+- Do NOT refactor into helper classes
+- Do NOT redesign Activity responsibilities
+- Do NOT touch MainActivity unless required for moving user-visible strings into resources
 
-========================================
+==================================================
 OUT OF SCOPE (DO NOT DO)
-========================================
+==================================================
 
-- NO preprocessing for ML (resizing to tensor, normalization, etc.)
-- NO ONNX / inference integration
-- NO OCR
-- NO persistent storage or caching
-- NO CameraX migration
-- NO new Activities, Fragments, or architecture layers
-- NO UI redesign
-- NO passing Bitmaps between Activities
-- NO additional permissions
+- No ML preprocessing
+- No ONNX / inference integration
+- No OCR
+- No persistent storage or caching
+- No CameraX migration
+- No new Activities
+- No new Fragments
+- No new architecture layers
+- No UI redesign
+- No passing Bitmaps between Activities
+- No additional permissions
+- No speculative cleanup
+- No unrelated refactors
 
-========================================
+==================================================
 FILES YOU MAY MODIFY
-========================================
+==================================================
 
 - ImageClassificationActivity.java
-- strings.xml
-- (optionally) layout XMLs ONLY for replacing hardcoded text
+- res/values/strings.xml
+- layout XML files only if needed to replace hardcoded user-visible text
+- MainActivity.java only if required for moving existing user-visible text into resources
 
-========================================
+Do not modify any other files.
+
+==================================================
 ACCEPTANCE CRITERIA
-========================================
+==================================================
 
-- No user-visible hardcoded strings remain
-- No resource leaks in image decode paths
+- No user-visible hardcoded strings remain in modified files
+- No resource leaks remain in image decode paths
 - Images display correctly after EXIF rotation when needed
-- Image remains visible after device rotation (simple persistence)
-- No regressions in Phase A or Phase B flows
+- Image remains visible after device rotation using a simple persistence approach
+- No regressions in photo picker or camera flow
 - No new features added
 
-========================================
+==================================================
 IMPLEMENTATION STYLE
-========================================
+==================================================
 
 - Keep changes minimal and surgical
 - Prefer clarity over abstraction
-- Do not introduce speculative improvements
 - Preserve existing behavior unless fixing a clear issue
+- Do not introduce speculative improvements
 
-Return:
-- Modified files only (full file contents)
+==================================================
+OUTPUT CONTRACT
+==================================================
+
+Return modified files only, with full file contents.
+
+Requirements:
 - No explanations
+- No commentary
+- No diff format
+- No ellipses
+- No placeholders
+- No partial snippets
+- For every modified file, return the complete final contents
+- If a file is unchanged, do not return it
