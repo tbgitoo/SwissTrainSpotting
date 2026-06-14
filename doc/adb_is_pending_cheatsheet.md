@@ -47,7 +47,7 @@ Match rows by index.
 ### Step 2 — Update specific image
 
 ```bash
-adb shell content update --uri content://media/external/images/media --bind is_pending:i:0 --where "_id=21"
+adb shell content update --uri content://media/external/images/media/21 --bind is_pending:i:0
 ```
 
 ✔ No fragile quoting  
@@ -79,6 +79,10 @@ adb shell content update --uri content://media/external/images/media --bind is_p
 ```bash
 \   # causes double shell parsing issues
 ```
+
+❌ Do NOT update the collection URI with --where "_id=..."
+✅ Update the specific row URI directly:
+   content://media/external/images/media/<_id>
 
 ---
 

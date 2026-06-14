@@ -29,6 +29,7 @@ import java.io.InputStream;
 public class ImageClassificationActivity extends AppCompatActivity {
 
     public static final String EXTRA_ACQUISITION_MODE = "acquisition_mode";
+    public static final String EXTRA_PICKER_RESULT_URI = "picker_result_uri";
     private static final int CAMERA_PERMISSION_REQUEST_CODE = 1;
     private static final String STATE_IMAGE_URI = "state_image_uri";
 
@@ -85,6 +86,12 @@ public class ImageClassificationActivity extends AppCompatActivity {
                 loadImageFromUri(currentImageUri);
                 return;
             }
+        }
+
+        String pickerResultUri = getIntent().getStringExtra(EXTRA_PICKER_RESULT_URI);
+        if (pickerResultUri != null) {
+            loadImageFromUri(Uri.parse(pickerResultUri));
+            return;
         }
 
         AcquisitionMode mode = AcquisitionMode.GALLERY;
