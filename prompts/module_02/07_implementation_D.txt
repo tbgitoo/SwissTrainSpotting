@@ -1,0 +1,166 @@
+Implement Module 2 — Phase C (Hardening) for the SwissTrainSpotting Android app.
+
+Follow AGENTS.md strictly.
+
+This is a hardening / cleanup pass only, not feature work.
+
+==================================================
+EDIT SAFETY RULES (MANDATORY)
+==================================================
+
+For ImageClassificationActivity.java:
+- Use FULL-FILE REWRITE mode
+- Do NOT perform a partial in-place patch of the class
+- Regenerate the complete file as valid Java source
+- Preserve the existing package declaration and class name
+- Preserve existing behavior unless a listed hardening change requires modification
+
+For XML edits:
+- Modify only files explicitly allowed below
+- If an XML file is modified, return the complete file contents
+- Do NOT redesign layouts
+- Do NOT rename IDs unless strictly necessary to replace hardcoded text references
+
+For Gradle edits:
+- Modify app/build.gradle ONLY if required because ExifInterface is unresolved
+- Keep the change minimal and local
+- Do NOT upgrade unrelated dependencies
+- Do NOT change plugin configuration
+- Do NOT modernize the build script beyond what is required
+
+Before returning Java output, self-check:
+- balanced braces
+- valid Java syntax
+- imports consistent with usage
+- no truncated identifiers
+- no duplicated or orphaned methods
+- no accidental changes outside the requested scope
+
+==================================================
+PROJECT CONTEXT
+==================================================
+
+- Android app
+- Java + XML
+- minSdk 24
+- Module 2 (image acquisition) is already implemented and working:
+  - Photo picker path works
+  - Camera path works
+  - Images are decoded and displayed in ImageClassificationActivity
+- This task is strictly a hardening / cleanup pass
+- Testing is deferred to a later phase; this prompt is implementation only
+
+==================================================
+SCOPE (ONLY WHAT IS LISTED BELOW)
+==================================================
+
+1) Move user-visible strings to resources
+- Identify all user-visible text currently hardcoded in Java or XML
+- Move them into res/values/strings.xml
+- Replace usages with string resources
+- Do NOT introduce new UI text
+- Do NOT rename existing IDs unless necessary
+
+2) Ensure safe image decoding resource handling
+- Review all decode paths (gallery + camera)
+- Ensure:
+  - InputStreams are always closed
+  - file descriptors, if used, are always closed
+- Use try-with-resources where possible
+- Do NOT change decoding strategy unless required for safety
+
+3) Add minimal EXIF orientation correction
+- Read EXIF metadata using ExifInterface where EXIF is available
+- If orientation is not ORIENTATION_NORMAL, rotate the decoded Bitmap accordingly
+- Apply correction only for sources where EXIF metadata is available
+- Keep implementation minimal
+- Do NOT add abstraction layers
+- Do NOT introduce helper classes
+
+Dependency rule for EXIF:
+- Use import:
+  androidx.exifinterface.media.ExifInterface
+- If that class is unresolved, modify app/build.gradle and add the AndroidX ExifInterface dependency using the current project-compatible stable version
+- Do NOT guess unrelated Android packages
+- Do NOT use android.util.ExifInterface
+
+4) Lightweight rotation persistence
+- Preserve the currently displayed image across configuration change
+- Prefer storing Uri rather than Bitmap
+- Re-decode on restore
+- Use onSaveInstanceState / onCreate
+- Do NOT introduce ViewModel, retained fragments, or architecture components
+
+5) Keep code structure minimal
+- Do NOT refactor into helper classes
+- Do NOT redesign Activity responsibilities
+- Do NOT touch MainActivity unless required for moving existing user-visible strings into resources
+
+==================================================
+OUT OF SCOPE (DO NOT DO)
+==================================================
+
+- No ML preprocessing
+- No ONNX / inference integration
+- No OCR
+- No persistent storage or caching
+- No CameraX migration
+- No new Activities
+- No new Fragments
+- No new architecture layers
+- No UI redesign
+- No passing Bitmaps between Activities
+- No additional permissions
+- No speculative cleanup
+- No unrelated refactors
+- No automated tests in this prompt
+
+==================================================
+FILES YOU MAY MODIFY
+==================================================
+
+- ImageClassificationActivity.java
+- res/values/strings.xml
+- layout XML files only if needed to replace hardcoded user-visible text
+- MainActivity.java only if required for moving existing user-visible strings into resources
+- app/build.gradle only if required for AndroidX ExifInterface
+
+Do not modify any other files.
+
+==================================================
+ACCEPTANCE CRITERIA
+==================================================
+
+- No user-visible hardcoded strings remain in modified files
+- No resource leaks remain in image decode paths
+- Images display correctly after EXIF-based rotation when metadata requires it
+- Image remains visible after device rotation using simple Uri-based persistence
+- No regressions in photo picker or camera flow
+- No new features added
+- If ExifInterface was unresolved before the change, the project now resolves it correctly
+
+==================================================
+IMPLEMENTATION STYLE
+==================================================
+
+- Keep changes minimal and surgical
+- Prefer clarity over abstraction
+- Preserve existing behavior unless fixing a clear issue
+- Do not introduce speculative improvements
+- If a complete file rewrite is safer than an in-place patch, rewrite the whole file cleanly
+
+==================================================
+OUTPUT CONTRACT
+==================================================
+
+Return modified files only, with full file contents.
+
+Requirements:
+- No explanations
+- No commentary
+- No diff format
+- No ellipses
+- No placeholders
+- No partial snippets
+- For every modified file, return the complete final contents
+- If a file is unchanged, do not return it
