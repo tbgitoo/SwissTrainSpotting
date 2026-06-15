@@ -1,0 +1,114 @@
+Please create a concise but implementation-ready planning document for SwissTrainSpotting Module 3 (Image Preprocessing), based on the overall architecture plan, which you should find at ../plans/01_architecture.md
+
+Write the result to:
+
+plans/module_03/implementation_plan.md
+
+Context:
+- Android app stack: Java + XML, not Kotlin, not Compose
+- Module 3 purpose from architecture: convert Bitmap -> float tensor for ONNX inference
+- Target output tensor shape: float[1×3×224×224]
+- Preprocessing contract from architecture:
+  - input image resized to 224×224
+  - RGB channel order
+  - float scaling by 255.0
+  - ImageNet normalization
+  - NCHW layout
+- EXIF rotation correction belongs to Module 2 and should be treated here as already done before preprocessing
+- Make testing explicit up front
+
+Important planning decision:
+For Module 3, the intended implementation/testing order is:
+1. define the preprocessing seam and exact contract
+2. define a small set of failing but well-specified tests first
+3. implement against those tests
+4. add one or two light integration/smoke tests afterward
+5. keep scope tight and avoid overbuilding test infrastructure
+
+The implementation plan should therefore explicitly recommend a small test-first approach for the core numerical invariants.
+
+Requirements for the content of plans/module_03/implementation_plan.md:
+- Write in clear, direct Markdown
+- Keep it compact, practical, and anti-fluff
+- Do not write a retrospective or process diary
+- Do not generate implementation code yet
+- Do not create multiple alternative architectures unless truly necessary
+- Do not drift into Module 4 or Module 5 except where interface contracts require brief mention
+
+Please structure the plan with the following sections:
+
+1. Module goal
+   - State exactly what Module 3 does and what it does not do
+
+2. Scope boundaries
+   - Explicitly separate Module 3 from Module 2 responsibilities
+   - Explicitly note that EXIF/orientation correction is upstream
+   - Explicitly note that ONNX inference is downstream
+
+3. Preprocessing contract
+   - Define exact expected behavior for Bitmap -> tensor conversion
+   - Include:
+     - resize to 224×224
+     - RGB channel order
+     - pixel / 255.0f scaling
+     - ImageNet mean/std normalization
+     - NCHW memory layout
+     - float[] length = 3 * 224 * 224
+   - Include the index logic in words or formula form
+
+4. Proposed implementation seam
+   - Propose one clean Java seam for testable preprocessing, e.g. a dedicated ImagePreprocessor utility/class
+   - Favor a seam that is easy to test directly from Android tests
+   - Keep the proposal conservative and compatible with Java + XML Android app structure
+
+5. Testing strategy
+   - State explicitly that a small number of failing specification tests should be written first
+   - Explain why this is appropriate for Module 3
+   - Keep this section practical, not philosophical
+
+6. Initial tests to write before implementation
+   - Define the minimum high-value tests that should exist first
+   - Include at least:
+     - tensor length test
+     - uniform RGB test using synthetic bitmap with all pixels (1,2,3) on 0–255 scale
+     - known pixel coordinate -> expected NCHW index mapping test
+   - Mention expected use of epsilon tolerance for float comparisons
+
+7. Additional tests after the first implementation passes
+   - Include:
+     - resize test using non-224 uniform image
+     - one spatial sanity test such as quadrant image
+     - one light integration or UI-path smoke test
+   - Keep these explicitly secondary to the core numerical tests
+
+8. Test fixtures and storage
+   - Recommend generated synthetic Bitmaps for strict numerical checks
+   - Recommend PNG test assets only where file-backed integration tests are useful
+   - If test assets are mentioned, place them under app/src/androidTest/assets/
+   - Explicitly discourage JPEG for exact numeric preprocessing tests
+
+9. Notices / pitfalls
+   - List the main failure modes this module must guard against
+   - Include:
+     - RGB/BGR confusion
+     - HWC/CHW/NCHW mismatch
+     - incorrect normalization
+     - off-by-one or wrong flat indexing
+     - resize side effects
+     - accidental mixing of Module 2 concerns into Module 3 tests
+
+10. Acceptance criteria
+   - Give a short, concrete checklist for “Module 3 done”
+
+Style constraints:
+- Prefer precise bullets over long prose
+- Be concrete and implementation-oriented
+- Avoid vague wording like “reasonably consistent values”
+- Replace vague milestones with crisp verifiable criteria
+- Keep the plan realistic for a small exam project
+- No code unless a tiny formula snippet is genuinely necessary for clarity
+- No unnecessary background explanations
+
+Please read ../plans/01_architecture.md first, align the Module 3 plan with it, and then create or overwrite:
+
+plans/module_03/implementation_plan.md

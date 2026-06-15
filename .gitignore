@@ -283,6 +283,20 @@ Thumbs.db
 # ===============================
 .vscode/
 
-.opencode/
+.opencode/*
+# But allow the skills folder
+!.opencode/skills/
+# And everything inside that folder
+!.opencode/skills/**
+
+# Ignore everything inside app-level .opencode
+SwissTrainSpottingApp/.opencode/*
+
+# Allow the skills folder
+!SwissTrainSpottingApp/.opencode/skills/
+
+# Allow contents of the skills folder
+!SwissTrainSpottingApp/.opencode/skills/**
+
 
 

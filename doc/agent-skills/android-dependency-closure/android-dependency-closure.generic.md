@@ -44,8 +44,10 @@ This means:
 2. Do not rely on wildcard imports.
 3. Do not rely on implicit resolution.
 4. Use fully qualified names only when needed to resolve a name clash.
-5. Remove unused imports before finishing.
-6. Ensure you are not mixing incompatible package families such as `android.*` and `androidx.*` variants for the same concept.
+5. Prefer explicit imports over fully qualified class names in method signatures, fields, variable declarations, and normal code when there is no name clash.
+6. Remove unused imports before finishing.
+7. Ensure you are not mixing incompatible package families such as `android.*` and `androidx.*` variants for the same concept.
+
 
 ## Dependency declaration rules
 

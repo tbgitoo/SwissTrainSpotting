@@ -1,0 +1,134 @@
+Task: Implement only the minimal non-functional production skeleton and the initial failing base tests for SwissTrainSpotting Module 3 (Image Preprocessing). Do not implement real preprocessing logic yet.
+
+Read and follow this planning document first:
+
+plans/module_03/implementation_plan.md
+
+Scope for this step:
+- Create a strictly minimal stub skeleton for ImagePreprocessor
+- Create the initial failing base tests described in the plan
+- Do NOT implement actual preprocessing behavior yet
+- Do NOT wire anything into activities, fragments, or UI
+- Do NOT add ONNX Runtime, OCR, model-loading, or inference code
+- Do NOT expand beyond Module 3
+- Keep changes conservative, minimal, and test-focused
+
+Relevant project skills for this step:
+- android-testing
+- android-dependency-closure
+
+Use these skills where applicable to:
+- place Android instrumentation tests correctly under androidTest
+- ensure any required Android test dependencies/imports are handled conservatively
+- avoid incomplete test setup or missing dependency issues
+
+Do not activate unrelated skills or expand scope beyond Module 3 Step 1.
+
+Project context:
+- Android app stack: Java + XML
+- minSdk 24
+- Module 3 input later: already upright in-memory Bitmap from Module 2
+- Module 3 output later: float[] in NCHW layout for 224x224 RGB ImageNet-normalized input
+- Bitmap-dependent tests belong under androidTest, not pure JVM test
+- This step should lock the seam and encode the contract as failing tests before behavior is implemented
+
+You must do the following now:
+
+1. Create the minimal production skeleton:
+   - File/class: ImagePreprocessor in the correct app package
+   - The class must be final
+   - The class must not be instantiable (private constructor)
+   - Add only these public constants:
+     - INPUT_WIDTH = 224
+     - INPUT_HEIGHT = 224
+     - CHANNELS = 3
+     - TENSOR_LENGTH = CHANNELS * INPUT_WIDTH * INPUT_HEIGHT
+   - Add only this public API:
+     - public static float[] preprocess(Bitmap bitmap)
+   - The method must NOT implement real logic yet
+   - The method should fail immediately and explicitly, e.g. by throwing UnsupportedOperationException
+   - Do not add partial resize, pixel extraction, normalization, or indexing logic in this step
+
+2. Create the Android instrumentation test file for Module 3 preprocessing tests:
+   - Use the package that matches the app's existing Java package structure
+   - Prefer a filename like:
+     app/src/androidTest/java/.../ImagePreprocessorInstrumentedTest.java
+
+3. Add only the initial failing tests from the implementation plan:
+   - tensorLength_is150528
+   - uniformRgb_1_2_3_producesExpectedChannels
+   - singlePixel_mapsToCorrectNchwIndex
+   - nullBitmap_throws
+
+4. These tests must reflect the exact preprocessing contract from the plan:
+   - target size = 224x224
+   - output tensor logically [1, 3, 224, 224]
+   - flat float[] length = 3 * 224 * 224 = 150528
+   - RGB channel order
+   - ImageNet normalization:
+     - mean = [0.485f, 0.456f, 0.406f]
+     - std  = [0.229f, 0.224f, 0.225f]
+   - NCHW flat index:
+     index(c, y, x) = c * (224 * 224) + y * 224 + x
+
+5. Use synthetic Bitmaps created in test code:
+   - Use Bitmap.createBitmap(..., Bitmap.Config.ARGB_8888)
+   - Prefer bulk pixel buffers + setPixels(...) over repeated setPixel(...) where convenient
+   - Do not use external image files
+   - Do not use JPEG
+   - Do not use Module 2 gallery fixtures
+   - Do not involve Uri, EXIF, MediaStore, or image decoding
+
+6. Test behavior details:
+   - tensorLength_is150528:
+     create a valid 224x224 bitmap and assert preprocess(...) returns length 150528
+   - uniformRgb_1_2_3_producesExpectedChannels:
+     create a uniform 224x224 bitmap with RGB(1,2,3)
+     assert representative indices in each channel plane equal the analytically expected normalized values
+   - singlePixel_mapsToCorrectNchwIndex:
+     create a 224x224 bitmap with all black pixels except one red pixel at (20,10)
+     assert the expected NCHW flat index contains the normalized red value
+     assert green and blue at the same spatial position equal normalized zero-channel values
+     assert at least one far-away location differs appropriately
+   - nullBitmap_throws:
+     assert preprocess(null) throws the intended exception type according to the plan
+
+7. Float assertion rules:
+   - use assertEquals(expected, actual, epsilon)
+   - use epsilon = 1e-4f
+   - compute expected normalized values explicitly in test code
+   - avoid vague “looks right” style assertions
+
+8. Important behavior expectations for this step:
+   - The production stub exists only so the tests can compile against the intended API
+   - The tests should currently fail because preprocess(...) is not implemented yet
+   - Do not silently turn this into real implementation work
+   - Do not add helper architecture, factories, interfaces, dependency injection, or test frameworks
+   - Small private helper methods inside the test class are fine for bitmap creation, bulk pixel filling, normalized-value calculation, and flat-index calculation
+
+9. Keep the implementation conservative:
+   - no new architecture layers
+   - no UI hooks
+   - no smoke tests yet
+   - no secondary tests yet
+   - no ONNX wiring
+   - no resizing logic yet
+   - no Color.red/green/blue production logic yet
+   - no getPixels production logic yet
+
+10. After making changes, summarize:
+   - which production file was created
+   - which test file was created
+   - which tests were added
+   - whether the tests currently fail at runtime and why
+   - confirm that ImagePreprocessor is still only a stub and real preprocessing remains for the next step
+
+Quality bar:
+- exact
+- conservative
+- no fluff
+- no scope creep
+- no guessing beyond plans/module_03/implementation_plan.md
+
+
+
