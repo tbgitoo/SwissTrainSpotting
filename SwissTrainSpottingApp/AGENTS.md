@@ -103,6 +103,18 @@ If you introduce a new AndroidX, test, or other non-project symbol, you must ens
 - do not leave unresolved symbols introduced by your own changes
 - compile the relevant target before declaring completion
 
+---
+
+## Packed vs planar arrays
+
+Packed arrays: some representations pack multiple components into a single value (e.g. ARGB int per pixel).
+
+Planar arrays: components are stored separately, typically one value per element (e.g. one float per channel per pixel).
+
+- Watch packed-vs-planar mistakes when converting image data.
+- Re-derive buffer sizes and flat indexing from what each structure actually stores.
+- Ask: "what does one element of this array represent?"
+- When in doubt, consult the `packed-vs-planar` skill.
 
 ---
 

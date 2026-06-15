@@ -6,6 +6,7 @@ Use these skills while performing this task:
 - `android-testing`
 - `android-dependency-closure`
 - `safe-java-edit`
+- `packed-vs-planar`
 
 Apply them in a restrained way:
 - `android-testing` because this module is defined by deterministic numeric correctness and existing §6 tests must pass
