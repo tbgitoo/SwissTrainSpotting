@@ -298,5 +298,5 @@ SwissTrainSpottingApp/.opencode/*
 # Allow contents of the skills folder
 !SwissTrainSpottingApp/.opencode/skills/**
 
-
+.settings
 
