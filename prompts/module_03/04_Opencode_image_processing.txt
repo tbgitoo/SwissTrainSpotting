@@ -1,0 +1,76 @@
+Implement **Prompt 2** from `plans/module_03/implementation_plan.md` for **Module 3 — Image Preprocessing**.
+
+## Skills to apply
+Use these skills while performing this task:
+
+- `android-testing`
+- `android-dependency-closure`
+- `safe-java-edit`
+
+Apply them in a restrained way:
+- `android-testing` because this module is defined by deterministic numeric correctness and existing §6 tests must pass
+- `android-dependency-closure` to ensure imports / Android test compatibility / compile integrity are handled cleanly
+- `safe-java-edit` to keep changes minimal and localized without unnecessary rewrites
+
+Do **not** use this task as a reason to expand architecture, refactor unrelated code, or rewrite existing modules broadly.
+
+---
+
+## Read first
+Before making changes, read these files:
+
+- `plans/module_03/implementation_plan.md`
+- `../plans/01_architecture.md`
+- `AGENTS.md`
+
+Treat `plans/module_03/implementation_plan.md` as the authoritative implementation contract for this task.
+
+---
+
+## Task scope
+
+Implement the production class for Module 3:
+
+- Create or complete:  
+  `app/src/main/java/com/tb/swisstrainspotting/ImagePreprocessor.java`
+
+The goal is to implement a **pure preprocessing utility** that converts an already-upright in-memory `Bitmap` into a normalized **NCHW float tensor** for later ONNX inference.
+
+This prompt is **implementation only**.
+
+### Do
+- Implement `ImagePreprocessor`
+- Make the existing **Module 3 §6 tests** pass
+- Keep the implementation minimal, deterministic, and aligned with the contract
+
+### Do not
+- Do **not** add ONNX Runtime code
+- Do **not** add OCR code
+- Do **not** add persistence
+- Do **not** add new architecture layers / wrappers / repositories / managers
+- Do **not** wire classification UI
+- Do **not** re-handle EXIF or image rotation
+- Do **not** introduce backend/network code
+- Do **not** broaden scope beyond `Bitmap -> float[]`
+
+---
+
+## Required API
+
+Implement this public class and API exactly (if not already implemented):
+
+```java
+package com.tb.swisstrainspotting;
+
+import android.graphics.Bitmap;
+
+public final class ImagePreprocessor {
+    public static final int INPUT_WIDTH = 224;
+    public static final int INPUT_HEIGHT = 224;
+    public static final int CHANNELS = 3;
+    public static final int TENSOR_LENGTH = CHANNELS * INPUT_WIDTH * INPUT_HEIGHT;
+
+    public static float[] preprocess(Bitmap bitmap) {
+        // implementation
+    }
+}
