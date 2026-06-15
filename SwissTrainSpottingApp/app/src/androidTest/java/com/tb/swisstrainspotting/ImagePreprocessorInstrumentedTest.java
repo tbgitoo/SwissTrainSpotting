@@ -166,34 +166,12 @@ public class ImagePreprocessorInstrumentedTest {
         int gPlaneStart = index(1, 0, 0);                         // 50176
         int bPlaneStart = index(2, 0, 0);                         // 100352
 
-        // --- start of each plane ----------------------------------
-        assertEquals("R at R-plane start", expectedR, result[rPlaneStart], EPSILON);
-        assertEquals("G at G-plane start", expectedG, result[gPlaneStart], EPSILON);
-        assertEquals("B at B-plane start", expectedB, result[bPlaneStart], EPSILON);
-
-        // --- end of each plane ------------------------------------
-        assertEquals("R at R-plane end  ", expectedR,
-                result[rPlaneStart + planeSize - 1], EPSILON);
-        assertEquals("G at G-plane end  ", expectedG,
-                result[gPlaneStart + planeSize - 1], EPSILON);
-        assertEquals("B at B-plane end  ", expectedB,
-                result[bPlaneStart + planeSize - 1], EPSILON);
-
-        // --- middle of each plane ---------------------------------
-        int midPlane = planeSize / 2;
-        assertEquals("R middle", expectedR, result[rPlaneStart + midPlane], EPSILON);
-        assertEquals("G middle", expectedG, result[gPlaneStart + midPlane], EPSILON);
-        assertEquals("B middle", expectedB, result[bPlaneStart + midPlane], EPSILON);
-
-        // --- a random-looking interior sample ----------------------
-        int y0 = 167, x0 = 99;
-        int rIdx = index(0, y0, x0);
-        int gIdx = index(1, y0, x0);
-        int bIdx = index(2, y0, x0);
-
-        assertEquals("R at (" + x0 + "," + y0 + ")", expectedR, result[rIdx], EPSILON);
-        assertEquals("G at (" + x0 + "," + y0 + ")", expectedG, result[gIdx], EPSILON);
-        assertEquals("B at (" + x0 + "," + y0 + ")", expectedB, result[bIdx], EPSILON);
+        // --- every element of every plane -------------------------
+        for (int i = 0; i < planeSize; i++) {
+            assertEquals("R[" + i + "]", expectedR, result[rPlaneStart + i], EPSILON);
+            assertEquals("G[" + i + "]", expectedG, result[gPlaneStart + i], EPSILON);
+            assertEquals("B[" + i + "]", expectedB, result[bPlaneStart + i], EPSILON);
+        }
 
         bitmap.recycle();
     }
