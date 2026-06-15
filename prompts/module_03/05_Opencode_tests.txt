@@ -1,0 +1,219 @@
+Implement **Prompt 3** from `plans/module_03/implementation_plan.md` for **Module 3 — Image Preprocessing**.
+
+## Skills to apply
+Use these skills while performing this task:
+
+- `android-testing`
+- `android-dependency-closure`
+- `safe-java-edit`
+- `packed-vs-planar`
+
+Apply them in a restrained way:
+
+- `android-testing` because this prompt is about adding targeted secondary validation without broadening scope
+- `android-dependency-closure` to keep test imports / androidTest setup / compile integrity clean
+- `safe-java-edit` to keep changes minimal and localized
+- `packed-vs-planar` to preserve the Bitmap buffer vs planar tensor distinction when writing assertions and index checks
+
+Do **not** use this task as an excuse to refactor production code, expand architecture, or add unrelated tests.
+
+---
+
+## Read first
+
+Before making changes, read these files:
+
+- `plans/module_03/implementation_plan.md`
+- `../plans/01_architecture.md`
+- `AGENTS.md`
+
+If present, also read the existing Module 3 test and implementation files so the new tests match the current structure:
+
+- `app/src/androidTest/java/.../ImagePreprocessorInstrumentedTest.java`
+- `app/src/test/java/.../ImagePreprocessorTest.java`
+- `app/src/main/java/com/tb/swisstrainspotting/ImagePreprocessor.java`
+
+Treat `plans/module_03/implementation_plan.md` as the authoritative task contract.
+
+---
+
+## Task scope
+
+This prompt is **secondary validation only**.
+
+Add the **§7 additional tests** for Module 3, with emphasis on deterministic synthetic-Bitmap checks.
+
+### Primary target
+Add these secondary tests:
+
+1. **`resize_stretchesNon224UniformImage`**
+2. **`quadrantSpatialSanity`**
+
+These should validate that preprocessing still behaves correctly beyond the initial §6 contract tests.
+
+### Optional target
+A very light smoke/integration check is allowed **only if there is already an obvious, minimal seam for it**.
+
+If such a seam is not already available, **skip the optional smoke test** rather than inventing new hooks, changing UI code, or broadening module boundaries.
+
+---
+
+## Do
+
+- Add the two secondary tests from §7:
+  - `resize_stretchesNon224UniformImage`
+  - `quadrantSpatialSanity`
+- Use **synthetic in-memory Bitmaps** created in test code
+- Keep tests deterministic and small
+- Prefer `setPixels(...)` with precomputed `int[]` buffers for test setup when practical
+- Reuse existing test structure and helper style if already present
+- Keep assertions focused on:
+  - resize/stretch behavior
+  - preservation of spatial structure
+  - correct planar tensor semantics
+- Run the smallest relevant Module 3 test target(s) and report results
+
+---
+
+## Do not
+
+- Do **not** add ONNX Runtime code
+- Do **not** add OCR code
+- Do **not** add backend or persistence
+- Do **not** use JPEG fixtures
+- Do **not** use gallery / MediaStore / Module 2 image fixtures
+- Do **not** assert EXIF, picker, `Uri`, or decode behavior
+- Do **not** add broad UI tests
+- Do **not** add screenshot/snapshot/golden-file infrastructure
+- Do **not** rewrite existing §6 tests unless strictly necessary for small consistency reasons
+- Do **not** refactor `ImagePreprocessor` unless a tiny correction is required to make the new tests meaningful and aligned with the plan
+
+---
+
+## Exact tests to add
+
+### 1. `resize_stretchesNon224UniformImage`
+
+Implement a test matching plan §7:
+
+- Create a **100 x 50** synthetic ARGB_8888 bitmap
+- Fill every pixel with uniform `RGB(128,128,128)`
+- Run `ImagePreprocessor.preprocess(...)`
+- Assert:
+  - returned length is `150528`
+  - all values in the R, G, and B planes equal the normalized value for `128/255f`
+- Use epsilon:
+  - `1e-4f`
+
+Purpose:
+- proves resize to `224 x 224` occurred
+- proves full output tensor is populated consistently after stretch resize
+- avoids interpolation ambiguity because the source is uniform
+
+### 2. `quadrantSpatialSanity`
+
+Implement a test matching plan §7:
+
+- Create a **224 x 224** synthetic ARGB_8888 bitmap
+- Fill:
+  - top-left quadrant = red `RGB(255,0,0)`
+  - all other quadrants = black `RGB(0,0,0)`
+- Run `ImagePreprocessor.preprocess(...)`
+- Assert at minimum:
+  - R-plane value at a top-left location such as `(x=50, y=50)` matches red-normalized expectation
+  - R-plane value at a bottom-right location such as `(x=200, y=200)` matches black-normalized expectation
+  - these differ beyond epsilon
+- Also optionally assert G/B values at those locations if already consistent with local test style
+
+Purpose:
+- confirms spatial structure is preserved through sampling
+- confirms layout/indexing is not accidentally interleaved or spatially scrambled
+
+---
+
+## Preferred test placement
+
+Since these tests are Bitmap-dependent, prefer:
+
+- `app/src/androidTest/java/.../ImagePreprocessorInstrumentedTest.java`
+
+Keep tests in the existing Module 3 test file if that is where the current instrumented preprocessing tests already live.
+
+Do not create unnecessary new test classes unless the existing structure makes that clearly cleaner.
+
+---
+
+## Important correctness reminders
+
+These are the main ways to drift incorrectly in Prompt 3:
+
+- Do not confuse **packed bitmap pixels** with **planar tensor output**
+- Do not write assertions as if output were interleaved `[R,G,B,R,G,B,...]`
+- Use planar NCHW indexing:
+  - `c * (width * height) + y * width + x`
+- For the uniform resize test, remember:
+  - the input pixel buffer is packed ARGB
+  - the output tensor is planar float RGB
+- For the quadrant test, assert against the **R plane**, not against packed color ints
+
+Use the `packed-vs-planar` skill if any indexing or buffer-size uncertainty appears.
+
+---
+
+## Optional smoke rule
+
+If there is already a very small, obvious seam to call `ImagePreprocessor.preprocess(...)` from an existing Activity test path without adding architectural noise, one optional smoke test may be added.
+
+But only do this if all of the following are true:
+
+- no new Activity/Fragment logic is introduced
+- no new assets are needed
+- no ONNX inference is involved
+- the test remains small and local
+- the seam already exists naturally
+
+Otherwise:
+- **skip the smoke test**
+- and report that Prompt 3 was completed with the two deterministic §7 tests only
+
+That is fully acceptable.
+
+---
+
+## File change policy
+
+Expected files to change are mainly test files, for example:
+
+- `app/src/androidTest/java/.../ImagePreprocessorInstrumentedTest.java`
+
+Avoid changing production files unless a very small correction is truly required.
+
+Do not touch unrelated modules.
+
+---
+
+## Build / verification
+
+After implementation, run the smallest relevant Module 3 test target(s).
+
+Prefer targeted verification over broad project test runs.
+
+Report:
+- what test target was run
+- whether all Module 3 preprocessing tests passed
+- whether the new §7 tests passed
+
+Do not start unrelated cleanup.
+
+---
+
+## Output format
+
+At the end, report concisely:
+
+1. Files changed
+2. Which §7 tests were added
+3. Whether the optional smoke test was added or intentionally skipped
+4. What test command/target was run
+5. Whether all relevant preprocessing tests passed
+6. Any minimal deviations from the plan
