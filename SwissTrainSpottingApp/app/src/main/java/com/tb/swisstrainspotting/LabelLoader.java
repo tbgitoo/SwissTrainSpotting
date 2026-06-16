@@ -2,8 +2,11 @@ package com.tb.swisstrainspotting;
 
 import android.content.Context;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -32,28 +35,14 @@ public final class LabelLoader {
         }
 
         List<String> labels = new ArrayList<>();
-        try (InputStream is = context.getAssets().open(assetPath)) {
-            byte[] buffer = new byte[1024];
-            int bytesRead;
-            StringBuilder lineBuilder = new StringBuilder();
-            while ((bytesRead = is.read(buffer)) != -1) {
-                String chunk = new String(buffer, 0, bytesRead, "UTF-8");
-                int start = 0;
-                int nlIndex;
-                while ((nlIndex = chunk.indexOf('\n', start)) != -1) {
-                    String line = chunk.substring(start, nlIndex).trim();
-                    if (!line.isEmpty()) {
-                        labels.add(line);
-                    }
-                    start = nlIndex + 1;
+        try (InputStream is = context.getAssets().open(assetPath);
+             BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String trimmed = line.trim();
+                if (!trimmed.isEmpty()) {
+                    labels.add(trimmed);
                 }
-                if (start < chunk.length()) {
-                    lineBuilder.append(chunk.substring(start));
-                }
-            }
-            String remaining = lineBuilder.toString().trim();
-            if (!remaining.isEmpty()) {
-                labels.add(remaining);
             }
         }
 

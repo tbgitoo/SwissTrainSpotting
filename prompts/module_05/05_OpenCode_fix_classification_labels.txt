@@ -1,0 +1,100 @@
+Fix the `LabelLoader` bug in Module 5 / Phase 5A.
+
+## Context
+The ONNX runtime integration is working.
+Real inference runs successfully.
+Do **not** touch ONNX session code, classifier lifecycle, tensor handling, Gradle setup, or UI.
+
+Current issue:
+- `imagenet_classes.txt` contains 1000 lines
+- current `LabelLoader` returns 1001 labels
+- shell inspection shows no blank lines in the file
+- therefore the bug is in Java loading logic, not in the asset content
+
+## Read first
+Before editing anything, read:
+- `AGENTS.md`
+- `plans/module_05/implementation_plan.md`
+- current `LabelLoader`
+- related label-loading tests
+
+## Goal
+Fix `LabelLoader` so it correctly loads labels line-by-line from the asset without introducing an extra synthetic entry.
+
+## Root-cause guidance
+The current implementation manually reads UTF-8 bytes in chunks and tries to reconstruct lines using `StringBuilder`.
+This logic is error-prone across chunk boundaries and likely introduces an extra final label.
+
+Preferred fix:
+- replace manual chunk parsing with a standard buffered text reader
+- use `BufferedReader` + `InputStreamReader(StandardCharsets.UTF_8)`
+- read one logical line at a time with `readLine()`
+- trim each line
+- ignore empty lines
+- keep the rest of the API unchanged
+
+## Required behavior
+After the fix:
+- loading `imagenet_classes.txt` yields exactly 1000 labels
+- no returned label is empty
+- no synthetic extra label is introduced
+- public API remains unchanged
+
+## Keep scope strict
+Do **not**:
+- modify `OnnxClassifier`
+- modify ONNX Runtime session logic
+- modify tensor code
+- redesign architecture
+- refactor unrelated classes
+- touch UI or threading
+- touch Phase 5B
+
+## Tests
+Update or add only the minimal tests needed for this issue.
+
+Required:
+1. loading `imagenet_classes.txt` yields exactly 1000 labels
+2. no returned label is empty
+3. loader does not introduce an extra trailing/synthetic entry
+
+Do not broaden test scope beyond label loading.
+
+## Build / verification
+Run only the narrowest relevant checks:
+- compile affected sources
+- affected unit test(s)
+- affected android test(s) only if needed for label-loading verification
+
+Do not rerun the full ONNX runtime battery unless required by compilation.
+
+## Output format
+When done, respond with:
+
+### 1. Summary
+Very short bullets.
+
+### 2. Files changed
+Explicit list.
+
+### 3. Root cause
+One short paragraph.
+
+### 4. What was fixed
+One short paragraph.
+
+### 5. Tests run
+Exact commands.
+
+### 6. Result
+- passed
+- failed
+- partially passed
+
+### 7. Remaining blockers
+Only if any remain.
+
+## Quality bar
+This is a surgical fix.
+Keep changes minimal, local, and easy to review.
+No opportunistic cleanup.
