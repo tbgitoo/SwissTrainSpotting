@@ -1,0 +1,184 @@
+You are reviewing an implementation plan for an Android project.
+
+## Task
+
+Critically review the file:
+
+- `plans/module_05/implementation_plan.md`
+
+This file defines **Module 5 — ONNX Inference Integration**.
+
+You must assess whether the plan is:
+
+- technically sound
+- realistic for Android (Java + XML)
+- robust against common ONNX Runtime pitfalls
+- consistent with the rest of the repository
+
+---
+
+## Required context (read before reviewing)
+
+You must also read and take into account:
+
+- `AGENTS.md`
+- `../plans/01_architecture.md`
+- `plans/module_03/implementation_plan.md` for consistency with preprocessing
+
+---
+
+## Review style (IMPORTANT)
+
+Be **critical, direct, and technical**.
+
+Do NOT:
+- summarize the plan
+- restate what is already correct
+- provide generic advice
+
+Instead:
+- focus on **weak points, risks, and inconsistencies**
+- assume the plan will be executed by an AI agent (OpenCode/Cursor)
+- identify where that agent is likely to:
+  - misinterpret
+  - over-engineer
+  - break Android constraints
+  - introduce silent bugs
+
+---
+
+## Focus areas
+
+### 1. Android-specific correctness (HIGH PRIORITY)
+
+Evaluate:
+
+- ONNX Runtime integration assumptions
+- resource loading (`res/raw` vs `assets`)
+- context usage and lifecycle
+- threading model (main thread vs background)
+- Activity integration
+- potential memory leaks (`OrtSession`, `OnnxTensor`)
+- handling of large model files (~14 MB)
+
+Identify:
+- incorrect assumptions
+- missing constraints
+- risky patterns
+- unclear responsibilities between Activity and helper classes
+
+---
+
+### 2. Tensor / ONNX correctness
+
+Check for risks related to:
+
+- NCHW vs HWC confusion
+- flat buffer cardinality (`150528`)
+- tensor shape correctness (`[1,3,224,224]`)
+- potential mismatch with ONNX input expectations
+- output parsing correctness (logits, argmax, softmax)
+
+Be especially critical about:
+- places where the plan *assumes correctness*
+- places where an agent could silently do the wrong thing
+
+---
+
+### 3. Testing strategy strength
+
+Evaluate whether the tests:
+
+- actually protect against real bugs
+- will fail in meaningful ways
+- sufficiently validate:
+  - model loading
+  - inference execution
+  - tensor correctness
+  - output parsing
+
+Be critical about:
+
+- missing failure conditions
+- weak assertions
+- places where tests might pass despite incorrect implementation
+
+---
+
+### 4. Agent-execution robustness (VERY IMPORTANT)
+
+Assume an LLM agent implements this plan.
+
+Identify where the plan may:
+
+- be too ambiguous
+- invite overengineering
+- omit key constraints
+- rely on implicit knowledge
+
+Highlight:
+- instructions that should be made stricter
+- any “interpretation gaps”
+- anything that could cause drift
+
+---
+
+### 5. Architecture discipline
+
+Check consistency with:
+
+- `AGENTS.md`
+- the project’s preference for:
+  - simple structure
+  - no unnecessary abstraction layers
+  - minimal Android architecture overhead
+
+Specifically evaluate the proposed classes:
+
+- `OnnxClassifier`
+- `ModelConfig`
+- `LabelLoader`
+- `LogitsParser`
+- `ClassificationResult`
+
+Are they:
+- justified and minimal?
+- at risk of overgrowth?
+- correctly scoped?
+
+---
+
+## Output format
+
+Structure your review as:
+
+### 1. Critical issues (must fix)
+List concrete problems that are likely to cause:
+- runtime errors
+- incorrect inference
+- Android crashes or ANRs
+- major agent drift
+
+### 2. Medium risks (should improve)
+Things that are:
+- unclear
+- fragile
+- likely to cause subtle bugs
+
+### 3. Minor suggestions (optional)
+Small improvements that would increase robustness or clarity.
+
+### 4. Overall verdict
+- Is the plan **ready for execution by an AI agent**?
+- Or does it need tightening first?
+
+---
+
+## Ground rules
+
+- Do not rewrite the plan.
+- Do not add new architecture.
+- Do not suggest unrelated features.
+- Stay within the scope of Module 5.
+
+Focus on making the **existing plan safer and sharper**.

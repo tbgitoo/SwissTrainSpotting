@@ -1,0 +1,335 @@
+Create a detailed implementation plan for **Module 5 — ONNX Inference Integration** and save it as:
+
+- `plans/module_05/implementation_plan.md`
+
+## Mode
+This task is **planning only**.
+
+Do **not** implement production code.
+Do **not** add test code.
+Do **not** modify Gradle or source files.
+Do **not** move files.
+Do **not** create placeholders outside the plan file.
+
+The output of this task is exactly one plan document:
+- `plans/module_05/implementation_plan.md`
+
+---
+
+## Read first
+
+Before drafting the plan, read and use these repository sources:
+
+- `../plans/01_architecture.md`
+- `AGENTS.md`
+
+Also inspect relevant current Android-side implementation and test seams if present, especially:
+
+- Module 2 image acquisition/orientation code
+- Module 3 preprocessing code and tests
+- current activity / UI class that will later call inference
+- current assets under `app/src/main/res/raw/`
+- current Android test assets under `app/src/androidTest/assets/`
+
+Use repository context so the plan fits this project rather than a generic ONNX Android tutorial.
+
+---
+
+## Skills to apply while planning
+
+Use these skills while drafting the plan:
+
+- `packed-vs-planar`
+- `android-dependency-closure`
+
+Apply them in a restrained and explicit way:
+
+- `packed-vs-planar` because Module 5 must consume the planar NCHW float tensor from Module 3 correctly and avoid layout/cardinality confusion when creating ONNX input tensors and parsing results
+- `android-dependency-closure` because Module 5 will likely involve dependency/runtime/resource/session/test wiring that must be planned cleanly and cautiously
+
+Do not invent extra skills unless the repo clearly already has a very relevant one.
+
+---
+
+## Core planning objective
+
+Draft a **working implementation plan** for Module 5 that is explicitly split into **two phases**:
+
+### Phase 5A — Reference-model Android inference bring-up
+Use a **known-good reference ONNX model already present in the repo** as a static app asset for Android-side inference plumbing validation.
+
+This phase exists to validate:
+- ONNX Runtime Android integration
+- model loading from Android resources
+- session creation
+- tensor creation from Module 3 preprocessing output
+- inference execution
+- output parsing
+- minimal UI/result integration on Android
+
+This phase is **not** about final Swiss train classes.
+It is a controlled reference-model bring-up phase.
+
+### Phase 5B — Project-model swap
+Later replace the reference model with the project-specific ONNX model and align:
+- model filename
+- labels file
+- metadata
+- input/output names
+- class count
+- result interpretation
+
+The plan must make clear that 5B depends on availability of the real project model artifacts and should reuse the Phase 5A infrastructure rather than re-architecting.
+
+---
+
+## Repository-specific assumptions to incorporate
+
+Include these assumptions in the plan if they match repo context:
+
+- Module 2 provides an already-upright in-memory `Bitmap`
+- Module 3 provides a tested `Bitmap -> float[]` preprocessing path producing:
+  - RGB
+  - float32
+  - NCHW
+  - `[1, 3, 224, 224]`
+- The reference ONNX model is already available as a static Android app asset/resource (do not plan dynamic download)
+- `app/src/androidTest/assets/metro_flon.png` exists and should be used for integration testing, up to Espresso integration
+- Java + XML app architecture
+- no backend
+- no persistence unless already clearly needed and justified
+- simple structure is preferred over abstract layers
+
+If any of these assumptions need refinement after reading repo files, reflect that carefully in the plan.
+
+---
+
+## What the plan must contain
+
+The plan should resemble the style and rigor of `plans/module_03/implementation_plan.md`.
+
+Include sections such as:
+
+1. **Module goal**
+2. **Scope boundaries**
+3. **Phase split (5A / 5B)**
+4. **Inference contract**
+5. **Proposed implementation seam**
+6. **Testing strategy**
+7. **Initial tests for 5A**
+8. **Additional tests / integration tests**
+9. **Artifacts / assets / labels / metadata**
+10. **Notices / pitfalls**
+11. **Acceptance criteria**
+12. **Recommended prompt split for later implementation**
+
+Keep the style practical, contract-driven, and implementation-oriented.
+
+---
+
+## Specific planning requirements
+
+### 1. Module definition
+The plan must define clearly what Module 5 does and does not do.
+
+It should cover:
+- consuming the preprocessed float tensor from Module 3
+- loading an ONNX model from Android app assets/resources
+- creating and managing an ONNX Runtime session
+- running inference
+- parsing model output
+- returning a minimal result object or equivalent result seam suitable for UI use
+
+It must explicitly exclude:
+- training
+- ONNX export
+- OCR
+- image acquisition / EXIF
+- backend
+- complex persistence
+- unrelated UI redesign
+
+---
+
+### 2. Two-phase sequencing
+The plan must make the 5A / 5B sequencing operational, not just narrative.
+
+It must explain:
+- why a known-good reference model is used first
+- what exact risks this isolates
+- what should be considered “done” for 5A
+- what changes in 5B and what must remain stable
+
+This is important:
+5A should validate the Android inference path independently from project-model uncertainty.
+
+---
+
+### 3. ONNX Runtime / Android integration seam
+The plan must define a plausible Android/Java seam for inference integration.
+
+It should consider and decide things like:
+- where the ONNX Runtime session should live
+- whether there should be a small dedicated wrapper/helper class
+- how model loading from resources should happen
+- how `float[]` from Module 3 becomes ONNX input
+- how result parsing returns something usable by the UI
+
+The seam should stay simple and repo-appropriate.
+Do not invent architecture layers unless clearly justified.
+
+---
+
+### 4. Packed-vs-planar correctness
+The plan must explicitly address:
+- Module 3 output is planar NCHW float data
+- ONNX input shape/layout expectations must match this
+- common mistakes the implementation must avoid:
+  - HWC/NHWC confusion
+  - interleaved RGB assumptions
+  - wrong tensor shape
+  - wrong input name
+  - wrong cardinality
+  - output interpretation drift
+
+This should appear in the plan’s pitfalls / guardrails / testing sections.
+
+---
+
+### 5. Serious testing strategy
+This is critical.
+
+The plan must include a serious Android-side testing strategy up to integration level.
+
+It should cover at least:
+
+#### Unit / narrow tests where possible
+Examples:
+- model session creation path
+- basic contract checks around input tensor length / expected shape
+- label loading sanity
+- predictable output parsing behavior where testing can be isolated
+
+#### Instrumented Android tests
+Examples:
+- load reference model from real Android resources
+- run inference on synthetic or controlled input tensors
+- run preprocessing + inference on real Android test image asset
+
+#### Integration tests
+The plan should explicitly include at least one realistic integration path using:
+
+- `app/src/androidTest/assets/metro_flon.png`
+
+This image should be used for an Android-side integration test such as:
+- decode asset to `Bitmap`
+- preprocess using Module 3
+- run Module 5 inference
+- assert no exception
+- assert output shape / result structure / top-k parsing sanity
+- optionally assert deterministic repeatability of top prediction if appropriate for the reference model
+
+The plan must be careful not to claim semantic correctness for Swiss train classes when using the reference model.
+The integration test should be framed as inference-path validation, not final domain validation.
+
+---
+
+### 6. Testing philosophy
+The plan should make clear that Module 5 can fail in ways that are:
+- compile-time obvious
+- runtime obvious
+- or silently wrong
+
+Therefore the testing strategy should be designed to catch:
+- missing dependency/config issues
+- model/resource loading failures
+- wrong tensor shape/name
+- wrong output parsing
+- threading misuse
+- UI integration seam breakage
+- packed-vs-planar mistakes
+
+The plan should not be casual about testing.
+
+---
+
+### 7. Assets and files
+The plan must explicitly discuss app assets/resources needed for 5A and 5B, for example:
+- reference model file
+- labels file
+- future project-model metadata
+- `metro_flon.png` test asset
+
+Make paths concrete where possible.
+Treat these as pre-existing inputs if they already exist.
+
+---
+
+### 8. Threading / UI responsibilities
+The plan must specify:
+- inference should not block the main thread
+- where background execution responsibility likely belongs
+- what Module 5 should expose to callers
+- what should remain in Activity/UI code vs inference helper code
+
+This should stay Android-practical and aligned with the app architecture.
+
+---
+
+### 9. Acceptance criteria
+Add explicit acceptance criteria for:
+- Phase 5A
+- Phase 5B
+
+Phase 5A acceptance should include:
+- model loads
+- session builds
+- inference runs from Module 3 output
+- labels load
+- result parsing works
+- relevant tests pass, including integration test(s)
+
+Phase 5B acceptance should include:
+- reference model swapped cleanly
+- project-specific labels/metadata aligned
+- no architecture rewrite required
+- regression tests updated as needed
+
+---
+
+### 10. Recommended implementation prompt split
+At the end of the plan, include a recommended prompt split for later AI-assisted implementation, similar in spirit to Module 3.
+
+For example, likely prompts might include:
+- Prompt 1: tests / seam scaffolding / dependency planning
+- Prompt 2: runtime integration with reference model
+- Prompt 3: integration testing and UI seam
+- Prompt 4: project-model swap (later, conditional on artifacts)
+
+Do not hardcode this exact split if the repo context suggests a better one, but do provide a practical split.
+
+---
+
+## Additional style constraints
+
+- Be repository-specific
+- Be explicit, not generic
+- Keep the plan detailed enough to be implementation-ready
+- Avoid motivational fluff
+- Avoid broad AI essay language
+- Prefer direct technical planning language
+- Use clear scope boundaries
+- Use concrete paths and seams where possible
+- If something depends on later availability of project-specific artifacts, say so clearly
+
+---
+
+## Output requirement
+
+Write the final plan directly to:
+
+- `plans/module_05/implementation_plan.md`
+
+Do not produce implementation code.
+Do not stop at an outline.
+Produce a full working implementation plan.
