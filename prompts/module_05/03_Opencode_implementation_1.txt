@@ -5,7 +5,7 @@ Implement **Module 5 / Phase 5A / Prompt 1** from `plans/module_05/implementatio
 Read these files before making changes:
 
 - `plans/module_05/implementation_plan.md`
-- `plans/01_architecture.md`
+- `../plans/01_architecture.md`
 - `AGENTS.md`
 
 Treat `plans/module_05/implementation_plan.md` as the implementation contract.
