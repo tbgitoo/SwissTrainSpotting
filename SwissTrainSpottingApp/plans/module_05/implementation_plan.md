@@ -72,19 +72,23 @@ Replace artifacts only (no redesign):
 - do not treat as HWC
 - use ONNX Runtime API only
 
+Create tensors using:
+- `OnnxTensor.createTensor(env, inputData, shape)`
+
 ---
 
 ## 5. Session lifecycle (STRICT)
 
 `OnnxClassifier`:
 
-- create `OrtEnvironment` once
+- obtain `OrtEnvironment` via `OrtEnvironment.getEnvironment()` (singleton)
 - create `OrtSession` once
 - reuse session for all calls
 - expose `close()`
 
 Forbidden:
-- session creation inside `classify()`
+- creating session inside `classify()`
+- creating multiple `OrtEnvironment` instances
 
 ---
 
@@ -99,6 +103,10 @@ Parser contract:
 ```
 parse(float[] logits)
 ```
+
+After inference:
+- assert output size is valid
+- assert all values are finite (no NaN / Infinity)
 
 ---
 
@@ -156,6 +164,7 @@ Responsibilities
 ### Required
 - tensor length = 150528
 - output size validation
+- output values are finite
 - repeatability
 
 ### Integration
@@ -190,4 +199,3 @@ Phase 5A done when:
 ---
 
 ## End of plan
-

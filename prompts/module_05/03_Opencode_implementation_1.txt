@@ -1,0 +1,177 @@
+Implement **Module 5 / Phase 5A / Prompt 1** from `plans/module_05/implementation_plan.md`.
+
+## Read first
+
+Read these files before making changes:
+
+- `plans/module_05/implementation_plan.md`
+- `plans/01_architecture.md`
+- `AGENTS.md`
+
+Treat `plans/module_05/implementation_plan.md` as the implementation contract.
+
+---
+
+## Skills to apply
+
+Use these skills:
+
+- `packed-vs-planar`
+- `android-dependency-closure`
+- `safe-java-edit`
+- `android-testing`
+
+Apply them narrowly. Do not broaden scope.
+
+---
+
+## Task scope
+
+This prompt is **tests + scaffolding only** for **Phase 5A**.
+
+Implement only:
+
+1. ONNX Runtime dependency wiring
+2. minimal scaffolding classes
+3. failing tests for the Module 5 Phase 5A seam
+
+Do **not** implement full runtime inference yet.  
+Do **not** wire UI yet.
+
+---
+
+## Files to read if present
+
+Read current relevant files if they exist:
+
+- `app/src/main/java/com/tb/swisstrainspotting/ImagePreprocessor.java`
+- `app/src/main/java/com/tb/swisstrainspotting/ImageClassificationActivity.java`
+- existing `app/src/test/java/...`
+- existing `app/src/androidTest/java/...`
+
+Follow current package/layout conventions.
+
+---
+
+## Add / scaffold only these classes
+
+Create minimal versions of:
+
+- `ClassificationResult`
+- `OnnxClassifier`
+- `LogitsParser`
+- `LabelLoader`
+- `ModelConfig`
+
+Keep them small.
+
+### Required shape
+
+- `ClassificationResult`: immutable POJO for class index, label, confidence
+- `LogitsParser`: pure Java helper only
+- `LabelLoader`: loader seam for labels from assets
+- `ModelConfig`: constants/config for Phase 5A reference model
+- `OnnxClassifier`: constructor + method signatures only as needed for tests, but do not complete runtime implementation yet
+
+Do not add extra classes or architecture layers.
+
+---
+
+## Dependency work
+
+Add ONNX Runtime Android dependency using the project’s existing Gradle/version-catalog style.
+
+Apply `android-dependency-closure` fully:
+- version catalog entry if needed
+- app module dependency
+- imports compile cleanly
+- relevant test scopes compile
+
+Do not invent custom Gradle structure.
+
+---
+
+## Tests to add now
+
+Add the Phase 5A initial tests from the plan.
+
+### JVM tests
+Add tests for `LogitsParser`:
+
+- `topIndex_returnsArgmax`
+- `softmax_sumsToOne`
+- `emptyOrNull_throwsOrGuards`
+
+These should be pure JVM tests.
+
+### Instrumented tests
+Add Android tests for:
+
+- `labelLoader_imagenet_loads1000Labels`
+- `onnxClassifier_rejectsWrongInputLength`
+
+Also add a session-seam test placeholder for:
+- model/session creation from assets
+
+If the runtime implementation is not present yet, the session-related tests may initially fail, but the test structure must be in place.
+
+### Important
+Use assets, not `res/raw`, for the Phase 5A model and labels:
+
+- `app/src/main/assets/mobilenetv2.onnx`
+- `app/src/main/assets/imagenet_classes.txt`
+
+Do not write tests against `res/raw`.
+
+---
+
+## Hard constraints
+
+- Do not implement actual inference logic yet beyond what is strictly required to compile the scaffolding
+- Do not wire `ImageClassificationActivity`
+- Do not add UI
+- Do not add Espresso UI tests yet
+- Do not add Module 5B logic
+- Do not transpose or repack tensors anywhere
+- Do not use custom ByteBuffer/direct-buffer tricks
+- Do not create multiple `OrtEnvironment` instances
+- Do not create `OrtSession` inside `classify()`
+
+---
+
+## Required API direction
+
+The scaffolding must reflect these Module 5 rules:
+
+- input tensor is `float[]`, length `150528`
+- shape is `[1, 3, 224, 224]`
+- layout is NCHW
+- `OnnxClassifier` will later use:
+  - `OrtEnvironment.getEnvironment()`
+  - one long-lived `OrtSession`
+- `LogitsParser.parse(...)` must accept flat `float[] logits`
+
+---
+
+## File change policy
+
+Expected changes are limited to:
+- Gradle/version catalog files
+- new small Module 5 classes
+- test files for Module 5
+
+Do not touch unrelated modules.
+
+Do not refactor Module 2 or Module 3.
+
+---
+
+## Output format
+
+At the end, report briefly:
+
+1. Files changed
+2. Dependency changes made
+3. Classes scaffolded
+4. Tests added
+5. What still intentionally remains unimplemented for Prompt 2
