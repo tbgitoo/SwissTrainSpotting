@@ -24,8 +24,6 @@
             android:layout_height="90dp"
             android:layout_width="600dp"/>
 
-
-
         <TextView
             android:id="@+id/tv_title"
             android:layout_width="wrap_content"
@@ -37,6 +35,20 @@
 
     </LinearLayout>
 
+    <TextView
+        android:id="@+id/tv_classification_result"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:textSize="18sp"
+        app:layout_constraintTop_toBottomOf="@+id/header_bar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
     <ImageView
         android:id="@+id/ivPlaceholder"
         android:layout_width="0dp"
@@ -44,7 +56,7 @@
         android:scaleType="centerCrop"
         android:src="@android:drawable/ic_menu_gallery"
         android:contentDescription="@string/placeholder_image_content_description"
-        app:layout_constraintTop_toBottomOf="@+id/header_bar"
+        app:layout_constraintTop_toBottomOf="@+id/tv_classification_result"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

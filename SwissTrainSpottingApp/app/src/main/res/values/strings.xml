@@ -12,4 +12,8 @@
     <string name="camera_permission_denied">Camera permission denied</string>
     <string name="camera_temp_file_error">Could not create temp file for camera</string>
     <string name="placeholder_image_content_description">Placeholder image</string>
+    <string name="classifying">Classifying…</string>
+    <string name="classification_result_format">%1$s (%2$.1f%%)</string>
+    <string name="classification_failed">Classification failed</string>
+    <string name="classifier_init_failed">Could not load classification model</string>
 </resources>

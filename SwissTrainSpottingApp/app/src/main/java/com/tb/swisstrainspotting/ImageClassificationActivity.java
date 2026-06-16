@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -25,6 +26,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class ImageClassificationActivity extends AppCompatActivity {
 
@@ -34,10 +37,14 @@ public class ImageClassificationActivity extends AppCompatActivity {
     private static final String STATE_IMAGE_URI = "state_image_uri";
 
     private ImageView iPreview;
+    private TextView tvClassificationResult;
     private ActivityResultLauncher<Intent> galleryPickerLauncher;
     private Uri currentCameraUri;
     private Uri currentImageUri;
     private ActivityResultLauncher<Uri> cameraLauncher;
+    private OnnxClassifier classifier;
+    private ExecutorService inferenceExecutor;
+    private int classificationGeneration = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +52,14 @@ public class ImageClassificationActivity extends AppCompatActivity {
         setContentView(R.layout.activity_image_classification);
 
         iPreview = findViewById(R.id.ivPlaceholder);
+        tvClassificationResult = findViewById(R.id.tv_classification_result);
+
+        inferenceExecutor = Executors.newSingleThreadExecutor();
+        try {
+            classifier = new OnnxClassifier(getApplicationContext());
+        } catch (IOException e) {
+            tvClassificationResult.setText(R.string.classifier_init_failed);
+        }
 
         galleryPickerLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
@@ -110,6 +125,20 @@ public class ImageClassificationActivity extends AppCompatActivity {
         } else if (mode == AcquisitionMode.CAMERA) {
             Toast.makeText(this, R.string.camera_temp_file_error, Toast.LENGTH_SHORT).show();
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        classificationGeneration++;
+        if (inferenceExecutor != null) {
+            inferenceExecutor.shutdownNow();
+            inferenceExecutor = null;
+        }
+        if (classifier != null) {
+            classifier.close();
+            classifier = null;
+        }
+        super.onDestroy();
     }
 
     @Override
@@ -190,6 +219,46 @@ public class ImageClassificationActivity extends AppCompatActivity {
 
         iPreview.setImageBitmap(bitmap);
         iPreview.setVisibility(View.VISIBLE);
+        runClassification(bitmap);
+    }
+
+    private void runClassification(Bitmap bitmap) {
+        if (classifier == null || inferenceExecutor == null || bitmap == null || bitmap.isRecycled()) {
+            return;
+        }
+
+        final int generation = ++classificationGeneration;
+        tvClassificationResult.setText(R.string.classifying);
+
+        inferenceExecutor.execute(() -> {
+            try {
+                float[] tensor = ImagePreprocessor.preprocess(bitmap);
+                ClassificationResult result = classifier.classify(tensor);
+
+                runOnUiThread(() -> {
+                    if (!shouldApplyClassificationResult(generation)) {
+                        return;
+                    }
+                    String formatted = getString(
+                            R.string.classification_result_format,
+                            result.getLabel(),
+                            result.getConfidence() * 100f
+                    );
+                    tvClassificationResult.setText(formatted);
+                });
+            } catch (RuntimeException e) {
+                runOnUiThread(() -> {
+                    if (!shouldApplyClassificationResult(generation)) {
+                        return;
+                    }
+                    tvClassificationResult.setText(R.string.classification_failed);
+                });
+            }
+        });
+    }
+
+    private boolean shouldApplyClassificationResult(int generation) {
+        return generation == classificationGeneration && !isFinishing() && !isDestroyed();
     }
 
     private Bitmap applyExifOrientation(Bitmap bitmap, ExifInterface exif) throws IOException {
