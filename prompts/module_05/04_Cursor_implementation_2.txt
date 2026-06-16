@@ -1,0 +1,376 @@
+Implement **Module 5 / Phase 5A / Step 2 = runtime layer only** for Android ONNX inference, following the existing plan exactly and without redesign.
+
+This is a **SoftUni AI-assisted implementation task**. Stay within the repository’s current architecture and package structure. Do not invent a parallel design.
+
+---
+
+## Read first
+
+Before editing anything, read and obey:
+
+- `AGENTS.md`
+- `../plans/01_architecture.md`
+- `plans/module_03/implementation_plan.md`
+- `plans/module_05/implementation_plan.md`
+- existing Module 2 / Module 3 preprocessing classes
+- the current Step 1 scaffolding already present in the repo
+
+You must actively apply these skills:
+
+- `packed-vs-planar`
+- `android-dependency-closure`
+
+---
+
+## Working mode (important)
+
+Do this implementation in **passes** inside this single task.
+
+After each pass:
+- keep changes minimal
+- ensure the code still makes architectural sense
+- do not broaden scope
+- do not refactor unrelated code
+
+Only implement what belongs to **runtime Step 2**.
+
+Do **not** implement:
+- Activity threading
+- UI integration beyond what is strictly necessary to compile
+- Phase 5B model swap
+- OCR
+- persistence
+- architecture cleanup
+- package reorganizations
+- opportunistic refactors
+
+---
+
+# Goal of this step
+
+Implement the runtime core for Phase 5A:
+
+- load MobileNetV2 ONNX model from assets
+- load ImageNet labels from assets
+- create and reuse ONNX Runtime session
+- run inference on already-preprocessed input (`float[]`, NCHW)
+- validate output
+- parse logits into `ClassificationResult`
+- add focused tests for this runtime layer
+
+Input is already produced by Module 3. Do not touch preprocessing logic except where absolutely required for compilation.
+
+---
+
+# Hard constraints
+
+## Tensor/layout constraints
+Input contract is exactly:
+
+- `float[]`
+- length `150528`
+- shape `[1, 3, 224, 224]`
+- layout `NCHW`
+
+Hard rules:
+- do **not** transpose
+- do **not** repack
+- do **not** reinterpret as HWC or NHWC
+- do **not** normalize again
+- do **not** call bitmap APIs from `OnnxClassifier`
+- do **not** inspect pixels inside inference code
+- do **not** allocate a transformed copy of input data
+
+The classifier must treat the incoming `float[]` as already-final model input.
+
+## Session/environment constraints
+- obtain environment only via `OrtEnvironment.getEnvironment()`
+- create `OrtSession` once
+- reuse the same session for all calls
+- expose `close()`
+- do **not** create session inside `classify()`
+- do **not** create multiple `OrtEnvironment` instances
+
+## Node name constraints
+Do **not** use “first input” / “first output” selection as final production behavior.
+
+Initialization must:
+- inspect actual session input/output names
+- compare them against `ModelConfig.INPUT_NODE_NAME` and `ModelConfig.OUTPUT_NODE_NAME`
+- fail fast with a clear exception if they do not match
+
+Allowed during implementation:
+- inspect actual model names once in order to encode verified constants into `ModelConfig`
+
+Forbidden:
+- keeping `iterator().next()` as production behavior
+- silently falling back to discovered names
+
+## Output handling constraints
+After inference:
+- retrieve the output by configured output name
+- do not use positional selection as final production behavior
+- validate rank exactly `2`
+- validate shape `[1, N]` with `N > 0`
+- flatten to `float[] logits`
+- validate all values are finite (`!NaN`, `!Infinity`)
+
+Forbidden:
+- blindly casting without rank/shape checks
+- silently accepting unexpected output forms like `[N]` or `[1,1,N]`
+
+## Resource lifetime constraints
+Long-lived per classifier instance:
+- `OrtEnvironment`
+- `OrtSession`
+
+Per-call objects:
+- `OnnxTensor`
+- `OrtSession.Result`
+
+Rules:
+- per-call objects must be closed inside the same `classify()` call, ideally with try-with-resources
+- `OrtSession` must remain open across calls
+- `OrtSession` must be closed only in `OnnxClassifier.close()`
+- do not close the shared `OrtEnvironment`
+- `close()` must be idempotent
+
+---
+
+# Package / file stability rule
+
+Prefer the package structure already present in the repository.
+
+Do not:
+- move existing scaffold classes into a new package just for cleanup
+- rename public classes already introduced in Step 1
+- create package churn for cosmetic reasons
+
+If the existing package is `com.tb.swisstrainspotting`, keep using it unless the repo already clearly uses a dedicated inference package and moving is strictly necessary.
+
+---
+
+# Pass-by-pass execution plan
+
+## Pass 1 — core value/config/parser/loader classes
+
+Implement or complete only the pure Java/runtime-support classes:
+
+### `ClassificationResult`
+Small immutable value object containing:
+- predicted label
+- predicted index
+- confidence (preferred)
+- keep API minimal
+
+### `ModelConfig`
+Central constants for Phase 5A:
+- model asset path: `mobilenetv2.onnx`
+- labels asset path: `imagenet_classes.txt`
+- input shape `[1, 3, 224, 224]`
+- input element count `150528`
+- expected input node name
+- expected output node name
+
+Use `long[]` for ONNX tensor shape constants, not `int[]`.
+
+### `LabelLoader`
+- loads one label per line from assets
+- trims safely
+- rejects empty / invalid file clearly
+- returns immutable list
+
+### `LogitsParser`
+Contract like:
+- `ClassificationResult parse(float[] logits, List<String> labels)`
+
+Responsibilities:
+- reject null / empty logits
+- reject non-finite values
+- argmax
+- map index to label
+- fail clearly if index outside label range
+- confidence optional but preferred
+- if confidence is implemented, use numerically stable softmax with `logit - maxLogit`
+
+No ONNX Runtime calls in these classes.
+
+Do not broaden to UI.
+
+---
+
+## Pass 2 — classifier initialization only
+
+Implement only the classifier initialization/runtime seam first.
+
+### `OnnxClassifier`
+Use the existing Step 1 scaffold if present.
+
+At this pass:
+- keep constructor context-based
+- load model bytes or asset stream as appropriate
+- obtain `OrtEnvironment.getEnvironment()`
+- create one long-lived session
+- inspect session input/output names
+- validate against `ModelConfig`
+- load labels through `LabelLoader`
+- store only the minimal fields required
+
+Do not yet implement the full parsing flow until session initialization is solid.
+
+If current `ModelConfig` constants are placeholders and actual node names differ, update `ModelConfig` to the verified names and keep explicit constants.
+
+Do not leave “first input” / “first output” behavior in final code.
+
+---
+
+## Pass 3 — implement `classify()`
+
+Now implement `classify(float[] inputData)`.
+
+Requirements:
+- reject null input
+- reject wrong length with message mentioning expected `150528`
+- reject use after close
+- create tensor directly from NCHW `float[]` using:
+  - `OnnxTensor.createTensor(env, inputData, ModelConfig.INPUT_SHAPE)`
+- run the session
+- retrieve configured output by output node name
+- validate output rank/shape
+- flatten batch item 0 to `float[] logits`
+- validate output finite
+- pass logits to `LogitsParser`
+- return `ClassificationResult`
+
+Use try-with-resources or equivalent for per-call native resources.
+
+Do not add async code.
+Do not involve activity classes.
+
+---
+
+## Pass 4 — tests
+
+Add focused tests for this runtime step only.
+
+### Unit tests (`src/test/...`)
+Add deterministic JVM tests where possible for:
+1. `LogitsParser` argmax behavior
+2. confidence / stable softmax behavior if implemented
+3. rejection of `NaN`
+4. rejection of `Infinity`
+5. label/index mismatch handling
+6. any classifier input validation that can be tested without Android runtime
+
+### Instrumentation tests (`src/androidTest/...`)
+Add runtime integration tests using real assets:
+
+1. classifier initializes from `mobilenetv2.onnx`
+2. labels load from `imagenet_classes.txt`
+3. inference accepts a deterministic valid input array of length `150528`
+4. output is non-empty and rank-compatible
+5. output values are finite
+6. repeatability:
+   - same deterministic input twice
+   - same predicted index
+   - confidence difference negligible within small tolerance if confidence is present
+
+Use a deterministic synthetic input such as all zeros or another very simple constant pattern.
+Do not depend on camera, gallery, UI, or bitmap pipeline in this step.
+
+Do not implement the full bitmap → preprocess → inference instrumentation test here unless it already exists and only needs trivial wiring.
+
+---
+
+## Pass 5 — dependency closure + verification
+
+If ONNX Runtime dependency is missing:
+- add it minimally and correctly in Gradle
+- do not add speculative dependencies
+- no manual jar hacks
+- no Kotlin
+- no Compose
+- Java/XML project only
+
+Dependency closure is not complete unless:
+- Gradle CLI build succeeds
+- no unresolved ONNX Runtime symbols remain
+- instrumentation test at least initializes the classifier with the real model
+- instrumentation test performs at least one real inference call, if executable in current environment
+
+If connected instrumentation execution is unavailable:
+- still write the tests
+- ensure they compile
+- state clearly that runtime proof remains pending on emulator/device
+
+---
+
+# Explicitly forbidden
+
+Do **not**:
+- implement Phase 5B
+- swap models or labels beyond Phase 5A assets
+- redesign architecture
+- introduce ViewModel / LiveData / coroutines / Rx unless already present and strictly required
+- move classes into a new package for cleanliness
+- touch unrelated UI
+- alter preprocessing output layout
+- add broad cleanup “while here”
+- silently swallow validation failures
+
+Stay narrow and mechanical.
+
+---
+
+# Output required from you when finished
+
+Respond with exactly these sections:
+
+## 1. Summary
+Very short bullets only.
+
+## 2. Files changed
+Explicit list.
+
+## 3. Pass completion
+State what was done in:
+- Pass 1
+- Pass 2
+- Pass 3
+- Pass 4
+- Pass 5
+
+## 4. Key design notes
+Only decisions forced by the plan or repo reality.
+No fluff.
+
+## 5. Tests added
+Each test class and what it verifies.
+
+## 6. Commands run
+Exact Gradle commands.
+
+## 7. Result
+- passed
+- failed
+- partially passed
+- not run
+
+## 8. Blockers
+If anything blocked completion, state it precisely and stop.
+Do not invent workaround architecture unless absolutely necessary.
+
+---
+
+# Quality bar
+
+This implementation must be:
+- narrow in scope
+- faithful to the plan
+- Java-first
+- explicit in validation
+- easy to debug
+- test-backed
+- free of opportunistic refactors
+
+If you find ambiguity, choose the most conservative interpretation and keep changes minimal.

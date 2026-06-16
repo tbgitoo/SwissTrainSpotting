@@ -1,8 +1,11 @@
 package com.tb.swisstrainspotting;
 
+import android.content.Context;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -15,11 +18,19 @@ public final class LabelLoader {
     /**
      * Load labels line-by-line from the given asset file path.
      *
+     * @param context   application or activity context with asset access
      * @param assetPath path relative to src/main/assets/
-     * @return list of label strings (one per line)
-     * @throws IOException if the asset cannot be read
+     * @return immutable list of label strings (one per non-empty trimmed line)
+     * @throws IOException if the asset cannot be read or contains no valid labels
      */
-    public static List<String> loadLabels(android.content.Context context, String assetPath) throws IOException {
+    public static List<String> loadLabels(Context context, String assetPath) throws IOException {
+        if (context == null) {
+            throw new IllegalArgumentException("Context must not be null");
+        }
+        if (assetPath == null || assetPath.trim().isEmpty()) {
+            throw new IllegalArgumentException("Asset path must not be empty");
+        }
+
         List<String> labels = new ArrayList<>();
         try (InputStream is = context.getAssets().open(assetPath)) {
             byte[] buffer = new byte[1024];
@@ -36,24 +47,27 @@ public final class LabelLoader {
                     }
                     start = nlIndex + 1;
                 }
-                // Append remaining (unterminated) portion for next read
                 if (start < chunk.length()) {
                     lineBuilder.append(chunk.substring(start));
                 }
             }
-            // Flush remaining content
             String remaining = lineBuilder.toString().trim();
             if (!remaining.isEmpty()) {
                 labels.add(remaining);
             }
         }
-        return labels;
+
+        if (labels.isEmpty()) {
+            throw new IOException("Label file is empty or contains no valid lines: " + assetPath);
+        }
+
+        return Collections.unmodifiableList(labels);
     }
 
     /**
      * Convenience: load labels from the Phase 5A default labels file.
      */
-    public static List<String> loadDefaultLabels(android.content.Context context) throws IOException {
+    public static List<String> loadDefaultLabels(Context context) throws IOException {
         return loadLabels(context, ModelConfig.LABELS_FILE);
     }
 }

@@ -1,11 +1,23 @@
 package com.tb.swisstrainspotting;
 
+import java.util.List;
+
 /**
  * Pure Java helper for parsing ONNX logits into a ClassificationResult.
  */
 public final class LogitsParser {
 
     private LogitsParser() {
+    }
+
+    /**
+     * Parse a flat logits array into a ClassificationResult without label lookup.
+     *
+     * @param logits flat logits array from ONNX output tensor
+     * @return ClassificationResult with classIndex and confidence; label is null
+     */
+    public static ClassificationResult parse(float[] logits) {
+        return parse(logits, null);
     }
 
     /**
@@ -17,13 +29,15 @@ public final class LogitsParser {
      *   <li>all values must be finite (not NaN, not Infinity)</li>
      *   <li>classIndex = argmax(logits)</li>
      *   <li>confidence = stable softmax probability of the argmax class</li>
+     *   <li>when labels is non-null, map index to label or fail if out of range</li>
      * </ul>
      *
      * @param logits flat logits array from ONNX output tensor
-     * @return ClassificationResult with classIndex and confidence; label remains null here
-     * @throws IllegalArgumentException if logits is null, empty, or contains non-finite values
+     * @param labels optional label list for index lookup; may be null
+     * @return ClassificationResult with classIndex, optional label, and confidence
+     * @throws IllegalArgumentException if logits is null, empty, non-finite, or index out of range
      */
-    public static ClassificationResult parse(float[] logits) {
+    public static ClassificationResult parse(float[] logits, List<String> labels) {
         if (logits == null || logits.length == 0) {
             throw new IllegalArgumentException("logits must be non-null and non-empty");
         }
@@ -53,6 +67,17 @@ public final class LogitsParser {
 
         float confidence = (float) (1.0 / denominator);
 
-        return new ClassificationResult(maxIndex, null, confidence);
+        String label = null;
+        if (labels != null) {
+            if (maxIndex < 0 || maxIndex >= labels.size()) {
+                throw new IllegalArgumentException(
+                        "Class index " + maxIndex + " is outside label range [0, "
+                                + labels.size() + ")"
+                );
+            }
+            label = labels.get(maxIndex);
+        }
+
+        return new ClassificationResult(maxIndex, label, confidence);
     }
 }

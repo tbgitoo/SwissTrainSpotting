@@ -20,11 +20,11 @@ public final class ModelConfig {
     /** Labels file in assets (Phase 5A — 1000 ImageNet classes). */
     public static final String LABELS_FILE = "imagenet_classes.txt";
 
-    /** Expected output node name for the reference model. */
-    public static final String OUTPUT_NODE_NAME = "output";
-
-    /** Expected output node name for the reference model. */
+    /** Expected input node name (ONNX Model Zoo mobilenetv2-10). */
     public static final String INPUT_NODE_NAME = "input";
+
+    /** Expected output node name (ONNX Model Zoo mobilenetv2-10). */
+    public static final String OUTPUT_NODE_NAME = "output";
 
     private ModelConfig() {}
 }
