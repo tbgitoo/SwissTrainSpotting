@@ -1,0 +1,6 @@
+Fix only the failing test `logitsParser_argmax_withLargeClassCount`.
+
+The current expectation `confidence > 0.99f` is mathematically wrong for 1000 classes when one logit is `9.9f` and all others are `0f`.
+
+Make the smallest correct change to the test only.
+Do not modify production code.

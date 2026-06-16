@@ -100,7 +100,7 @@ public class Phase5AStep1Test {
         ClassificationResult result = LogitsParser.parse(logits);
 
         assertEquals("argmax should be index 42", 42, result.getClassIndex());
-        assertTrue("Confidence should be near 1.0 for large margin", result.getConfidence() > 0.99f);
+        assertTrue("Confidence should be near 1.0 for large margin", result.getConfidence() > 0.95f);
     }
 
     @Test
