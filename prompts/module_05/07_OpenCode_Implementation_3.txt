@@ -1,0 +1,242 @@
+Implement **Module 5 / Phase 5A / Step 3 = integration + minimal UI wiring only** for Android ONNX inference, following the existing plan exactly and without redesign.
+
+## Read first
+Before editing anything, read and obey:
+
+- `AGENTS.md`
+- `../plans/01_architecture.md`
+- `plans/module_03/implementation_plan.md`
+- `plans/module_05/implementation_plan.md`
+- existing Module 1 / Module 2 / Module 3 code
+- current Module 5 Step 1 + Step 2 implementation already present in the repo
+
+You must actively apply these skills:
+
+- `packed-vs-planar`
+- `android-dependency-closure`
+
+---
+
+## Goal of this prompt
+Integrate the already-implemented ONNX runtime layer into the existing Android app flow.
+
+This step must:
+- take the upright `Bitmap` already produced by Module 2
+- pass it through existing Module 3 preprocessing
+- run inference using the existing `OnnxClassifier`
+- display a minimal classification result in the existing classification screen
+- run inference off the main thread
+- update UI on the main thread only
+- discard stale results if the Activity is destroyed or no longer valid
+
+This step must **not** redesign runtime, preprocessing, or architecture.
+
+---
+
+## Keep scope strict
+
+### This step DOES
+- wire existing preprocessing + existing classifier into the Activity/UI flow
+- add minimal UI state for inference progress / result / error
+- add focused integration tests for the full Phase 5A path:
+  - Bitmap → preprocess → inference → parse → UI/result
+
+### This step DOES NOT
+- change Module 3 preprocessing behavior
+- change ONNX Runtime session lifecycle design
+- change tensor layout
+- implement Phase 5B artifact swap
+- redesign navigation, architecture, or screen structure
+- introduce ViewModel / LiveData / coroutines / Rx unless already present and strictly required
+- add OCR
+- add persistence
+- refactor unrelated UI
+
+Stay narrow and mechanical.
+
+---
+
+## Hard constraints
+
+### 1. Reuse existing runtime layer
+Use the existing:
+- `OnnxClassifier`
+- `ClassificationResult`
+- `LogitsParser`
+- `LabelLoader`
+- `ModelConfig`
+
+Do not reopen or redesign runtime internals unless strictly required for compilation.
+
+Do not:
+- recreate ONNX session lifecycle in UI code
+- duplicate inference logic in the Activity
+- instantiate ONNX runtime objects ad hoc in multiple places
+
+### 2. Respect Module 3 contract
+Input to inference must still be exactly the existing Module 3 output:
+
+- `float[]`
+- length `150528`
+- shape `[1,3,224,224]`
+- layout `NCHW`
+
+Hard rules:
+- do **not** transpose
+- do **not** repack
+- do **not** reinterpret as HWC/NHWC
+- do **not** add second preprocessing logic in the Activity
+
+The Activity must call the existing `ImagePreprocessor.preprocess(...)` and pass the resulting tensor unchanged to `OnnxClassifier.classify(...)`.
+
+### 3. Threading / UI safety
+Inference must **not** run on the main thread.
+
+Required behavior:
+- launch preprocessing + inference on a background thread
+- update UI on the main thread only
+- if the Activity is destroyed, finishing, or otherwise invalid before the result returns, discard the result instead of updating the UI
+- do not leak Activity references through long-lived background work
+
+Use the simplest existing Java/Android mechanism already consistent with the repo.
+Do not introduce major new concurrency abstractions unless already used.
+
+### 4. UI ownership rule
+For Phase 5A Step 3, preprocessing + inference UI wiring belongs **exclusively** to the existing second screen, `ImageClassificationActivity`.
+
+Required:
+- `ImageClassificationActivity` owns preprocessing + inference triggering for the selected/captured upright `Bitmap`
+- result display is updated in `ImageClassificationActivity`
+
+Do not:
+- move inference wiring into `MainActivity`
+- split inference ownership across multiple Activities
+- introduce a second parallel classification screen
+
+### 5. Minimal UI integration
+Display only a minimal result sufficient for Phase 5A:
+
+- predicted label
+- confidence (if already available)
+- optional simple loading state
+- simple error display if inference fails
+
+Do not redesign the UI.
+
+If a result TextView / image preview / classification screen already exists, reuse it.
+Only add the smallest required UI elements if the current screen has no place to display the result.
+
+### 6. Activity lifecycle
+If `OnnxClassifier` is Activity-owned in the current design:
+- initialize it once per Activity lifecycle as appropriate
+- close it at the appropriate lifecycle point
+- do not create a new classifier per button click if a reusable instance is already appropriate
+
+Keep this aligned with the existing app structure and the Step 2 runtime design.
+
+Do not create multiple long-lived classifier instances unnecessarily.
+
+---
+
+## Package / file stability rule
+Prefer the existing package structure already used in the repository.
+
+Do not:
+- move existing classes into a new package for cleanup
+- rename public classes unless strictly necessary
+- restructure Activities or layouts beyond what this UI integration step requires
+
+---
+
+## Expected implementation areas
+Adapt to the repo reality, but likely targets include:
+
+- existing `ImageClassificationActivity`
+- layout XML for the classification/result screen
+- existing image preview handling
+- existing callback or navigation flow after image acquisition
+- focused instrumentation tests under `app/src/androidTest/java/...`
+
+Do not create parallel UI flow if one already exists.
+
+---
+
+## Implementation tasks
+
+### A. Wire image → preprocessing → inference
+In `ImageClassificationActivity`:
+1. receive the upright `Bitmap` from Module 2
+2. call existing `ImagePreprocessor.preprocess(bitmap)`
+3. call existing `OnnxClassifier.classify(tensor)`
+4. obtain `ClassificationResult`
+5. display minimal result
+
+Do not duplicate preprocessing logic inline.
+
+### B. Background execution
+Implement the classification trigger so that:
+- preprocessing + inference occurs off the main thread
+- UI updates are posted back to the main thread
+
+Keep the implementation small and consistent with existing Java code style.
+
+### C. UI state
+Implement minimal state handling:
+- before classification: optionally clear old result or show pending state
+- during classification: optionally show "Classifying..." or disable repeat trigger if relevant
+- after success: show label (+ confidence if available)
+- after failure: show a minimal error message
+- if Activity is no longer valid: do not apply the result
+
+Avoid UI embellishment.
+
+### D. Lifecycle-safe classifier ownership
+Integrate `OnnxClassifier` into the `ImageClassificationActivity` lifecycle in the smallest clean way:
+- create when needed in a stable place
+- reuse for repeated calls
+- close when Activity is destroyed or otherwise appropriate
+
+Avoid classifier re-creation per inference call unless existing code structure makes reuse impossible.
+If such a constraint exists, state it clearly in the final summary.
+
+---
+
+## Testing requirements (strict)
+
+### Test source-set placement rule
+Use:
+- `app/src/test/java/...` only for plain JVM tests with no Android runtime dependencies
+- `app/src/androidTest/java/...` for tests requiring `Context`, assets, Activity/UI interaction, instrumentation, emulator/device runtime
+
+For this step, most meaningful tests belong in:
+- `app/src/androidTest/java/...`
+
+Do not place Android-dependent UI/integration tests in `src/test/java/...`.
+
+### Test naming rule
+- JVM test classes must end with `UnitTest`
+- instrumentation test classes must end with `InstrumentedTest`
+
+Do not create ambiguous names like `SomethingTest` if Android and JVM variants may coexist.
+
+### No fake tests rule
+Do not create placeholder tests that only assert `true`.
+If a behavior cannot be meaningfully verified in the current source set, omit that test and state why.
+
+### Required instrumentation coverage
+Add focused Android instrumentation tests for this step.
+
+At minimum verify:
+
+1. **Bitmap → preprocess → inference integration**
+   - use the provided integration asset:
+     - `app/src/androidTest/assets/metro_flon.png`
+   - pipeline must exercise:
+     - Bitmap decode
+     - preprocessing
+     - inference
+     - result parsing
+
+2. **UI result update**
+   - when classification completes successfully, the result is displayed in `ImageClassificationActivity`
+
