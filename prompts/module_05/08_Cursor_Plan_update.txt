@@ -1,0 +1,77 @@
+Revise `plans/module_05/implementation_plan.md`.
+
+I have decided to evolve the app so it can use multiple classifications in order to better handle the edge case of non-train images.
+
+For this reason, it is necessary that the app be able:
+- to consume different ONNX model families
+- at a later stage, to keep multiple ONNX models in memory at the same time
+- and later still, to apply a decision / routing logic between a generic classifier and a specialized classifier
+
+Please update the Module 5 plan accordingly.
+
+## Requirements
+
+- Keep **Step / Phase 5A exactly as it is**. It is already implemented and remains valid regardless of this architectural evolution.
+- Replace the current simplistic phrasing of **Phase 5B** (“replace artifacts only”) with a clearer next step that reflects loading model families via configuration/profile rather than assuming one fixed artifact layout.
+- Add a following phase for **multi-model support**, i.e. making it possible for more than one ONNX model to coexist in memory.
+- Add a later phase for **decision / routing logic**, i.e. how outputs from a generic and a specialized model are combined in one prediction flow.
+- As part of this rewrite, inspect the existing Phase 4A output artifacts under `../model/export/` (for example `hymenoptera.onnx`, `hymenoptera_labels.json`, `hymenoptera_model_metadata.json`) and use them to ground the revised Module 5 phase structure.
+
+## Explicit proposed phase structure
+
+Use the following structure unless there is a strong reason to improve wording while keeping the same meaning:
+
+### Phase 5B — Multi-configuration model loading
+This phase should cover:
+- loading different model families through explicit configuration / profile handling
+- support for model + labels + metadata as one artifact family
+- support for different label formats or metadata requirements across models
+- ability to switch between a generic reference model and a specialized model without assuming one fixed artifact layout
+
+### Phase 5C — Multi-model support
+This phase should cover:
+- keeping more than one ONNX model available at runtime
+- loading and managing multiple ONNX sessions in parallel
+- coexistence of a generic model and a specialized model
+- independent handling of labels / metadata for each loaded model
+
+This phase is about runtime coexistence and infrastructure only.
+Do not turn it into decision logic yet.
+
+### Phase 5D — Decision / routing logic
+This phase should cover:
+- combining a generic classifier and a specialized classifier in one prediction flow
+- running the generic classifier first
+- checking whether the generic prediction belongs to a predefined allowed set for which the specialized model is applicable
+- if yes, continuing with the specialized classifier
+- if no, returning the generic category together with the information that it is outside the specialized model scope (for example: generic result + “not compatible with specialized classifier”)
+
+This phase is about decision logic, not model loading.
+
+## Constraints
+
+- Do not rewrite the whole plan.
+- Do not redesign or alter 5A implementation planning.
+- Keep the revised structure concise and natural.
+- Do not introduce speculative features unrelated to this evolution.
+- Preserve existing valid constraints in Module 5 (threading, ONNX lifecycle, tensor contract, cleanup, etc.).
+
+## Goal
+
+The revised Module 5 phase structure should evolve naturally from:
+
+- runtime validation with one model
+- to configurable model-family loading
+- to multi-model coexistence
+- to routing / decision logic
+
+## Output
+
+Edit only:
+- `plans/module_05/implementation_plan.md`
+
+When done, report:
+1. which phase section(s) were updated
+2. the resulting revised phase structure
+3. how the existing Phase 4A artifact family influenced the updated Module 5 planning
+4. any small remaining wording in the plan that still assumes the older single-model-only progression
