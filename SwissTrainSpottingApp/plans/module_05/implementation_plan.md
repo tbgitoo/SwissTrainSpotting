@@ -96,6 +96,20 @@ Runtime coexistence and infrastructure only; **no routing or combined prediction
 - Independent labels / metadata handling per loaded model.
 - Expose per-model inference entry points; do **not** merge or choose between model outputs in this phase.
 
+#### Testing — multi-model coexistence only
+
+Phase 5B already validated single-model correctness (profile-based loading, JSON label parsing, alternative model initialization and inference, non-ImageNet class count support). Phase 5C testing must **not repeat** those validations.
+
+**Required tests:**
+
+1. **Coexistence test** — Load two model profiles (e.g. MobileNetV2 + Hymenoptera), initialize two classifiers with separate sessions, run inference on both using the same input tensor, assert both produce valid results with independent class indices / labels.
+
+2. **Isolation test** — Run classifier A, then classifier B, then classifier A again; assert classifier A produces consistent results across runs with no cross-contamination from classifier B.
+
+3. **Lifecycle independence (optional)** — Close one classifier and verify the other remains operational.
+
+**Explicitly excluded (already covered by Phase 5B):** asset existence, metadata parsing, label loading, ONNX model loading correctness, parser correctness.
+
 ### Phase 5D — Decision / routing logic
 Decision logic only; **not model loading.**
 

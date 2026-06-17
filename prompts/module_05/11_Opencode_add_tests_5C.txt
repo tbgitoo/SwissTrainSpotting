@@ -1,0 +1,71 @@
+Use and respect these skills while performing this task:
+- android-testing
+- android-dependency-closure
+- safe-java-edit
+- safe-java-rewrite
+
+You are editing an existing project plan for the SwissTrainSpotting Android app.
+
+Read first:
+- plans/module_05/implementation_plan.md
+- ../plans/01_architecture.md
+- AGENTS.md
+
+Task:
+Modify only the Phase 5C section of the Module 5 implementation plan to make its testing/validation requirements precise, minimal, and aligned with the actual implementation state.
+
+Context (important):
+- Phase 5A and Phase 5B are already implemented and validated.
+- Phase 5B already includes strong evidence:
+  - profile-based model loading works
+  - JSON labels load correctly
+  - alternative model (e.g. Hymenoptera) can be initialized and run through classify()
+  - parser supports non-ImageNet class counts
+- Therefore Phase 5C testing must NOT re-test Phase 5B capabilities.
+
+Goal for Phase 5C:
+- Verify multi-model coexistence and isolation only
+- Avoid redundant or low-value tests (e.g. asset existence, metadata parsing, label loading)
+
+Required changes:
+- Add a concise validation/testing subsection under Phase 5C that:
+  1. Clearly states that Phase 5B already validated single-model correctness
+  2. Defines the minimal required tests for Phase 5C
+  3. Focuses only on multi-model coexistence and independence
+
+Phase 5C testing must include:
+- One primary coexistence test:
+  - load two model profiles (e.g. MobileNetV2 + Hymenoptera)
+  - initialize two classifiers (separate sessions)
+  - run inference on both using the same input tensor
+  - assert that both produce valid results
+  - assert no crashes or shared-state interference
+
+- One isolation test:
+  - run classifier A
+  - run classifier B
+  - run classifier A again
+  - assert that classifier A’s result remains consistent (no cross-contamination)
+
+- Optional (but concise) lifecycle test:
+  - closing one classifier does not affect the other
+
+Explicitly state:
+- No repetition of Phase 5B tests is required
+- No re-validation of:
+  - metadata parsing
+  - label loading
+  - ONNX model loading correctness
+  - parser correctness
+- Keep Phase 5C test scope minimal and focused
+
+Strict constraints:
+- Do NOT modify Phase 5A
+- Do NOT modify Phase 5B
+- Do NOT redesign the plan
+- Do NOT introduce Phase 5D logic changes
+- Keep wording consistent with existing document style
+- Keep the addition short and precise (no long explanations)
+
+Output:
+- Return only the updated Phase 5C section (not the entire document)

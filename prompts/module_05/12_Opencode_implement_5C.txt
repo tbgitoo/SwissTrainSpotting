@@ -1,0 +1,89 @@
+Use and respect these skills while performing this task:
+- android-testing
+- android-dependency-closure
+- packed-vs-planar
+- safe-java-edit
+- safe-java-rewrite
+
+You are working on the SwissTrainSpotting Android app.
+
+Read and follow these project documents before editing:
+- plans/module_05/implementation_plan.md
+- ../plans/01_architecture.md
+- AGENTS.md
+
+Repository boundary rule:
+- Only read, create, or modify files inside the current repository root
+- Do not touch sibling directories, parent directories, other repositories, or absolute paths outside the repo
+- Do not use rm or destructive cleanup
+- Do not delete existing files
+- If test structure needs correction, refactor or move files instead of recreating from scratch
+
+Current known state:
+1. Phase 5A is implemented and validated.
+2. Phase 5B is implemented and validated.
+3. Phase 5B already proves:
+   - profile-based model loading
+   - JSON label loading
+   - alternative model initialization and inference
+   - parser support for non-ImageNet class counts
+4. The Module 5 plan was updated so that Phase 5C testing is now explicitly minimal and focused on multi-model coexistence only.
+
+Task:
+Implement Phase 5C only.
+
+Goal:
+Add minimal multi-model coexistence support so that two already-valid classifier families (for example MobileNetV2 + Hymenoptera) can be loaded at the same time, each with its own `OrtSession` on a shared `OrtEnvironment`, and both can run inference on the same input tensor without cross-contamination.
+
+Required implementation:
+- support simultaneous coexistence of two classifier instances
+- each classifier instance must keep its own session
+- still use a single shared `OrtEnvironment`
+- no routing logic
+- no combined prediction logic
+- no model selection policy beyond explicitly calling one classifier or the other
+- no redesign of earlier phases
+
+Required tests (as defined in the updated Phase 5C plan):
+1. Coexistence test
+   - load two model profiles (e.g. MobileNetV2 + Hymenoptera)
+   - initialize two classifiers with separate sessions
+   - run inference on both using the same input tensor
+   - assert both produce valid results
+   - assert no crashes or shared-state interference
+
+2. Isolation test
+   - run classifier A
+   - run classifier B
+   - run classifier A again
+   - assert classifier A remains consistent across runs
+
+3. Optional lifecycle test
+   - close one classifier
+   - verify the other still works
+
+Explicitly out of scope (already covered by Phase 5B):
+- metadata parsing
+- label loading
+- alternative single-model smoke inference
+- parser correctness
+- asset existence checks
+
+Strict scope constraints:
+- Implement only Phase 5C
+- Do not modify Phase 5A or Phase 5B behavior unless a tiny change is strictly required for 5C
+- Do not implement Phase 5D
+- Do not add routing logic
+- Do not add a broad classifier manager/registry unless absolutely necessary; prefer the smallest possible change
+- Keep changes localized and minimal
+- Preserve the planar NCHW contract from Module 3
+- Do not introduce alternate preprocessing paths
+
+Output requirements:
+- Modify only files needed for minimal Phase 5C support and tests
+- Return:
+  1. changed files
+  2. summary of implementation changes
+  3. tests added/updated
+  4. any tiny production-code change made only to support coexistence cleanly
+  5. confirmation that Phase 5A and 5B behavior was preserved
