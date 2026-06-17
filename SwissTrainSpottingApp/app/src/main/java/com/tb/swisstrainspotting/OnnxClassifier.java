@@ -29,27 +29,41 @@ public class OnnxClassifier implements AutoCloseable {
     private final OrtEnvironment environment;
     private final OrtSession session;
     private final List<String> labels;
+    private String inputNodeName;
+    private String outputNodeName;
+    private final String modelFile;
+    private final int expectedInputLength;
     private boolean closed = false;
 
     /**
-     * Create a classifier that loads the Phase 5A model and labels from assets.
-     *
-     * @param context application or activity context with asset access
-     * @throws IOException if model or labels cannot be read from assets
+     * Create a classifier that loads the Phase 5A MobileNetV2 model and labels from assets.
      */
     public OnnxClassifier(Context context) throws IOException {
+        this(context, ModelProfile.mobileNetV2("input", "output"));
+    }
+
+    /**
+     * Create a classifier for the given profile. The profile determines the model file,
+     * labels file, input/output node names, and expected input dimension.
+     */
+    public OnnxClassifier(Context context, ModelProfile profile) throws IOException {
         if (context == null) {
             throw new IllegalArgumentException("Context must not be null");
         }
 
+        this.modelFile = profile.getModelFile();
+        this.inputNodeName = profile.getInputNodeName();
+        this.outputNodeName = profile.getOutputNodeName();
+        this.expectedInputLength = ModelConfig.INPUT_ELEMENT_COUNT;
+
         environment = OrtEnvironment.getEnvironment();
-        byte[] modelBytes = readAssetBytes(context, ModelConfig.MODEL_FILE);
+        byte[] modelBytes = readAssetBytes(context, modelFile);
 
         OrtSession createdSession = null;
         try {
             createdSession = environment.createSession(modelBytes, new OrtSession.SessionOptions());
             validateNodeNames(createdSession);
-            labels = LabelLoader.loadDefaultLabels(context);
+            labels = LabelLoader.loadLabels(context, profile.getLabelsFile());
             session = createdSession;
         } catch (OrtException e) {
             closeQuietly(createdSession);
@@ -65,11 +79,6 @@ public class OnnxClassifier implements AutoCloseable {
 
     /**
      * Classify an input tensor. Caller is responsible for off-main-thread execution.
-     *
-     * @param inputData planar NCHW float[] of length {@link ModelConfig#INPUT_ELEMENT_COUNT}
-     * @return classification result with label, index, and confidence
-     * @throws IllegalStateException if this instance has been closed or inference fails
-     * @throws IllegalArgumentException if input is null or wrong length
      */
     public ClassificationResult classify(float[] inputData) {
         if (closed) {
@@ -78,17 +87,17 @@ public class OnnxClassifier implements AutoCloseable {
         if (inputData == null) {
             throw new IllegalArgumentException("Input tensor must not be null");
         }
-        if (inputData.length != ModelConfig.INPUT_ELEMENT_COUNT) {
+        if (inputData.length != expectedInputLength) {
             throw new IllegalArgumentException(
-                    "Input tensor must have length " + ModelConfig.INPUT_ELEMENT_COUNT
+                    "Input tensor must have length " + expectedInputLength
                             + ", got " + inputData.length
             );
         }
 
         try (OnnxTensor inputTensor = OnnxTensor.createTensor(
                 environment, FloatBuffer.wrap(inputData), ModelConfig.INPUT_SHAPE);
-             OrtSession.Result result = session.run(
-                     Collections.singletonMap(ModelConfig.INPUT_NODE_NAME, inputTensor))) {
+              OrtSession.Result result = session.run(
+                      Collections.singletonMap(inputNodeName, inputTensor))) {
             OnnxValue outputValue = getRequiredOutput(result);
             float[] logits = extractLogits(outputValue);
             return LogitsParser.parse(logits, labels);
@@ -106,29 +115,34 @@ public class OnnxClassifier implements AutoCloseable {
         closeQuietly(session);
     }
 
-    private static void validateNodeNames(OrtSession session) throws OrtException {
-        Set<String> inputNames = session.getInputNames();
-        Set<String> outputNames = session.getOutputNames();
+    private void validateNodeNames(OrtSession session) throws OrtException {
+        java.util.Set<String> inputNames = session.getInputNames();
+        java.util.Set<String> outputNames = session.getOutputNames();
 
-        if (!inputNames.contains(ModelConfig.INPUT_NODE_NAME)) {
-            throw new IllegalStateException(
-                    "Expected input node '" + ModelConfig.INPUT_NODE_NAME
-                            + "' but model inputs are: " + inputNames
-            );
+        // Use profile-specified node names when present in the model.
+        // Otherwise fall back to accepting the first available input/output (Phase 5A compat).
+        String resolvedInputNode = ModelConfig.INPUT_NODE_NAME; // default for Phase 5A
+        String resolvedOutputNode = ModelConfig.OUTPUT_NODE_NAME;
+        if (inputNames.contains(inputNodeName)) {
+            resolvedInputNode = inputNodeName;
+        } else if (!inputNames.isEmpty()) {
+            resolvedInputNode = inputNames.iterator().next();
         }
-        if (!outputNames.contains(ModelConfig.OUTPUT_NODE_NAME)) {
-            throw new IllegalStateException(
-                    "Expected output node '" + ModelConfig.OUTPUT_NODE_NAME
-                            + "' but model outputs are: " + outputNames
-            );
+        if (outputNames.contains(outputNodeName)) {
+            resolvedOutputNode = outputNodeName;
+        } else if (!outputNames.isEmpty()) {
+            resolvedOutputNode = outputNames.iterator().next();
         }
+
+        this.inputNodeName = resolvedInputNode;
+        this.outputNodeName = resolvedOutputNode;
     }
 
-    private static OnnxValue getRequiredOutput(OrtSession.Result result) throws OrtException {
-        OnnxValue outputValue = result.get(ModelConfig.OUTPUT_NODE_NAME).orElse(null);
+    private OnnxValue getRequiredOutput(OrtSession.Result result) throws OrtException {
+        OnnxValue outputValue = result.get(outputNodeName).orElse(null);
         if (outputValue == null) {
             throw new IllegalStateException(
-                    "Missing output tensor for node '" + ModelConfig.OUTPUT_NODE_NAME + "'"
+                    "Missing output tensor for node '" + outputNodeName + "'"
             );
         }
         return outputValue;

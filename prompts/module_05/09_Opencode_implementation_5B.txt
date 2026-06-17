@@ -1,0 +1,253 @@
+Implement **Module 5 / Phase 5B — Model profile configuration** only.
+
+## Read first
+Before editing anything, read and obey:
+
+- `AGENTS.md`
+- `plans/module_05/implementation_plan.md`
+- `../model/plans/module_04/implementation_plan.md`
+- current Module 5A implementation already present in the repo
+
+Important context:
+- Phase 5A is already implemented and must remain valid.
+- This task is an evolution of the existing single-model runtime, not a redesign.
+- Do not touch Android code unrelated to model/profile loading.
+- Do not implement Phase 5C (multi-model coexistence) or Phase 5D (decision/routing logic).
+
+---
+
+## Goal
+Evolve the current Module 5A implementation so that the app can load a **model family via explicit configuration/profile**, instead of assuming one fixed generic model asset layout.
+
+For this task, support at least:
+- the existing generic MobileNetV2/ImageNet family
+- one exported specialized family such as `hymenoptera`
+
+This phase is about **configuration-based model-family loading**, not multi-model runtime coexistence.
+
+---
+
+## What Phase 5B must achieve
+
+Phase 5B must make it possible to load a model family through configuration, where a family includes:
+
+- ONNX model file
+- labels file
+- metadata file (when present)
+
+The app must no longer assume that all models use:
+- the same asset filenames
+- the same label format
+- the same metadata assumptions
+
+---
+
+## Hard scope constraints
+
+### This task DOES
+- add profile/config-based loading for one selected model family at a time
+- support both:
+  - generic ImageNet-style family
+  - specialized exported-family loading
+- introduce whatever minimal configuration structure is needed to describe a model family
+- support different label formats across families:
+  - plain text labels for Phase 5A generic model
+  - JSON labels for exported profile families
+- use metadata when present to drive:
+  - model file
+  - labels file
+  - input/output names
+  - num_classes
+
+### This task DOES NOT
+- keep multiple ONNX models loaded at once
+- add generic + specialized parallel sessions
+- add classifier routing / allowed-set logic
+- redesign Phase 5A runtime lifecycle
+- modify Module 3 preprocessing
+- change UI flow beyond what is strictly needed to choose or apply the active model profile
+- implement artifact copy automation from Python side
+
+This is **single active model profile at a time**.
+
+---
+
+## Preserve existing valid behavior
+
+Phase 5A must still work.
+
+That means:
+- existing generic MobileNetV2/ImageNet path must remain supported
+- ONNX Runtime lifecycle rules remain unchanged:
+  - single `OrtEnvironment`
+  - one active session in this phase
+  - session reused
+- inference remains off the UI thread
+- result parsing remains as already implemented unless adaptation is strictly needed for profile loading
+
+---
+
+## Required implementation direction
+
+### 1. Introduce model profile/config concept
+Add the smallest clean mechanism needed to represent a model family.
+
+A profile must be able to describe, at minimum:
+- profile id
+- model asset path
+- labels asset path
+- whether labels are plain text or JSON artifact family
+- metadata asset path if present
+- input/output node names or whether these come from metadata
+
+This can be done with:
+- a small config class
+- or equivalent minimal structure
+
+Do not overengineer this into a framework.
+
+### 2. Support generic and specialized families
+Support at least these two cases:
+
+#### Generic Phase 5A family
+- `mobilenetv2.onnx`
+- `imagenet_classes.txt`
+- no required metadata JSON
+- existing constants remain acceptable here
+
+#### Specialized exported family
+Example:
+- `hymenoptera.onnx`
+- `hymenoptera_labels.json`
+- `hymenoptera_model_metadata.json`
+
+For specialized families, metadata must drive:
+- model file
+- labels file
+- node names
+- class count
+
+### 3. Label loading must handle both formats
+Extend or adapt label loading so that:
+- plain text labels still work for ImageNet-style model
+- JSON exported labels work for `*_labels.json` artifact family
+
+Do not duplicate unrelated logic.
+Keep the implementation minimal and local.
+
+### 4. Metadata-aware loading
+For exported families, parse metadata and use it to configure model loading.
+
+At minimum use:
+- `model_file`
+- `labels_file`
+- `input_name`
+- `output_name`
+- `num_classes`
+
+Do not ignore metadata and re-hardcode the same values elsewhere.
+
+### 5. One active model profile at a time
+This phase still uses one active classifier/session at runtime.
+
+Do not implement multiple active sessions yet.
+Do not preload both generic and specialized models in this task.
+
+---
+
+## Expected code shape
+Adapt to repository reality, but the implementation will likely involve small changes or additions around:
+
+- `ModelConfig`
+- `LabelLoader`
+- `OnnxClassifier`
+- possibly a small new class for model-profile description / metadata loading
+
+Prefer extending the existing design over introducing parallel new architecture.
+
+---
+
+## Testing requirements
+
+Add or update only the tests needed for Phase 5B.
+
+### Required coverage
+1. existing Phase 5A generic model path still works
+2. specialized profile can be loaded from:
+   - metadata
+   - JSON labels
+   - profile configuration
+3. label resolution is correct for JSON `classes[].index`
+4. ONNX profile loading uses metadata-driven node names where present
+5. switching active profile requires configuration change only, not code-path rewrite
+
+### Test placement
+- plain JVM tests in `src/test/...` only if no Android runtime is needed
+- Android-dependent tests in `src/androidTest/...`
+
+Do not create fake placeholder tests.
+
+---
+
+## Build / verification
+Run the narrowest relevant checks needed for this phase.
+
+At minimum:
+- compile affected sources
+- run affected unit tests
+- run affected instrumentation tests if profile loading depends on Android asset access
+
+Do not implement or test 5C/5D behavior.
+
+---
+
+## Explicitly forbidden
+Do **not**:
+- add multi-model coexistence
+- add routing logic
+- add “other” class behavior
+- redesign session lifecycle
+- introduce new preprocessing variants
+- hardcode hymenoptera-only behavior in place of profile support
+- remove valid Phase 5A support
+- create broad cleanup unrelated to profile loading
+
+Stay strict and mechanical.
+
+---
+
+## Output format
+When done, respond with:
+
+### 1. Summary
+Very short bullets only.
+
+### 2. Files changed
+Explicit list.
+
+### 3. Model profile support
+State how generic and specialized families are now represented.
+
+### 4. Label / metadata handling
+State exactly how plain text and JSON labels are handled.
+
+### 5. Tests run
+Exact commands.
+
+### 6. Result
+- passed
+- partially passed
+- failed
+
+### 7. Remaining blockers
+Only real blockers, if any.
+
+---
+
+## Quality bar
+This phase must:
+- preserve 5A
+- add profile-based model-family loading
+- support one active model at a time
+- remain compatible with later 5C / 5D extension
+- stay minimal and easy to review
