@@ -1,0 +1,185 @@
+Derive a detailed implementation plan for **Module 4 — Model Training & ONNX Export** from the general project architecture.
+
+## Read first
+Before writing anything, read and obey:
+- `../plans/01_architecture.md`
+- `../AGENTS.md`
+- current repository structure under `model/`, presumably empty
+- current Android-side contract already established by Module 3 and Module 5, accessible in separate Android Studio project folder at `../SwissTrainSpottingApp/` 
+
+## Output target
+Create or overwrite:
+
+- `plans/module_04/implementation_plan.md`
+
+The result must be a **final implementation plan**, not code, not a tutorial, and not a broad ML essay.
+
+Use concise, execution-focused markdown in the same style as the other module plans.
+
+---
+
+## Purpose of Module 4
+Module 4 must:
+- train a small image classifier using transfer learning
+- export a deployment-ready ONNX model
+- produce aligned metadata/artifacts for Android use
+
+Expected outputs:
+- `model/export/swiss_trains.onnx`
+- `model/export/labels.json`
+- `model/export/model_metadata.json`
+
+Milestone:
+- exported ONNX model runs in Python and matches the Android inference contract
+
+---
+
+## Critical planning constraints
+
+### 1. Dataset layout must be explicitly specified
+The plan must define exactly:
+- where training images are stored
+- how labels are derived
+- how datasets are split or organized
+
+Start from the architecture assumption:
+- folder-per-class dataset
+- `model/data/raw/<class_name>/*.jpg`
+
+The plan must decide and document whether validation is:
+- a separate folder tree (e.g. `train/` and `val/`)
+- or a scripted split derived from `raw/`
+
+Be explicit. Do not leave dataset organization implicit.
+
+### 2. Label source of truth must be defined
+The plan must state:
+- labels come from class folder names
+- class ordering must be deterministic
+- the same ordering must be serialized into `labels.json`
+- this ordering must remain consistent with ONNX output index interpretation on Android
+
+Do not leave label ordering as an accidental property of runtime behavior.
+
+### 3. Python ↔ Android preprocessing contract must remain aligned
+The plan must explicitly preserve the existing deployment contract already established in the architecture and Android implementation:
+
+- input size: `224x224`
+- RGB
+- ImageNet normalization
+- NCHW
+- float32
+
+Very important:
+- the architecture intentionally chose **simplified resize-only preprocessing**
+- do **not** silently replace this with the usual PyTorch tutorial defaults like `RandomResizedCrop` or `CenterCrop` unless the plan explicitly discusses and rejects/accepts that change
+
+The plan must state how Python preprocessing during:
+- training
+- validation
+- export verification
+
+will be kept compatible with Android inference.
+
+### 4. MobileNetV2 transfer-learning strategy must be decided explicitly
+The plan must choose and justify an initial transfer-learning strategy for the small dataset:
+- feature extraction first
+- or fine-tuning
+- or staged approach (e.g. head-only first, optional unfreeze later)
+
+The plan should stay conservative and reproducible rather than aggressively optimized.
+
+### 5. ONNX export contract must be explicit
+The plan must define:
+- model input name
+- model output name
+- expected ONNX input shape
+- expected output shape
+- export path
+- Python-side ONNX verification step
+
+Do not leave input/output naming to accidental defaults.
+
+### 6. Metadata artifacts must be planned, not hand-waved
+The plan must define what goes into:
+- `labels.json`
+- `model_metadata.json`
+
+At minimum, metadata should include enough information to validate:
+- class names / order
+- input size
+- normalization used
+- tensor layout
+- model type/backbone
+- export date/version if useful
+
+The metadata should support later Phase 5B model swap without redesign.
+
+### 7. Testing/validation must be part of the plan
+The plan must include validation steps for:
+- dataset readability / class discovery
+- class index ordering
+- training sanity checks
+- ONNX export success
+- Python-side ONNX inference sanity check
+- artifact completeness
+
+Do not stop at “model exports” — define how the export is checked before Android asset swap.
+
+---
+
+## Required plan structure
+Use a structure similar in rigor to the existing module plans, including at least:
+
+1. module goal
+2. dataset layout and label source
+3. preprocessing contract
+4. transfer-learning strategy
+5. training workflow
+6. export workflow
+7. artifact definitions
+8. validation/testing
+9. acceptance criteria
+10. implementation steps
+
+Keep the plan implementation-focused and conservative.
+
+---
+
+## Important guidance
+
+### Use official patterns where appropriate, but adapt them to this project
+The official PyTorch transfer-learning material uses pretrained vision models and folder-based datasets, which is relevant. However, this project has a stricter cross-platform preprocessing contract than a generic tutorial. The plan must therefore adapt official practice to repository reality rather than copying tutorial defaults blindly.
+
+### Keep the plan reproducible
+Prefer a plan that:
+- is deterministic
+- is easy to debug
+- isolates uncertainty
+- produces artifacts that can be validated independently of Android training assumptions
+
+### Preserve separation of concerns
+The plan should support the already validated Android inference environment by producing a model that conforms to the established runtime contract, rather than redesigning the Android side around training-time convenience.
+
+---
+
+## Explicitly forbidden
+Do **not**:
+- write training code yet
+- redesign Module 3 or Module 5
+- change the Android preprocessing contract casually
+- introduce backend/persistence concerns
+- add quantization/mobile optimization unless clearly marked as optional later work
+- produce a vague data-science tutorial instead of a concrete module plan
+
+---
+
+## Output quality bar
+The plan must be:
+- concise
+- technically explicit
+- repo-specific
+- anti-fluff
+- suitable for direct later implementation
+
+If something is uncertain, make the uncertainty explicit and choose the most conservative option.

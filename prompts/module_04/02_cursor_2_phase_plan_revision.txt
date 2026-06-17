@@ -1,0 +1,209 @@
+Revise `plans/module_04/implementation_plan.md` so that the Module 4 training/export pipeline explicitly supports two dataset profiles:
+
+- a **reference dataset profile** used to validate the training and ONNX export pipeline independently of project-specific image acquisition
+- a **project dataset profile** used for the final SwissTrainSpotting model
+
+## Goal
+Update the Module 4 plan so that training/export is no longer modeled as a single-dataset pipeline only.
+
+The revised plan must support a staged strategy in which:
+1. the training/export pipeline is first validated against a small, public, reproducible reference dataset
+2. the same pipeline is then reused unchanged for the final project-specific train dataset
+
+The reason for this change is **not presentation**, but engineering:
+- to decouple image acquisition and labeling modalities from the training/export pipeline
+- to validate the pipeline against a known dataset before private/project-specific data exists
+- to isolate training/export failures from dataset-quality or data-availability issues
+- to preserve artifact provenance and reproducibility across both phases
+
+---
+
+## Read first
+Before editing anything, read:
+- `../plans/01_architecture.md`
+- `plans/module_04/implementation_plan.md`
+- `../SwissTrainSpottingApp/AGENTS.md`
+- other relevant files in the separate Android Studio project folder `../SwissTrainSpottingApp/` 
+
+---
+
+## Required change in planning logic
+
+The current plan is too centered on a single final dataset.
+Revise it so that Module 4 becomes a **shared pipeline with two named dataset profiles**.
+
+### Reference dataset profile
+This profile is used to validate:
+- dataset discovery
+- split generation
+- preprocessing
+- transfer learning
+- ONNX export
+- Python-side ONNX verification
+
+This profile must produce distinct artifacts and must not be treated as a temporary undocumented exception.
+
+### Project dataset profile
+This profile reuses the exact same pipeline for the final Swiss train/loco dataset.
+
+The plan must make clear that:
+- the training/export logic stays the same
+- only the dataset profile and artifact names change
+- this keeps training/export verification independent from project-specific image acquisition timing
+
+---
+
+## Required revisions
+
+### 1. Dataset roots
+Revise dataset layout so that the plan no longer assumes only one generic raw tree.
+
+Instead, define profile-specific dataset roots, for example:
+
+- `model/data/raw_hymenoptera/<class>/...`
+- `model/data/raw_swiss_trains/<class>/...`
+
+or an equally explicit profile-based structure.
+
+Requirements:
+- the reference dataset and project dataset must not share one mixed raw tree
+- folder-per-class labeling logic must remain unchanged
+- class identity must still derive from folder names
+
+### 2. Split manifests
+Revise split handling so that manifests are profile-specific, for example:
+
+- `model/data/splits/hymenoptera_val_manifest.json`
+- `model/data/splits/swiss_trains_val_manifest.json`
+
+The plan must show that deterministic splitting is independent per profile.
+
+### 3. Output artifacts
+Revise export/output sections so that both profiles produce distinct artifacts.
+
+At minimum, the revised plan should support artifact families of the form:
+
+- `model/export/hymenoptera.onnx`
+- `model/export/hymenoptera_labels.json`
+- `model/export/hymenoptera_model_metadata.json`
+
+and
+
+- `model/export/swiss_trains.onnx`
+- `model/export/swiss_trains_labels.json`
+- `model/export/swiss_trains_model_metadata.json`
+
+Do not collapse both phases into one shared artifact name.
+
+### 4. Shared scripts with profile selection
+The revised plan must explicitly state that the scripts are shared and profile-aware rather than duplicated.
+
+Acceptable interface examples:
+- `--profile hymenoptera`
+- `--profile swiss_trains`
+
+or an equivalent explicit dataset/profile argument.
+
+This must apply to:
+- dataset discovery
+- split generation
+- training
+- export
+- verification
+
+Do not leave the pipeline hardcoded to one dataset identity.
+
+### 5. Repository structure section
+Revise repository layout so it reflects that:
+- reference data and project data are distinct
+- reference artifacts and final artifacts are distinct
+- both are generated through the same implementation pipeline
+
+### 6. Acceptance criteria
+Revise acceptance criteria so that they distinguish:
+
+- **Phase 4A complete** = reference dataset profile validates the training/export/verification pipeline end-to-end
+- **Phase 4B complete** = final Swiss train profile produces final deployment artifacts using the same contract
+
+### 7. Implementation steps
+Revise implementation steps so they are visibly staged, for example:
+
+1. scaffold profile-aware data/export structure
+2. implement shared preprocessing/discovery/split pipeline
+3. validate training/export using reference dataset profile
+4. switch to project dataset profile without changing the pipeline
+5. export final `swiss_trains` artifacts
+
+Do not leave the plan in a form where the reference phase appears as an undocumented side path.
+
+---
+
+## Keep these unchanged
+Do **not** change:
+- Python ↔ Android preprocessing contract
+- resize-only spatial preprocessing
+- explicit ONNX input/output names
+- logits-only output
+- deterministic class ordering
+- labels derived from folder names
+- Module 5 Phase 5A/5B interface assumptions
+
+The revised plan must still preserve:
+- fixed 224×224 resize-only preprocessing
+- ImageNet normalization
+- NCHW float32 contract
+- `input` / `output` node names
+- Python verification before Android asset copy
+
+---
+
+## Important guidance
+Keep this conservative and local.
+
+Do **not** introduce:
+- CI/CD
+- experiment tracking frameworks
+- cloud training
+- dataset registries
+- broad configuration systems
+- MLOps architecture
+
+The result should remain:
+- one small local training/export pipeline
+- two explicit dataset profiles
+- two artifact families
+- minimal but clear profile selection
+
+---
+
+## Explicitly forbidden
+Do **not**:
+- write implementation code
+- redesign the whole project
+- turn the plan into a speculative ML tutorial
+- hide the profile split only inside prose
+- collapse both phases back into one generic dataset path or one generic artifact name
+
+The distinction must be structural in the plan.
+
+---
+
+## Output requirements
+Edit only `plans/module_04/implementation_plan.md`.
+
+When done, respond with:
+1. summary of what changed
+2. which sections were revised
+3. how the profile-based staged strategy is now reflected structurally
+4. any remaining ambiguity that should be resolved before implementation
+
+---
+
+## Quality bar
+The revised plan must be:
+- concise
+- technically explicit
+- implementation-ready
+- traceable in repository structure
+- aligned with staged validation and separation of concerns
+- free of unnecessary abstraction
