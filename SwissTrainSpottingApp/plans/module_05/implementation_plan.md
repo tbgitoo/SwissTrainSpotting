@@ -110,15 +110,28 @@ Phase 5B already validated single-model correctness (profile-based loading, JSON
 
 **Explicitly excluded (already covered by Phase 5B):** asset existence, metadata parsing, label loading, ONNX model loading correctness, parser correctness.
 
-### Phase 5D — Decision / routing logic
-Decision logic only; **not model loading.**
+### Phase 5D — Presentation-aware routing logic
+Routing / presentation only; **not model loading.**
 
-- Combine generic and specialized classifiers in one prediction flow on the shared preprocessed tensor.
-- Run the generic classifier first.
+- Run the generic MobileNetV2 classifier first.
+- Run the specialized classifier (e.g. hymenoptera → later SwissTrains) regardless of the generic result. Do **not** skip or gate execution based on the generic output.
+- The specialized classifier result is always computed and retained.
 - Check whether the generic top prediction belongs to a predefined **allowed set** for which the specialized model is applicable (e.g. train-related ImageNet categories).
-- If **yes**: run the specialized classifier; return specialized label + confidence.
-- If **no**: return the generic category together with an out-of-scope indication (e.g. generic result + “not compatible with specialized classifier”).
-- UI may surface both stages when useful; keep display minimal per AGENTS.md.
+- If **yes** (in-scope): present the specialized classifier result as the direct classification (label + confidence).
+- If **no** (out-of-scope): present the specialized result conditionally / hypothetically via UI text such as:
+  - "Doesn't look like a train; if it were a train, the closest class would be: Re420."
+- The allowed set is defined by the specialized profile's metadata.
+
+#### Validation — Phase 5D routing scenarios
+
+1. **Applicable case** — Generic top prediction falls within the specialized profile's allowed set. Assert that the UI presents the specialized result as a direct classification (label + confidence) with no conditional framing.
+
+2. **Non-applicable case** — Generic top prediction does NOT fall within the allowed set. Assert that:
+   - the specialized classifier was still computed (non-null result);
+   - the UI presents the specialized result as conditional / hypothetical;
+   - the generic result is also surfaced to the user.
+
+3. **No execution gating** — Out-of-scope generic results must never prevent the specialized classifier from running. Verify that inference on both models executes regardless of the generic output.
 
 ---
 
@@ -266,9 +279,10 @@ Phase 5C done when:
 - both can run inference on the same preprocessed tensor without cross-contamination
 
 Phase 5D done when:
-- prediction flow runs generic classifier first, then conditionally specialized
-- out-of-scope generic results return without specialized inference
-- in-scope results return the specialized label + confidence
+- both generic and specialized classifiers run unconditionally (no execution gating)
+- in-scope generic results present the specialized label + confidence directly
+- out-of-scope generic results present the specialized result as conditional / hypothetical
+- specialized classifier output is always computed, retained, and displayed regardless of the generic prediction
 
 ---
 

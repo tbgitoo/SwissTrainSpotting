@@ -1,0 +1,55 @@
+Use and respect these skills while performing this task:
+- android-testing
+- android-dependency-closure
+- safe-java-edit
+- safe-java-rewrite
+
+You are editing an existing project plan for the SwissTrainSpotting Android app.
+
+Read first:
+- plans/module_05/implementation_plan.md
+- ../plans/01_architecture.md
+- AGENTS.md
+
+Task:
+Modify only the Phase 5D section of the Module 5 implementation plan so that the decision/routing logic reflects this refined behavior:
+
+New intended Phase 5D behavior:
+- The image is first classified by the generic MobileNetV2 classifier.
+- The specialized classifier (currently Hymenoptera as stand-in, later SwissTrains) is still run even if the generic result is not considered compatible with the specialized domain.
+- The generic classifier result is used to determine whether the specialized result is presented as:
+  1. a direct specialized classification, or
+  2. a conditional / hypothetical specialized interpretation.
+
+Required semantics:
+- If the generic MobileNetV2 top prediction belongs to the specialized profile’s compatible/allowed set, present the specialized classifier result directly in the UI.
+- If the generic MobileNetV2 top prediction does NOT belong to the specialized profile’s compatible/allowed set, still compute and retain the specialized result, but present it as conditional / hypothetical, for example:
+  - “Doesn’t look like a train; if it were a train, the closest class would be: Re420.”
+- The specialized profile should still define which generic MobileNetV2 classes it considers compatible / in-scope.
+- This is presentation-aware routing, not execution gating.
+
+What to change:
+1. Update only the Phase 5D section text so it no longer says the specialized classifier is skipped when the generic result is out of scope.
+2. Replace that logic with:
+   - generic classifier always runs
+   - specialized classifier also runs
+   - generic result decides whether specialized output is shown as direct or conditional
+3. Add a short validation subsection for Phase 5D covering:
+   - applicable case → specialized result shown directly
+   - non-applicable case → specialized result still computed and shown conditionally
+   - no execution gating based only on generic out-of-scope result
+4. Update the Phase 5D acceptance criteria so they match this refined behavior.
+
+Strict constraints:
+- Modify only Phase 5D.
+- Do NOT modify Phase 5A.
+- Do NOT modify Phase 5B.
+- Do NOT modify Phase 5C.
+- Do NOT redesign the architecture.
+- Do NOT add new phases.
+- Do NOT add implementation code.
+- Keep the tone concise, technical, and consistent with the existing plan.
+- Preserve the existing structure and heading style as much as possible.
+
+Output:
+- Return only the revised Phase 5D section, including its validation text and updated acceptance criteria if they are part of that section.

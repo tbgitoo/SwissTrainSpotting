@@ -30,7 +30,8 @@
 USER → Capture / Select image  
 → Bitmap  
 → Preprocessing  
-→ ONNX inference  
+→ ONNX inference (generic + optional specialized classifiers)
+→ routing / result selection 
 → Optional OCR  
 → UI display  
 
@@ -71,8 +72,8 @@ Images → training → ONNX export → copy to Android assets
 
 ### Module 5 — ONNX Inference Integration
 - Purpose: Run model in Android
-- Output: Predicted class + confidence
-- Milestone: App displays classification result
+- Output: Combined classification result (generic + optional specialized) with confidence(s)
+- Milestone: App displays interpreted classification result (generic and/or specialized)
 
 ⚠️ Implementation constraints:
 - Inference must **not run on the UI thread**
@@ -97,6 +98,7 @@ Note: OCR is not part of the critical path and may be skipped.
 
 ## C. Repository structure
 
+
 ```
 SwissTrainSpotting/
 ├── plans/
@@ -106,17 +108,27 @@ SwissTrainSpotting/
 │   ├── data/raw/<class>/
 │   ├── scripts/
 │   └── export/
+│       ├── hymenoptera.onnx
+│       ├── hymenoptera_labels.json
+│       ├── hymenoptera_model_metadata.json
 │       ├── swiss_trains.onnx
-│       ├── labels.json
-│       └── model_metadata.json
+│       ├── swiss_trains_labels.json
+│       └── swiss_trains_model_metadata.json
 │
 └── SwissTrainSpottingApp/
     └── app/src/main/
         ├── assets/
+        │   ├── mobilenetv2.onnx
+        │   ├── imagenet_classes.txt
+        │   ├── hymenoptera.onnx
+        │   ├── hymenoptera_labels.json
+        │   ├── hymenoptera_model_metadata.json
         │   ├── swiss_trains.onnx
-        │   ├── labels.json
-        │   └── model_metadata.json
+        │   ├── swiss_trains_labels.json
+        │   └── swiss_trains_model_metadata.json
 ```
+
+**Note:** `mobilenetv2.onnx` and `imagenet_classes.txt` are downloaded reference assets used for baseline (generic) inference, whereas `hymenoptera_*` and `swiss_trains_*` are profile-specific artifacts produced by the Python export workflow.
 
 ---
 
