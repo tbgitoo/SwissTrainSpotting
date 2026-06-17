@@ -1,0 +1,122 @@
+To complete the plan:
+
+
+You are editing an existing project plan for the SwissTrainSpotting Android app
+
+
+
+Task:
+Modify only the Phase 5B section by adding a short, concrete test/validation subsection that proves the ONNX pipeline is not validated only for the baseline ImageNet MobileNetV2 model, but also for alternative model loading using a small transfer-learning example such as Hymenoptera.
+
+Scope constraints:
+- Edit only Phase 5B.
+- Keep the change small and localized.
+- Do not redesign the plan.
+- Do not add new phases.
+- Do not rewrite unrelated sections.
+- Preserve the existing style, structure, and tone.
+- Keep the wording practical and technical, not promotional.
+- Do not mention grades, exam strategy, or “visibility to the examiner”.
+- Do not add implementation code.
+
+Content requirements for the added subsection:
+- Clarify that the baseline ImageNet MobileNetV2 ONNX model is used to verify the generic inference pipeline.
+- Add explicit validation that Phase 5B must also include evidence that an alternative ONNX model and matching labels file can be loaded.
+- Use Hymenoptera (ants/bees) as the concrete example of the alternative model.
+- State that the purpose is to verify model-agnostic loading and output handling, not final production accuracy.
+- State that this validation should cover:
+  1. loading an alternative ONNX asset,
+  2. loading its matching labels file,
+  3. handling a different output class count than ImageNet,
+  4. at least one smoke test or deterministic test proving inference runs without pipeline changes.
+- Keep the addition concise: one short subsection or a compact paragraph plus bullet list.
+- The new text must read as a natural extension of Phase 5B, not as a new architecture proposal.
+
+Output requirements:
+- Return only the revised Phase 5B section.
+- Preserve the existing heading if present.
+- Integrate the new test subsection directly into that section.
+
+Use and respect these skills while performing this task:
+- android-testing
+- android-dependency-closure
+- packed-vs-planar
+- safe-java-edit
+- safe-java-rewrite
+
+
+
+
+========== and for actually implementing and running the tests ==================
+
+
+Use and respect these skills while performing this task:
+- android-testing
+- android-dependency-closure
+- packed-vs-planar
+- safe-java-edit
+- safe-java-rewrite
+
+You are working on the SwissTrainSpotting Android app.
+
+Read and follow these project documents before editing:
+- plans/module_05/implementation_plan.md
+- ../plans/01_architecture.md
+- AGENTS.md
+
+Context:
+- The Phase 5B implementation for profile-based ONNX model loading has already been added.
+- The Module 5 plan was updated so that Phase 5B now explicitly requires test evidence beyond the baseline ImageNet MobileNetV2 model.
+- This task is NOT to redesign or reimplement Phase 5B.
+- This task is only to add the missing Phase 5B test evidence required by the updated Module 5 plan.
+
+Task:
+Add or update tests for Phase 5B so the test suite proves that the ONNX pipeline is not validated only for the baseline ImageNet MobileNetV2 model, but also for an alternative profile-based model family such as Hymenoptera.
+
+Strict scope constraints:
+- Focus on tests only.
+- Do not rewrite unrelated production code.
+- Do not redesign architecture.
+- Do not implement Phase 5C or 5D.
+- Do not add multi-model coexistence logic.
+- Do not broaden the task into general refactoring.
+- Only make the smallest production-code change if absolutely necessary to enable a clean test seam.
+- Keep the implementation aligned with the updated Phase 5B section of the Module 5 plan.
+
+What the tests must prove (as required by the updated Phase 5B plan):
+1. an alternative profile-based family can be loaded from assets/configuration
+2. the matching alternative labels file is loaded correctly
+3. output handling works for a different class count than ImageNet
+4. at least one smoke or deterministic test shows the alternative family runs through the same inference pipeline without model-specific code paths
+5. existing baseline Phase 5A tests remain valid
+
+Concrete alternative family:
+- use Hymenoptera as the test example
+- expected family:
+  - hymenoptera.onnx
+  - hymenoptera_labels.json
+  - hymenoptera_model_metadata.json
+
+Testing guidance:
+- Prefer deterministic tests
+- Keep tests small, targeted, and readable
+- If a unit test is sufficient, prefer that over instrumentation
+- If one minimal instrumentation or smoke test is the cleanest proof of alternative loading, add exactly that, not broader UI coverage
+- Keep the packed-vs-planar contract intact: do not introduce alternate preprocessing assumptions
+- Preserve the existing MobileNetV2 baseline tests and behavior
+
+Expected areas of coverage:
+- metadata/profile loading
+- JSON label resolution by class index
+- non-1000-class output shape handling
+- one alternative-family inference smoke test
+
+Output requirements:
+- Modify only the files needed for Phase 5B test coverage
+- Return:
+  1. changed files
+  2. tests added or updated
+  3. any tiny production-code change made only for testability
+  4. whether existing Phase 5A tests were preserved
+  5. a short note explaining how the new tests satisfy the updated Phase 5B plan
+

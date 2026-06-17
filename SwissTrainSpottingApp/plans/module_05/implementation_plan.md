@@ -3,7 +3,7 @@
 **Status:** Final for implementation  
 **Depends on:** Module 2 (upright `Bitmap`), Module 3 (`ImagePreprocessor` → planar NCHW `float[]`)  
 **Reference:** `plans/01_architecture.md`, `AGENTS.md`, `plans/module_03/implementation_plan.md`  
-**Skills:** packed-vs-planar, android-dependency-closure  
+**Skills:** packed-vs-planar, android-dependency-closure, android-testing 
 **Target:** Java + XML, minSdk 24
 
 ---
@@ -76,6 +76,16 @@ Load different model families through explicit configuration / profile handling 
 - Support different label formats across families: Phase 5A plain-text `imagenet_classes.txt` (line index → label) vs exported `{prefix}_labels.json` (`classes[].index`, `id`, `display_name`).
 - Read input/output node names, `num_classes`, and tensor contract from metadata where present; retain Phase 5A constants for the MobileNetV2 reference family.
 - Switch between the generic reference model and a specialized exported profile (e.g. `hymenoptera` for pipeline validation, `swiss_trains` for deployment) via configuration only — no layout-specific code paths.
+
+#### Validation beyond the baseline ImageNet MobileNetV2 model
+
+The Phase 5A baseline (`mobilenetv2.onnx` / `imagenet_classes.txt`) verifies that the generic inference pipeline (asset loading, session creation, preprocessing → ONNX tensor, logits → argmax) works end-to-end. Phase 5B must also demonstrate that the profile-driven path is not specific to ImageNet:
+
+- An alternative model such as `hymenoptera.onnx` with its matching label file (`hymenoptera_labels.json`) loads and runs through the same pipeline without introducing model-specific code paths.
+- Output handling works with a different number of classes (e.g. `num_classes = 2` vs ImageNet's 1000) — shape validation, logits extraction, and argmax must not assert or hard-code a specific class count.
+- At least one smoke test loads the alternative metadata profile construct from an assets JSON, creates the classifier via `ModelProfile`, runs a single deterministic inference pass with valid preprocessed input, and asserts that a result (label, confidence) is returned non-null.
+
+This validation confirms model-agnostic loading and output handling. It establishes that Phase 5B has wired up the profile → ONNX session lifecycle correctly; it does **not** assert production-level classification accuracy for the transferred model.
 
 ### Phase 5C — Multi-model support
 Runtime coexistence and infrastructure only; **no routing or combined prediction yet.**
