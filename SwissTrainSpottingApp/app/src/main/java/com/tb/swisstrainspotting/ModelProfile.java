@@ -23,10 +23,18 @@ public final class ModelProfile {
     private final String inputNodeName;
     private final String outputNodeName;
     private final int numClasses;
+    private final java.util.Set<String> allowedSet;
 
     private ModelProfile(String id, String modelFile, String labelsFile,
-                         String labelsFormat, String inputNodeName,
-                         String outputNodeName, int numClasses) {
+                          String labelsFormat, String inputNodeName,
+                          String outputNodeName, int numClasses) {
+        this(id, modelFile, labelsFile, labelsFormat, inputNodeName, outputNodeName, numClasses, java.util.Collections.emptySet());
+    }
+
+    private ModelProfile(String id, String modelFile, String labelsFile,
+                          String labelsFormat, String inputNodeName,
+                          String outputNodeName, int numClasses,
+                          java.util.Set<String> allowedSet) {
         this.id = id;
         this.modelFile = modelFile;
         this.labelsFile = labelsFile;
@@ -34,6 +42,7 @@ public final class ModelProfile {
         this.inputNodeName = inputNodeName;
         this.outputNodeName = outputNodeName;
         this.numClasses = numClasses;
+        this.allowedSet = java.util.Collections.unmodifiableSet(allowedSet != null ? allowedSet : java.util.Collections.emptySet());
     }
 
     public String getId() { return id; }
@@ -43,6 +52,12 @@ public final class ModelProfile {
     public String getInputNodeName() { return inputNodeName; }
     public String getOutputNodeName() { return outputNodeName; }
     public int getNumClasses() { return numClasses; }
+
+    /**
+     * Returns the set of generic ImageNet top-predictions class labels that are considered
+     * "in-scope" for this specialized classifier. Empty means no allowed-set filtering.
+     */
+    public java.util.Set<String> getAllowedSet() { return allowedSet; }
 
     @Override
     public String toString() {
@@ -67,6 +82,8 @@ public final class ModelProfile {
             throw new JSONException("Missing or empty 'dataset_profile' in metadata");
         }
 
+        java.util.Set<String> allowedSet = readAllowedSet(json);
+
         return new ModelProfile(
                 id,
                 requiredString(json, "model_file"),
@@ -74,7 +91,8 @@ public final class ModelProfile {
                 LABEL_FORMAT_JSON,
                 safeString(json, "input_name", "input"),
                 safeString(json, "output_name", "output"),
-                json.optInt("num_classes", 0)
+                json.optInt("num_classes", 0),
+                allowedSet
         );
     }
 
@@ -130,6 +148,52 @@ public final class ModelProfile {
             // metadata asset does not exist for this prefix → use generic defaults
         }
         return mobileNetV2("input", "output");
+    }
+
+    // -----------------------------------------------------------------------
+    // JSON helpers
+    // -----------------------------------------------------------------------
+
+    private static JSONObject requiredObject(JSONObject json, String key) throws JSONException {
+        Object val = json.opt(key);
+        if (val == null || !(val instanceof JSONObject)) {
+            throw new JSONException("Missing or invalid required field: " + key);
+        }
+        return (JSONObject) val;
+    }
+
+    private static double safeDouble(JSONObject json, String key, double fallback) {
+        if (!json.has(key)) return fallback;
+        Object val = json.opt(key);
+        return (val instanceof Number) ? ((Number) val).doubleValue() : fallback;
+    }
+
+    private static long safeLong(JSONObject json, String key, long fallback) {
+        if (!json.has(key)) return fallback;
+        Object val = json.opt(key);
+        return (val instanceof Number) ? ((Number) val).longValue() : fallback;
+    }
+
+    // -----------------------------------------------------------------------
+    // Allowed-set support for Phase 5D routing
+    // -----------------------------------------------------------------------
+
+    /**
+     * Read the allowed set from metadata's "class_ids" field.
+     * These represent ImageNet top-prediction labels considered in-scope for this specialized model.
+     */
+    private static java.util.Set<String> readAllowedSet(JSONObject json) throws JSONException {
+        java.util.Set<String> allowed = new java.util.HashSet<>();
+        JSONArray idArray = json.optJSONArray("class_ids");
+        if (idArray != null) {
+            for (int i = 0; i < idArray.length(); i++) {
+                String id = idArray.getString(i);
+                if (id != null && !id.isEmpty()) {
+                    allowed.add(id);
+                }
+            }
+        }
+        return allowed;
     }
 
     // -----------------------------------------------------------------------

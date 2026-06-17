@@ -1,0 +1,129 @@
+Use and respect these skills while performing this task:
+- android-testing
+- android-dependency-closure
+- packed-vs-planar
+- safe-java-edit
+- safe-java-rewrite
+
+You are working on the SwissTrainSpotting Android app.
+
+Read and follow these project documents before editing:
+- plans/module_05/implementation_plan.md
+- ../plans/01_architecture.md
+- AGENTS.md
+
+Repository boundary rule:
+- Only read, create, or modify files inside the current repository root.
+- Do not touch sibling directories, parent directories, other repositories, or absolute paths outside the repo.
+- Do not use destructive commands with suppressed output.
+- Do not delete existing files.
+- If structure needs adjustment, refactor in place instead of delete-and-recreate.
+
+Current known state:
+1. Phase 5A is implemented and validated.
+2. Phase 5B is implemented and validated.
+3. Phase 5C is implemented and validated.
+4. Existing validated capabilities already include:
+   - baseline MobileNetV2 inference
+   - profile-based model loading
+   - JSON label loading for exported profiles
+   - alternative model inference (e.g. Hymenoptera)
+   - multi-model coexistence with separate sessions on a shared OrtEnvironment
+5. Therefore, Phase 5D is NOT a model-loading or session-management task.
+6. Phase 5D is routing / presentation logic only.
+
+Task:
+Implement Phase 5D only.
+
+Goal:
+Add presentation-aware routing logic so that:
+- the generic MobileNetV2 classifier always runs first,
+- the specialized classifier also always runs,
+- the generic result determines whether the specialized result is presented as:
+  1. direct specialized classification, or
+  2. conditional / hypothetical specialized interpretation.
+
+Critical Phase 5D rule:
+- Do NOT gate specialized execution based on the generic result.
+- The specialized classifier must still run and produce a result even when the generic result is out of scope.
+
+Required behavior:
+1. Run the generic MobileNetV2 classifier.
+2. Run the specialized classifier on the same preprocessed tensor.
+3. Check whether the generic top prediction belongs to the specialized profile’s allowed / compatible set.
+4. If the generic result is in-scope:
+   - present the specialized result directly (label + confidence).
+5. If the generic result is out-of-scope:
+   - still retain the specialized result,
+   - present it conditionally / hypothetically,
+   - also surface the generic result to the user,
+   - keep wording concise but make the distinction between direct vs conditional specialized interpretation explicit.
+
+Examples of intended meaning:
+- In-scope: direct specialized result is shown.
+- Out-of-scope: “Doesn’t look like a train; if it were a train, the closest class would be: Re420.”
+The exact UI copy may be concise, but the distinction must be preserved.
+
+Allowed changes:
+- Add a small routing seam such as `ClassificationRouter` if helpful.
+- Add a small combined / routed result model if helpful.
+- Update UI binding minimally so it can present:
+  - direct specialized result, or
+  - conditional specialized result plus generic context.
+
+Strong constraints:
+- Implement only Phase 5D.
+- Do not rework Phase 5A, 5B, or 5C logic.
+- Do not change model loading behavior.
+- Do not change preprocessing.
+- Do not change session lifecycle architecture.
+- Do not introduce multi-model registries or managers beyond what is already needed.
+- Do not redesign the app architecture.
+- Keep the change localized and minimal.
+- Preserve current tested behavior from Phases 5A–5C.
+
+Allowed-set source:
+- The specialized profile’s metadata / config defines which generic MobileNetV2 classes are considered compatible / in-scope.
+- If a minimal implementation seam is needed to represent this, keep it narrow and explicit.
+- Do not add broad future-facing architecture beyond what Phase 5D immediately needs.
+
+Testing requirements:
+Add or update tests so Phase 5D is explicitly validated.
+
+Required tests:
+1. Applicable routing case
+   - generic result is in the specialized allowed set,
+   - specialized result is presented directly,
+   - no conditional framing is used.
+
+2. Non-applicable routing case
+   - generic result is outside the specialized allowed set,
+   - specialized result is still computed,
+   - specialized result is presented conditionally / hypothetically,
+   - generic result is also surfaced.
+
+3. No execution gating
+   - verify that out-of-scope generic results do not prevent specialized inference from running.
+
+Testing guidance:
+- Prefer small focused tests for routing logic if it can be isolated cleanly.
+- If UI text binding must be tested, keep UI / instrumentation coverage minimal and targeted.
+- Do not repeat Phase 5B or 5C tests.
+- Do not re-test metadata parsing, label loading, single-model inference correctness, or coexistence unless directly required by 5D routing validation.
+
+Implementation guidance:
+- The main new work is decision logic and result presentation.
+- Keep model inference calls explicit and readable.
+- Keep UI changes minimal.
+- Avoid speculative abstractions.
+- Prefer one small routing class over scattering conditional logic across the Activity if that improves clarity.
+- If a combined result object is introduced, keep it small and purpose-specific.
+
+Output requirements:
+- Modify only files needed for minimal Phase 5D routing / presentation support and tests.
+- Return:
+  1. changed files
+  2. summary of implementation changes
+  3. tests added / updated
+  4. any tiny production-code change made outside routing / UI support and why it was necessary
+  5. confirmation that Phase 5A–5C behavior was preserved

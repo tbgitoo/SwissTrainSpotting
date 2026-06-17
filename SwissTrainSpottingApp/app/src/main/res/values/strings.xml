@@ -16,4 +16,10 @@
     <string name="classification_result_format">%1$s (%2$.1f%%)</string>
     <string name="classification_failed">Classification failed</string>
     <string name="classifier_init_failed">Could not load classification model</string>
+    <string name="generic_result_label">Generic classification: %1$s</string>
+    <string name="specialized_direct_result">%1$s (%2$.1f%%)</string>
+    <string name="specialized_conditional_prefix">Doesn\'t look like a train; if it were a train, the closest class would be:</string>
+    <string name="combined_direct_result">%3$s\n%1$s — %2$.1f%%</string>
+    <string name="combined_conditional_result">%1$s — %2$s (%3$.1f%%)</string>
+    <string name="routing_error">Could not load specialized classifier: %s</string>
 </resources>

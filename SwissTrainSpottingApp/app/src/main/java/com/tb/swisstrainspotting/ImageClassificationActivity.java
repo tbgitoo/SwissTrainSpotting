@@ -42,7 +42,12 @@ public class ImageClassificationActivity extends AppCompatActivity {
     private Uri currentCameraUri;
     private Uri currentImageUri;
     private ActivityResultLauncher<Uri> cameraLauncher;
-    private OnnxClassifier classifier;
+
+    // Phase 5D: dual classifier support with routing
+    private OnnxClassifier genericClassifier;
+    private OnnxClassifier specializedClassifier;
+    private ClassificationRouter.AllowedSet allowedSet;
+
     private ExecutorService inferenceExecutor;
     private int classificationGeneration = 0;
 
@@ -55,8 +60,13 @@ public class ImageClassificationActivity extends AppCompatActivity {
         tvClassificationResult = findViewById(R.id.tv_classification_result);
 
         inferenceExecutor = Executors.newSingleThreadExecutor();
+
+        // Phase 5D: load specialized classifier with profile-based allowed set (falls back gracefully)
         try {
-            classifier = new OnnxClassifier(getApplicationContext());
+            ModelProfile specialtyProfile = ModelProfile.load(getApplicationContext(), "hymenoptera");
+            allowedSet = ClassificationRouter.fromModelProfile(specialtyProfile);
+            genericClassifier = new OnnxClassifier(getApplicationContext());
+            specializedClassifier = new OnnxClassifier(getApplicationContext(), specialtyProfile);
         } catch (IOException e) {
             tvClassificationResult.setText(R.string.classifier_init_failed);
         }
