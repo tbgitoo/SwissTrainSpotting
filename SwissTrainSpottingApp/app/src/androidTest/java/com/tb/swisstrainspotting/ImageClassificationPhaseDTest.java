@@ -11,6 +11,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.core.content.FileProvider;
 import androidx.test.core.app.ActivityScenario;
@@ -89,6 +90,54 @@ public class ImageClassificationPhaseDTest {
                 Bitmap bitmap = drawable.getBitmap();
                 assertNotNull(bitmap);
                 assertTrue(bitmap.getWidth() > bitmap.getHeight());
+            });
+        }
+    }
+
+    @Test
+    public void routedDirectResult_isPresentedWithoutConditionalFraming() throws IOException {
+        Intent intent = createIntentWithFixture(FIXTURE_BASELINE);
+
+        try (ActivityScenario<ImageClassificationActivity> scenario = ActivityScenario.launch(intent)) {
+            scenario.onActivity(activity -> {
+                RoutedClassificationResult routedResult = new RoutedClassificationResult(
+                        new ClassificationResult(466, "train", 0.91f),
+                        new ClassificationResult(1, "bees", 0.875f),
+                        RoutingMode.DIRECT
+                );
+
+                activity.applyRoutedResult(routedResult);
+
+                TextView resultView = activity.findViewById(R.id.tv_classification_result);
+                String text = resultView.getText().toString();
+                assertTrue(text.contains("bees"));
+                assertTrue(text.contains("87.5%"));
+                assertTrue(!text.contains("Doesn't look like a train"));
+                assertTrue(!text.contains("Generic classification:"));
+            });
+        }
+    }
+
+    @Test
+    public void routedConditionalResult_surfacesGenericAndHypotheticalSpecializedText() throws IOException {
+        Intent intent = createIntentWithFixture(FIXTURE_BASELINE);
+
+        try (ActivityScenario<ImageClassificationActivity> scenario = ActivityScenario.launch(intent)) {
+            scenario.onActivity(activity -> {
+                RoutedClassificationResult routedResult = new RoutedClassificationResult(
+                        new ClassificationResult(980, "volcano", 0.63f),
+                        new ClassificationResult(0, "ants", 0.712f),
+                        RoutingMode.CONDITIONAL
+                );
+
+                activity.applyRoutedResult(routedResult);
+
+                TextView resultView = activity.findViewById(R.id.tv_classification_result);
+                String text = resultView.getText().toString();
+                assertTrue(text.contains("Generic classification: volcano"));
+                assertTrue(text.contains("Doesn't look like a train"));
+                assertTrue(text.contains("ants"));
+                assertTrue(text.contains("71.2%"));
             });
         }
     }

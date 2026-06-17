@@ -29,6 +29,8 @@ import java.io.InputStream;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.json.JSONException;
+
 public class ImageClassificationActivity extends AppCompatActivity {
 
     public static final String EXTRA_ACQUISITION_MODE = "acquisition_mode";
@@ -43,7 +45,7 @@ public class ImageClassificationActivity extends AppCompatActivity {
     private Uri currentImageUri;
     private ActivityResultLauncher<Uri> cameraLauncher;
 
-    // Phase 5D: dual classifier support with routing
+    // Phase 5D: generic + specialized classifiers with presentation-aware routing.
     private OnnxClassifier genericClassifier;
     private OnnxClassifier specializedClassifier;
     private ClassificationRouter.AllowedSet allowedSet;
@@ -61,13 +63,19 @@ public class ImageClassificationActivity extends AppCompatActivity {
 
         inferenceExecutor = Executors.newSingleThreadExecutor();
 
-        // Phase 5D: load specialized classifier with profile-based allowed set (falls back gracefully)
+        allowedSet = new ClassificationRouter.AllowedSet();
+
+        try {
+            genericClassifier = new OnnxClassifier(getApplicationContext());
+        } catch (IOException e) {
+            tvClassificationResult.setText(R.string.classifier_init_failed);
+        }
+
         try {
             ModelProfile specialtyProfile = ModelProfile.load(getApplicationContext(), "hymenoptera");
             allowedSet = ClassificationRouter.fromModelProfile(specialtyProfile);
-            genericClassifier = new OnnxClassifier(getApplicationContext());
             specializedClassifier = new OnnxClassifier(getApplicationContext(), specialtyProfile);
-        } catch (IOException e) {
+        } catch (IOException | JSONException e) {
             tvClassificationResult.setText(R.string.classifier_init_failed);
         }
 
@@ -144,9 +152,13 @@ public class ImageClassificationActivity extends AppCompatActivity {
             inferenceExecutor.shutdownNow();
             inferenceExecutor = null;
         }
-        if (classifier != null) {
-            classifier.close();
-            classifier = null;
+        if (genericClassifier != null) {
+            genericClassifier.close();
+            genericClassifier = null;
+        }
+        if (specializedClassifier != null) {
+            specializedClassifier.close();
+            specializedClassifier = null;
         }
         super.onDestroy();
     }
@@ -233,7 +245,11 @@ public class ImageClassificationActivity extends AppCompatActivity {
     }
 
     private void runClassification(Bitmap bitmap) {
-        if (classifier == null || inferenceExecutor == null || bitmap == null || bitmap.isRecycled()) {
+        if (genericClassifier == null
+                || specializedClassifier == null
+                || inferenceExecutor == null
+                || bitmap == null
+                || bitmap.isRecycled()) {
             return;
         }
 
@@ -243,18 +259,18 @@ public class ImageClassificationActivity extends AppCompatActivity {
         inferenceExecutor.execute(() -> {
             try {
                 float[] tensor = ImagePreprocessor.preprocess(bitmap);
-                ClassificationResult result = classifier.classify(tensor);
+                RoutedClassificationResult routedResult = ClassificationRouter.runAndRoute(
+                        tensor,
+                        genericClassifier::classify,
+                        specializedClassifier::classify,
+                        allowedSet
+                );
 
                 runOnUiThread(() -> {
                     if (!shouldApplyClassificationResult(generation)) {
                         return;
                     }
-                    String formatted = getString(
-                            R.string.classification_result_format,
-                            result.getLabel(),
-                            result.getConfidence() * 100f
-                    );
-                    tvClassificationResult.setText(formatted);
+                    applyRoutedResult(routedResult);
                 });
             } catch (RuntimeException e) {
                 runOnUiThread(() -> {
@@ -265,6 +281,37 @@ public class ImageClassificationActivity extends AppCompatActivity {
                 });
             }
         });
+    }
+
+    void applyRoutedResult(RoutedClassificationResult routedResult) {
+        tvClassificationResult.setText(formatRoutedResult(routedResult));
+    }
+
+    String formatRoutedResult(RoutedClassificationResult routedResult) {
+        if (routedResult == null) {
+            throw new IllegalArgumentException("Routed result must not be null");
+        }
+
+        ClassificationResult specializedResult = routedResult.getSpecializedResult();
+        if (routedResult.getRoutingMode() == RoutingMode.DIRECT) {
+            return getString(
+                    R.string.specialized_direct_result,
+                    specializedResult.getLabel(),
+                    specializedResult.getConfidence() * 100f
+            );
+        }
+
+        String genericText = getString(
+                R.string.generic_result_label,
+                routedResult.getGenericResult().getLabel()
+        );
+        String conditionalText = getString(
+                R.string.combined_conditional_result,
+                getString(R.string.specialized_conditional_prefix),
+                specializedResult.getLabel(),
+                specializedResult.getConfidence() * 100f
+        );
+        return genericText + "\n" + conditionalText;
     }
 
     private boolean shouldApplyClassificationResult(int generation) {

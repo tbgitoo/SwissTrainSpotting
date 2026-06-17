@@ -179,12 +179,15 @@ public final class ModelProfile {
     // -----------------------------------------------------------------------
 
     /**
-     * Read the allowed set from metadata's "class_ids" field.
-     * These represent ImageNet top-prediction labels considered in-scope for this specialized model.
+     * Read the allowed set from metadata/config.
+     *
+     * <p>Phase 5D uses {@code compatible_generic_labels} to define which generic MobileNetV2
+     * top-prediction labels are considered in-scope for this specialized model. This is distinct
+     * from the specialized model's own {@code class_ids}.
      */
     private static java.util.Set<String> readAllowedSet(JSONObject json) throws JSONException {
         java.util.Set<String> allowed = new java.util.HashSet<>();
-        JSONArray idArray = json.optJSONArray("class_ids");
+        JSONArray idArray = json.optJSONArray("compatible_generic_labels");
         if (idArray != null) {
             for (int i = 0; i < idArray.length(); i++) {
                 String id = idArray.getString(i);

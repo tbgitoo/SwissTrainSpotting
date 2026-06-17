@@ -1,7 +1,6 @@
 package com.tb.swisstrainspotting;
 
 import java.util.HashSet;
-import java.util.Random;
 import java.util.Set;
 
 /**
@@ -16,6 +15,16 @@ import java.util.Set;
  * The specialized classifier runs unconditionally regardless of the generic result.
  */
 public final class ClassificationRouter {
+
+    /**
+     * Minimal inference seam for Phase 5D.
+     *
+     * <p>Each runner consumes the same already-preprocessed planar NCHW tensor and returns a
+     * fully computed classification result.
+     */
+    public interface InferenceRunner {
+        ClassificationResult classify(float[] inputTensor);
+    }
 
     /**
      * Represents which ImageNet top-prediction labels are considered "compatible" with a
@@ -85,7 +94,8 @@ public final class ClassificationRouter {
         RoutingMode mode;
         String genericLabel = genericResult.getLabel();
 
-        if (allowedSet.isEmpty() || allowedSet.contains(genericLabel)) {
+        AllowedSet effectiveAllowedSet = allowedSet != null ? allowedSet : new AllowedSet();
+        if (effectiveAllowedSet.isEmpty() || effectiveAllowedSet.contains(genericLabel)) {
             mode = RoutingMode.DIRECT;
         } else {
             mode = RoutingMode.CONDITIONAL;
@@ -95,11 +105,38 @@ public final class ClassificationRouter {
     }
 
     /**
+     * Run the generic and specialized classifiers on the same preprocessed tensor, then route the
+     * already-computed specialized result for presentation.
+     *
+     * <p>This method intentionally does not gate specialized execution based on the generic
+     * prediction. The specialized runner always executes after the generic runner.
+     */
+    public static RoutedClassificationResult runAndRoute(
+            float[] inputTensor,
+            InferenceRunner genericRunner,
+            InferenceRunner specializedRunner,
+            AllowedSet allowedSet) {
+
+        if (inputTensor == null) {
+            throw new IllegalArgumentException("Input tensor must not be null");
+        }
+        if (genericRunner == null) {
+            throw new IllegalArgumentException("Generic runner must not be null");
+        }
+        if (specializedRunner == null) {
+            throw new IllegalArgumentException("Specialized runner must not be null");
+        }
+
+        ClassificationResult genericResult = genericRunner.classify(inputTensor);
+        ClassificationResult specializedResult = specializedRunner.classify(inputTensor);
+        return route(genericResult, specializedResult, allowedSet);
+    }
+
+    /**
      * Build an allowed set from the specialized profile's metadata.
      *
-     * <p>Phase 5D: reads class_ids from model metadata to represent the ImageNet classes that are
-     * in-scope for this specialized classifier. For a hymenoptera model trained on images originally
-     * tagged as "train" in ImageNet, this contains one entry.
+     * <p>Phase 5D: reads the metadata/config-defined compatible generic labels that represent the
+     * ImageNet classes considered in-scope for this specialized classifier.
      */
     public static AllowedSet fromModelProfile(ModelProfile profile) {
         if (profile == null || profile.getAllowedSet().isEmpty()) {
