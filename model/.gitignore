@@ -306,6 +306,8 @@ data/raw_*
 # Optional: downloaded archives
 data/*.zip
 data/hymenoptera_data/
+.venv
+export
 
 
 

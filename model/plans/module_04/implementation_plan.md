@@ -14,6 +14,7 @@
 - Train a small **MobileNetV2** image classifier via transfer learning on folder-per-class data.
 - Export profile-specific ONNX models and aligned metadata artifacts.
 - Verify each exported model in Python using the **same preprocessing contract** as Android Module 3.
+- Run all pipeline commands from a **project-local virtual environment** at `model/.venv` (local to `model/`, not committed, expected environment for all Module 4 commands).
 
 ### Two-phase staged strategy
 
@@ -88,7 +89,7 @@ Rules (both profiles):
 - **Purpose:** Known public dataset to exercise the full pipeline independently of Swiss train photo collection.
 - **Expected classes:** `ants`, `bees` (PyTorch transfer-learning tutorial hymenoptera layout, reorganized into folder-per-class under `raw_hymenoptera/`).
 - **Minimum counts:** ≥ **2** classes, ≥ **5** images per class.
-- **Acquisition (out of band):** Download/prepare hymenoptera images locally; place into `raw_hymenoptera/<class>/`. Document the setup command(s) in `model/README.md` only — no automated registry or download framework in pipeline code.
+- **Acquisition (out of band):** Download/prepare hymenoptera images locally; place into `raw_hymenoptera/<class>/`. Document dataset setup in `model/README.md` only — no automated registry or download framework in pipeline code.
 
 ### Project profile: `swiss_trains`
 - **Purpose:** Final on-device Swiss train/loco classifier.
@@ -234,6 +235,7 @@ Examples:
 
 ```
 model/
+├── .venv/                                # local Python env (not committed)
 ├── data/
 │   ├── raw_hymenoptera/<class>/*.jpg
 │   ├── raw_swiss_trains/<class>/*.jpg
@@ -265,7 +267,7 @@ model/
 ```
 
 ### Execution order (per profile)
-Replace `<profile>` with `hymenoptera` or `swiss_trains`:
+All commands assume `model/.venv` is activated. Replace `<profile>` with `hymenoptera` or `swiss_trains`:
 
 1. `python scripts/discover_dataset.py --profile <profile>`
 2. `python scripts/make_split.py --profile <profile>` (if not combined with discover)
@@ -283,6 +285,8 @@ Replace `<profile>` with `hymenoptera` or `swiss_trains`:
 - Checkpoint reload reproduces same `class_to_idx` as discovery output for that profile.
 
 ### Reproducibility
+- Use project-local virtual environment at `model/.venv` for all Module 4 commands.
+- Install pinned dependencies from `requirements.txt` into `.venv`.
 - Seeds: `torch.manual_seed(42)`, `random.seed(42)`.
 - Log Python, torch, torchvision, onnx, onnxruntime versions in export metadata.
 - Pin dependencies in `requirements.txt`.
@@ -341,7 +345,9 @@ cp model/export/swiss_trains.onnx \
    ../SwissTrainSpottingApp/app/src/main/assets/
 ```
 
-Rename at copy time **only if** Module 5B expects unprefixed asset names (`labels.json`, `model_metadata.json`). Document the exact target filenames in `model/README.md` to match Phase 5B without changing this plan's export names. The README.md must document per-profile command usage, dataset preparation steps, and exact command sequences for `hymenoptera` and `swiss_trains` profiles.
+Rename at copy time **only if** Module 5B expects unprefixed asset names (`labels.json`, `model_metadata.json`). Document the exact target filenames in `model/README.md` to match Phase 5B without changing this plan's export names.
+
+`model/README.md` must document: `.venv` creation and activation; `pip install -r requirements.txt`; `TORCH_HOME=$HOME/.cache/torch`; exact per-profile command sequence (discover → split → train → export → verify); dataset preparation steps; Android asset copy filenames.
 
 
 Reference profile artifacts are **not** copied to Android assets.
@@ -480,7 +486,7 @@ Failure handling:
 
 Execute in order. Each step should be a small, reviewable commit.
 
-1. **Scaffold profile-aware tree** — `raw_hymenoptera/`, `raw_swiss_trains/`, `splits/`, `export/checkpoints/`, `requirements.txt`, `README.md` with per-profile command examples.
+1. **Scaffold profile-aware tree and local `.venv`** — create `model/.venv`; install from `requirements.txt`; scaffold `raw_hymenoptera/`, `raw_swiss_trains/`, `splits/`, `export/checkpoints/`, `requirements.txt`, `README.md` with per-profile command examples.
 2. **Implement `profiles.py`** — registry for both profiles (paths, prefixes, minimum counts).
 3. **Implement `preprocess.py`** — canonical compose; profile-agnostic.
 4. **Implement `discover_dataset.py --profile`** — scan profile raw root; enforce profile thresholds.
@@ -518,6 +524,9 @@ Execute in order. Each step should be a small, reviewable commit.
 ---
 
 ## Implementation notes
+
+### Python execution environment
+All Module 4 commands are expected to run with `model/.venv` activated, not from an unspecified global Python environment.
 
 ### Pretrained backbone source
 MobileNetV2 weights from TorchVision (`MobileNet_V2_Weights.IMAGENET1K_V1`); not stored in repo.

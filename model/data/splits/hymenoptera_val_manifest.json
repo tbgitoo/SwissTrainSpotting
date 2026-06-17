@@ -1,0 +1,320 @@
+{
+  "version": 1,
+  "profile": "hymenoptera",
+  "seed": 42,
+  "val_ratio": 0.2,
+  "entries": [
+    {
+      "class_id": "ants",
+      "path": "data/raw_hymenoptera/ants/10308379_1b6c72e180.jpg"
+    },
+    {
+      "class_id": "ants",
+      "path": "data/raw_hymenoptera/ants/1053149811_f62a3410d3.jpg"
+    },
+    {
+      "class_id": "ants",
+      "path": "data/raw_hymenoptera/ants/1095476100_3906d8afde.jpg"
+    },
+    {
+      "class_id": "ants",
+      "path": "data/raw_hymenoptera/ants/1225872729_6f0856588f.jpg"
+    },
+    {
+      "class_id": "ants",
+      "path": "data/raw_hymenoptera/ants/1247887232_edcb61246c.jpg"
+    },
+    {
+      "class_id": "ants",
+      "path": "data/raw_hymenoptera/ants/1262877379_64fcada201.jpg"
+    },
+    {
+      "class_id": "ants",
+      "path": "data/raw_hymenoptera/ants/150801171_cd86f17ed8.jpg"
+    },
+    {
+      "class_id": "ants",
+      "path": "data/raw_hymenoptera/ants/153320619_2aeb5fa0ee.jpg"
+    },
+    {
+      "class_id": "ants",
+      "path": "data/raw_hymenoptera/ants/159515240_d5981e20d1.jpg"
+    },
+    {
+      "class_id": "ants",
+      "path": "data/raw_hymenoptera/ants/161076144_124db762d6.jpg"
+    },
+    {
+      "class_id": "ants",
+      "path": "data/raw_hymenoptera/ants/1693954099_46d4c20605.jpg"
+    },
+    {
+      "class_id": "ants",
+      "path": "data/raw_hymenoptera/ants/17081114_79b9a27724.jpg"
+    },
+    {
+      "class_id": "ants",
+      "path": "data/raw_hymenoptera/ants/183260961_64ab754c97.jpg"
+    },
+    {
+      "class_id": "ants",
+      "path": "data/raw_hymenoptera/ants/188552436_605cc9b36b.jpg"
+    },
+    {
+      "class_id": "ants",
+      "path": "data/raw_hymenoptera/ants/208072188_f293096296.jpg"
+    },
+    {
+      "class_id": "ants",
+      "path": "data/raw_hymenoptera/ants/209615353_eeb38ba204.jpg"
+    },
+    {
+      "class_id": "ants",
+      "path": "data/raw_hymenoptera/ants/2127908701_d49dc83c97.jpg"
+    },
+    {
+      "class_id": "ants",
+      "path": "data/raw_hymenoptera/ants/2238242353_52c82441df.jpg"
+    },
+    {
+      "class_id": "ants",
+      "path": "data/raw_hymenoptera/ants/226951206_d6bf946504.jpg"
+    },
+    {
+      "class_id": "ants",
+      "path": "data/raw_hymenoptera/ants/2278278459_6b99605e50.jpg"
+    },
+    {
+      "class_id": "ants",
+      "path": "data/raw_hymenoptera/ants/384191229_5779cf591b.jpg"
+    },
+    {
+      "class_id": "ants",
+      "path": "data/raw_hymenoptera/ants/460372577_f2f6a8c9fc.jpg"
+    },
+    {
+      "class_id": "ants",
+      "path": "data/raw_hymenoptera/ants/474806473_ca6caab245.jpg"
+    },
+    {
+      "class_id": "ants",
+      "path": "data/raw_hymenoptera/ants/484293231_e53cfc0c89.jpg"
+    },
+    {
+      "class_id": "ants",
+      "path": "data/raw_hymenoptera/ants/488272201_c5aa281348.jpg"
+    },
+    {
+      "class_id": "ants",
+      "path": "data/raw_hymenoptera/ants/506249836_717b73f540.jpg"
+    },
+    {
+      "class_id": "ants",
+      "path": "data/raw_hymenoptera/ants/518746016_bcc28f8b5b.jpg"
+    },
+    {
+      "class_id": "ants",
+      "path": "data/raw_hymenoptera/ants/541630764_dbd285d63c.jpg"
+    },
+    {
+      "class_id": "ants",
+      "path": "data/raw_hymenoptera/ants/6240329_72c01e663e.jpg"
+    },
+    {
+      "class_id": "ants",
+      "path": "data/raw_hymenoptera/ants/67270775_e9fdf77e9d.jpg"
+    },
+    {
+      "class_id": "ants",
+      "path": "data/raw_hymenoptera/ants/69639610_95e0de17aa.jpg"
+    },
+    {
+      "class_id": "ants",
+      "path": "data/raw_hymenoptera/ants/707895295_009cf23188.jpg"
+    },
+    {
+      "class_id": "ants",
+      "path": "data/raw_hymenoptera/ants/800px-Meat_eater_ant_qeen_excavating_hole.jpg"
+    },
+    {
+      "class_id": "ants",
+      "path": "data/raw_hymenoptera/ants/8398478_50ef10c47a.jpg"
+    },
+    {
+      "class_id": "ants",
+      "path": "data/raw_hymenoptera/ants/854534770_31f6156383.jpg"
+    },
+    {
+      "class_id": "ants",
+      "path": "data/raw_hymenoptera/ants/886401651_f878e888cd.jpg"
+    },
+    {
+      "class_id": "ants",
+      "path": "data/raw_hymenoptera/ants/Nepenthes_rafflesiana_ant.jpg"
+    },
+    {
+      "class_id": "ants",
+      "path": "data/raw_hymenoptera/ants/formica.jpeg"
+    },
+    {
+      "class_id": "bees",
+      "path": "data/raw_hymenoptera/bees/1093831624_fb5fbe2308.jpg"
+    },
+    {
+      "class_id": "bees",
+      "path": "data/raw_hymenoptera/bees/1097045929_1753d1c765.jpg"
+    },
+    {
+      "class_id": "bees",
+      "path": "data/raw_hymenoptera/bees/144098310_a4176fd54d.jpg"
+    },
+    {
+      "class_id": "bees",
+      "path": "data/raw_hymenoptera/bees/152789693_220b003452.jpg"
+    },
+    {
+      "class_id": "bees",
+      "path": "data/raw_hymenoptera/bees/177677657_a38c97e572.jpg"
+    },
+    {
+      "class_id": "bees",
+      "path": "data/raw_hymenoptera/bees/1799726602_8580867f71.jpg"
+    },
+    {
+      "class_id": "bees",
+      "path": "data/raw_hymenoptera/bees/196430254_46bd129ae7.jpg"
+    },
+    {
+      "class_id": "bees",
+      "path": "data/raw_hymenoptera/bees/205835650_e6f2614bee.jpg"
+    },
+    {
+      "class_id": "bees",
+      "path": "data/raw_hymenoptera/bees/2086294791_6f3789d8a6.jpg"
+    },
+    {
+      "class_id": "bees",
+      "path": "data/raw_hymenoptera/bees/208702903_42fb4d9748.jpg"
+    },
+    {
+      "class_id": "bees",
+      "path": "data/raw_hymenoptera/bees/2103637821_8d26ee6b90.jpg"
+    },
+    {
+      "class_id": "bees",
+      "path": "data/raw_hymenoptera/bees/220376539_20567395d8.jpg"
+    },
+    {
+      "class_id": "bees",
+      "path": "data/raw_hymenoptera/bees/2321139806_d73d899e66.jpg"
+    },
+    {
+      "class_id": "bees",
+      "path": "data/raw_hymenoptera/bees/2330918208_8074770c20.jpg"
+    },
+    {
+      "class_id": "bees",
+      "path": "data/raw_hymenoptera/bees/2452236943_255bfd9e58.jpg"
+    },
+    {
+      "class_id": "bees",
+      "path": "data/raw_hymenoptera/bees/2478216347_535c8fe6d7.jpg"
+    },
+    {
+      "class_id": "bees",
+      "path": "data/raw_hymenoptera/bees/2486729079_62df0920be.jpg"
+    },
+    {
+      "class_id": "bees",
+      "path": "data/raw_hymenoptera/bees/2486746709_c43cec0e42.jpg"
+    },
+    {
+      "class_id": "bees",
+      "path": "data/raw_hymenoptera/bees/2506114833_90a41c5267.jpg"
+    },
+    {
+      "class_id": "bees",
+      "path": "data/raw_hymenoptera/bees/2580598377_a4caecdb54.jpg"
+    },
+    {
+      "class_id": "bees",
+      "path": "data/raw_hymenoptera/bees/2617161745_fa3ebe85b4.jpg"
+    },
+    {
+      "class_id": "bees",
+      "path": "data/raw_hymenoptera/bees/2625499656_e3415e374d.jpg"
+    },
+    {
+      "class_id": "bees",
+      "path": "data/raw_hymenoptera/bees/2652877533_a564830cbf.jpg"
+    },
+    {
+      "class_id": "bees",
+      "path": "data/raw_hymenoptera/bees/266644509_d30bb16a1b.jpg"
+    },
+    {
+      "class_id": "bees",
+      "path": "data/raw_hymenoptera/bees/2756397428_1d82a08807.jpg"
+    },
+    {
+      "class_id": "bees",
+      "path": "data/raw_hymenoptera/bees/2765347790_da6cf6cb40.jpg"
+    },
+    {
+      "class_id": "bees",
+      "path": "data/raw_hymenoptera/bees/2801728106_833798c909.jpg"
+    },
+    {
+      "class_id": "bees",
+      "path": "data/raw_hymenoptera/bees/2841437312_789699c740.jpg"
+    },
+    {
+      "class_id": "bees",
+      "path": "data/raw_hymenoptera/bees/2861002136_52c7c6f708.jpg"
+    },
+    {
+      "class_id": "bees",
+      "path": "data/raw_hymenoptera/bees/2883093452_7e3a1eb53f.jpg"
+    },
+    {
+      "class_id": "bees",
+      "path": "data/raw_hymenoptera/bees/3100226504_c0d4f1e3f1.jpg"
+    },
+    {
+      "class_id": "bees",
+      "path": "data/raw_hymenoptera/bees/359928878_b3b418c728.jpg"
+    },
+    {
+      "class_id": "bees",
+      "path": "data/raw_hymenoptera/bees/421515404_e87569fd8b.jpg"
+    },
+    {
+      "class_id": "bees",
+      "path": "data/raw_hymenoptera/bees/457457145_5f86eb7e9c.jpg"
+    },
+    {
+      "class_id": "bees",
+      "path": "data/raw_hymenoptera/bees/469333327_358ba8fe8a.jpg"
+    },
+    {
+      "class_id": "bees",
+      "path": "data/raw_hymenoptera/bees/540976476_844950623f.jpg"
+    },
+    {
+      "class_id": "bees",
+      "path": "data/raw_hymenoptera/bees/576452297_897023f002.jpg"
+    },
+    {
+      "class_id": "bees",
+      "path": "data/raw_hymenoptera/bees/65038344_52a45d090d.jpg"
+    },
+    {
+      "class_id": "bees",
+      "path": "data/raw_hymenoptera/bees/90179376_abc234e5f4.jpg"
+    },
+    {
+      "class_id": "bees",
+      "path": "data/raw_hymenoptera/bees/abeja.jpg"
+    }
+  ]
+}

@@ -1,0 +1,336 @@
+Implement **Module 4 — Model Training & ONNX Export** up to **Step 9 / Phase 4A completed**, following `plans/module_04/implementation_plan.md` exactly and without redesign.
+
+## Read first
+Before editing anything, read and obey:
+
+- `../plans/01_architecture.md`
+- `plans/module_04/implementation_plan.md`
+- `AGENTS.md`
+- You may also want to consult the parent rules at `../AGENTS.md`
+
+Important context:
+- This is **Python-side work under the current root `.`**
+- This is **not** an Android implementation task
+- The goal is to generate artifacts that will later be consumed by the already validated Android ONNX pipeline
+- Do **not** modify Android code, Gradle, assets, or Java classes in this task
+
+---
+
+## Goal of this prompt
+Implement the **shared, profile-aware Python training/export/verification pipeline** and complete **Phase 4A** using the `hymenoptera` reference dataset profile.
+
+This means:
+- create and use the local virtual environment under `./.venv`
+- install dependencies from the already existing `./requirements.txt`
+- implement the shared scripts
+- run the full `hymenoptera` pipeline:
+  - discover
+  - split
+  - train
+  - export
+  - verify
+- stop after the **Phase 4A gate**
+- do **not** implement or run Phase 4B on `swiss_trains` data yet
+
+The implementation must preserve the existing Android-facing contract and avoid introducing preprocessing drift.
+
+---
+
+## Scope
+
+### This task DOES
+- create the Python scripts and local file structure required for Module 4
+- support **both named profiles** in the code (`hymenoptera`, `swiss_trains`)
+- fully execute and validate **only `hymenoptera`** in this task
+- generate the `hymenoptera` artifact family under `./export/`
+- create or update `./README.md` with the exact local runbook
+
+### This task DOES NOT
+- require `./data/raw_swiss_trains/` to be populated
+- run training/export for `swiss_trains`
+- copy anything into Android assets
+- modify Android-side preprocessing or inference code
+- introduce notebooks, cloud training, CI/CD, experiment tracking, quantization, or MLOps frameworks
+- redesign the plan
+- rewrite `requirements.txt` unless it is missing or required for compilation/runtime correctness
+
+Stay narrow and mechanical.
+
+---
+
+## Hard constraints
+
+### 1. Shared pipeline, two profiles
+The implementation must support:
+
+- `--profile hymenoptera`
+- `--profile swiss_trains`
+
+All scripts must resolve paths through a shared `scripts/profiles.py`.
+
+Do not hardcode dataset roots or artifact names in individual scripts.
+
+### 2. Only Phase 4A is executed now
+You must implement support for both profiles, but in this task you only:
+- run commands for `hymenoptera`
+- validate `hymenoptera`
+- generate `hymenoptera_*` artifacts
+
+`./data/raw_swiss_trains/` may remain empty and this must **not** be treated as a blocker for this task.
+
+### 3. Local Python environment is mandatory
+All Module 4 commands must run from a **project-local virtual environment** under:
+
+- `./.venv`
+
+Requirements:
+- create `.venv` if missing
+- activate `.venv`
+- install dependencies from the already existing `requirements.txt`
+- set `TORCH_HOME="$HOME/.cache/torch"` before pipeline execution
+
+Do not assume a working global Python environment.
+
+### 4. Preserve the Python ↔ Android preprocessing contract
+This is a hard constraint.
+
+The canonical preprocessing must remain:
+
+- resize to `(224, 224)` by stretch
+- RGB
+- divide by 255
+- ImageNet mean/std normalization
+- NCHW
+- float32
+
+Do **not** use:
+- `RandomResizedCrop`
+- `CenterCrop`
+- letterboxing
+- OpenCV BGR
+- separate train/verify preprocess implementations
+
+Use one shared `scripts/preprocess.py`.
+
+### 5. Transfer-learning strategy is fixed for baseline
+Implement the required baseline exactly as planned:
+
+- pretrained `mobilenet_v2(weights=MobileNet_V2_Weights.IMAGENET1K_V1)`
+- replace final classifier head only
+- freeze all backbone parameters
+- train head only
+- Adam, lr `1e-3`
+- batch size `16` (fallback `8` if needed)
+- `CrossEntropyLoss`
+- target epochs: `15`
+
+Do not introduce a broader fine-tuning strategy in this task.
+Optional unfreezing remains out of scope for implementation now.
+
+### 6. ONNX export contract is fixed
+Export must produce:
+
+- input name: `"input"`
+- output name: `"output"`
+- input shape: `[1, 3, 224, 224]`
+- logits output only
+- opset 17
+- no dynamic axes
+
+Do not export softmax into the ONNX graph.
+
+### 7. Deterministic class ordering and split
+Class identity comes from folder names.
+Class order must be lexicographic.
+Validation split must be deterministic and manifest-based.
+Raw files must never be moved or rewritten.
+
+### 8. README and dataset handling
+Do not automate public dataset download inside pipeline code.
+Document dataset preparation commands in `./README.md` only.
+
+The dataset has already been prepared locally under:
+- `./data/raw_hymenoptera/`
+
+The script pipeline should assume the data exists and validate it.
+
+---
+
+## Files to create or update
+
+Create or update only what is necessary under the current root `.`.
+
+Expected targets:
+
+- `./README.md`
+- `./scripts/profiles.py`
+- `./scripts/preprocess.py`
+- `./scripts/discover_dataset.py`
+- `./scripts/make_split.py`
+- `./scripts/train.py`
+- `./scripts/export_onnx.py`
+- `./scripts/verify_onnx.py`
+
+Use the already existing:
+- `./requirements.txt`
+
+And resulting generated outputs after Phase 4A run:
+
+- `./data/splits/hymenoptera_val_manifest.json`
+- `./export/checkpoints/hymenoptera_best_model.pt`
+- `./export/hymenoptera.onnx`
+- `./export/hymenoptera_labels.json`
+- `./export/hymenoptera_model_metadata.json`
+- optional:
+  - `./export/hymenoptera_test_fixture_tensor_head.json`
+
+Do not create unnecessary extra files or frameworks.
+
+---
+
+## Required implementation details
+
+### A. `profiles.py`
+Implement a small profile registry as the single source of truth for:
+
+- raw root
+- split manifest path
+- artifact prefix
+- minimum class/image counts
+
+Support both profiles:
+- `hymenoptera`
+- `swiss_trains`
+
+Even though only `hymenoptera` will be executed now.
+
+### B. `preprocess.py`
+Implement the canonical shared preprocessing used by:
+- training
+- validation
+- export verification
+- optional fixture generation
+
+Requirements:
+- PIL load via `Image.open(...).convert("RGB")`
+- resize `(224, 224)` only
+- tensor conversion
+- ImageNet normalization
+- helper to produce `(1, 3, 224, 224)` tensor if useful for verification/export
+
+Do not duplicate preprocessing elsewhere.
+
+### C. `discover_dataset.py`
+Implement:
+- profile selection via `--profile`
+- class discovery from immediate subfolders
+- lexicographic class ordering
+- image counting
+- profile-specific minimum count enforcement
+- clear stdout summary:
+  - class IDs in order
+  - counts per class
+  - train/val estimate if helpful
+
+Fail clearly if:
+- profile unknown
+- raw root missing
+- too few classes
+- too few images in any class
+
+### D. `make_split.py`
+Implement:
+- deterministic manifest generation per profile
+- 20% validation split, minimum 1 image per class
+- lexicographic filename ordering
+- no file mutation
+- creation of `./data/splits/` if missing
+
+The manifest must include:
+- version
+- profile
+- seed
+- val_ratio
+- entries with `class_id` and image path
+
+Re-running with unchanged data must produce identical output.
+
+### E. `train.py`
+Implement:
+- profile-aware training
+- loading train vs val from raw tree + manifest
+- MobileNetV2 head-only transfer learning
+- checkpoint saving to `./export/checkpoints/{prefix}_best_model.pt`
+
+Checkpoint must include at least:
+- `profile`
+- `state_dict`
+- `class_to_idx`
+- hyperparameter snapshot
+
+Use the simplest correct implementation.
+Do not introduce notebooks or training frameworks.
+
+### F. `export_onnx.py`
+Implement:
+- profile-aware checkpoint loading
+- model rebuild + head reconstruction
+- ONNX export with fixed `input` / `output`
+- generation of:
+  - `{prefix}.onnx`
+  - `{prefix}_labels.json`
+  - `{prefix}_model_metadata.json`
+
+These artifacts must derive label ordering from the checkpoint, not by accidental re-discovery only.
+
+### G. `verify_onnx.py`
+Implement:
+- profile-aware ONNX verification
+- ONNX checker
+- onnxruntime inference
+- metadata consistency checks
+- one real-image inference from the selected profile raw tree
+- finite logits
+- shape `[1, N]`
+- `N == len(labels)`
+- print top-1 class + confidence (softmax in script only)
+- optionally emit `{prefix}_test_fixture_tensor_head.json`
+
+Exit non-zero on failure.
+
+### H. `README.md`
+Create or update a minimal but concrete runbook documenting:
+- expected working directory (`./`)
+- `python3 -m venv .venv`
+- `source .venv/bin/activate`
+- `pip install -r requirements.txt`
+- `export TORCH_HOME="$HOME/.cache/torch"`
+- dataset prep note for `hymenoptera`
+- exact command sequence for:
+  - `discover_dataset.py --profile hymenoptera`
+  - `make_split.py --profile hymenoptera`
+  - `train.py --profile hymenoptera`
+  - `export_onnx.py --profile hymenoptera`
+  - `verify_onnx.py --profile hymenoptera`
+
+Also document that `swiss_trains` uses the same commands later.
+
+---
+
+## Execution requirements
+
+After implementation, run the full Phase 4A pipeline from the local environment:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+export TORCH_HOME="$HOME/.cache/torch"
+
+python scripts/discover_dataset.py --profile hymenoptera
+python scripts/make_split.py --profile hymenoptera
+python scripts/train.py --profile hymenoptera
+python scripts/export_onnx.py --profile hymenoptera
+python scripts/verify_onnx.py --profile hymenoptera
+```
+

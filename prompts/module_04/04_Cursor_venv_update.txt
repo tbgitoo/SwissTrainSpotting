@@ -1,0 +1,101 @@
+Revise `plans/module_04/implementation_plan.md` with **strictly minimal changes** so that the plan explicitly specifies the local Python execution environment for Module 4.
+
+## Goal
+The plan is already structurally sound, but it still under-specifies one operational requirement:
+
+- Module 4 is a Python training/export pipeline
+- it depends on a local Python environment and pinned dependencies
+- the plan should explicitly state that work is executed from a local virtual environment under `model/.venv`
+
+This is not a redesign. The goal is only to make the plan operationally complete and reproducible.
+
+---
+
+## Read first
+Before editing anything, read:
+- `plans/module_04/implementation_plan.md`
+
+---
+
+## Required changes (minimal only)
+
+Apply only the smallest wording additions needed to cover the following points:
+
+### 1. Local Python environment
+The plan must explicitly state that Module 4 uses a **project-local virtual environment** under:
+
+- `model/.venv`
+
+This environment is:
+- local to the `model/` subtree
+- not committed to the repository
+- the expected environment for all Module 4 commands
+
+### 2. Repository layout
+The repository layout section should reflect that `model/.venv/` exists as a local execution environment.
+
+Do not expand this into packaging/tooling discussion.
+A single line in the tree is sufficient.
+
+### 3. Reproducibility section
+The reproducibility section should explicitly mention:
+- local `.venv`
+- `requirements.txt`
+- version logging (already present)
+
+Do not change the rest of the reproducibility logic.
+
+### 4. README responsibility
+Where the plan already mentions `README.md`, make it explicit that `README.md` must document:
+- local `.venv` creation
+- activation
+- dependency installation from `requirements.txt`
+- `TORCH_HOME=$HOME/.cache/torch`
+- exact command sequence per profile
+
+Do not turn this into a long README design section.
+
+### 5. Implementation steps
+The first implementation step should explicitly include:
+- creating the local `.venv`
+- alongside scaffolding the profile-aware tree
+
+Do not reorder the rest of the steps.
+
+### 6. Implementation notes
+Under the existing implementation notes, add a short note that:
+- all Module 4 commands are expected to run from `model/.venv`
+- not from an unspecified global Python environment
+
+---
+
+## Constraints
+
+### Keep scope strict
+Do **not**:
+- rewrite the plan
+- restructure sections
+- change the profile logic
+- add Poetry, uv, conda, Docker, pyproject, or dependency-management frameworks
+- change preprocessing, transfer-learning strategy, export contract, or acceptance criteria beyond the minimal environment additions
+- add exam-oriented justification language
+
+### Style
+Keep changes:
+- concise
+- technical
+- implementation-focused
+- anti-fluff
+
+The final plan should read like the same plan, just with the missing local environment details filled in.
+
+---
+
+## Output requirements
+Edit only:
+- `plans/module_04/implementation_plan.md`
+
+When done, respond with:
+1. summary of changes
+2. exact sections touched
+3. confirmation that changes were minimal only

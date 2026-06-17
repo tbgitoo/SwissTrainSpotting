@@ -1,0 +1,203 @@
+Create a local `AGENTS.md` inside the present root directory for the Python-side Module 4 training/export pipeline.
+
+## Read first
+Before writing anything, read and obey:
+
+- `../AGENTS.md`
+- `../plans/01_architecture.md`
+- `plans/module_04/implementation_plan.md`
+- relevant contract assumptions from:
+  - `../SwissTrainSpottingApp/plans/module_03/implementation_plan.md`
+  - `../plans/SwissTrainSpottingApp/module_05/implementation_plan.md`
+
+Do not assume the local `model/AGENTS.md` replaces the root `../AGENTS.md`.
+It must be a **local specialization** for work under `model/`.
+
+---
+
+## Goal
+Write `AGENTS.md` so that coding agents working inside the present root folder follow the Module 4 training/export contract correctly and conservatively.
+
+This local AGENTS file must:
+- specialize the global project rules for the Python ML pipeline
+- prevent drift between Python training/export and Android inference
+- keep the pipeline profile-aware (`hymenoptera`, `swiss_trains`)
+- keep the implementation minimal and reproducible
+- make the expected file structure, artifact naming, and preprocessing contract explicit
+
+---
+
+## Important context
+This local `AGENTS.md` is for **Python code in the current root only**.
+
+It is **not** for:
+- Android Java/XML/Groovy/Kotlin work
+- UI changes
+- Gradle changes
+- Android runtime redesign
+
+The purpose of the local subtree is:
+
+- profile-aware dataset discovery
+- deterministic split generation
+- MobileNetV2 transfer learning
+- ONNX export
+- Python-side ONNX verification
+- generation of artifacts later consumed by the Android app
+
+The local policy must therefore describe:
+- what agents may do
+- what they must not do
+- what contracts they must preserve
+
+---
+
+## Required content to include
+
+The generated `AGENTS.md` must include concise sections covering at least:
+
+### 1. Scope
+Make clear that this AGENTS file applies only to `model/` and the Python Module 4 pipeline.
+
+### 2. Relationship to root AGENTS
+State that `../AGENTS.md` remains authoritative for global project constraints, while this file adds stricter local rules for Python training/export work.
+
+### 3. Python execution environment
+State clearly that:
+- all Module 4 commands run from `./.venv`
+- dependencies come from `./requirements.txt`
+- `TORCH_HOME=$HOME/.cache/torch`
+- agents must not assume global Python packages
+
+### 4. Dataset profile rules
+State clearly that:
+- there are exactly two dataset profiles:
+  - `hymenoptera`
+  - `swiss_trains`
+- all scripts must use profile-aware path resolution via `scripts/profiles.py`
+- no hardcoded dataset roots
+- `raw_hymenoptera/` and `raw_swiss_trains/` must stay separate
+- class identity comes only from folder names
+- folder names must stay lowercase ASCII identifiers
+
+### 5. Split and label-order rules
+State clearly that:
+- splits are manifest-based, deterministic, and derived from raw data
+- raw data must never be moved or mutated during splitting
+- class ordering is lexicographic by folder name
+- exported labels/metadata must preserve this order exactly
+- agents must not re-derive labels “helpfully” in a different order
+
+### 6. Preprocessing contract
+State clearly that the Python pipeline must stay aligned with Android:
+- resize-only to 224×224
+- no crop
+- RGB
+- ImageNet normalization
+- NCHW
+- float32
+
+Make explicit that agents must not introduce:
+- `RandomResizedCrop`
+- `CenterCrop`
+- letterboxing
+- OpenCV/BGR paths
+- separate train/verify preprocess implementations
+
+### 7. Transfer-learning policy
+State clearly that baseline implementation is:
+- MobileNetV2 pretrained on ImageNet
+- head-only training
+- backbone frozen
+- no broad redesign or aggressive optimization
+
+Optional later fine-tuning may be mentioned as out-of-scope by default.
+
+### 8. ONNX export contract
+State clearly that export must preserve:
+- input name `input`
+- output name `output`
+- shape `[1,3,224,224]`
+- logits only
+- opset 17
+- no dynamic axes
+
+Agents must not change ONNX names or add softmax in-graph.
+
+### 9. Artifact rules
+State clearly the expected artifact families:
+- `{prefix}.onnx`
+- `{prefix}_labels.json`
+- `{prefix}_model_metadata.json`
+- `checkpoints/{prefix}_best_model.pt`
+
+Make explicit that:
+- reference artifacts must not be overwritten by project artifacts
+- `swiss_trains` artifacts are the only ones copied to Android assets later
+
+### 10. Simplicity / anti-overengineering rules
+State clearly that agents must not introduce:
+- notebooks
+- cloud training
+- experiment tracking systems
+- CI/CD
+- MLOps frameworks
+- package-management overkill (Poetry, conda, Docker, etc.) unless explicitly requested
+
+This module should stay:
+- local
+- script-based
+- minimal
+- reproducible
+
+### 11. README expectation
+State that `model/README.md` must document:
+- `.venv` setup
+- dependency installation
+- `TORCH_HOME`
+- dataset preparation
+- exact per-profile command sequence
+- Android asset copy filenames for `swiss_trains`
+
+---
+
+## Style requirements
+The generated `model/AGENTS.md` must be:
+
+- concise
+- concrete
+- anti-fluff
+- policy-style
+- directly useful to coding agents
+
+Do not write an essay.
+Do not repeat the entire root `../AGENTS.md`.
+Do not add motivational or explanatory filler.
+
+Prefer:
+- short sections
+- bullets
+- hard rules
+- “do / do not” phrasing where helpful
+
+---
+
+## Explicitly forbidden
+Do **not**:
+- modify any code in this task
+- rewrite root `../AGENTS.md`
+- generate implementation plans
+- produce Android-specific instructions beyond contract references
+- introduce new architecture not already present in the plans
+
+The task is only to create:
+
+- `./AGENTS.md`
+
+---
+
+## Output requirements
+When done, respond with:
+1. summary of the file created
+2. the main local rules it adds beyond `../AGENTS.md`
+3. any ambiguity you could not resolve from the plans

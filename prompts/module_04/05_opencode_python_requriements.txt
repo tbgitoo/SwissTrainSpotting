@@ -1,0 +1,44 @@
+Create a minimal `requirements.txt` file for the Python Module 4 training/export pipeline.
+
+## Context
+This is a local Python pipeline using:
+- PyTorch (MobileNetV2 transfer learning)
+- ONNX export
+- ONNX Runtime for verification
+- PIL image loading
+- NumPy operations
+
+## Requirements
+The file must include only the minimal dependencies needed for:
+- training
+- ONNX export
+- ONNX verification
+- image preprocessing
+
+## Include exactly these packages
+- torch
+- torchvision
+- onnx
+- onnxruntime
+- pillow
+- numpy
+
+Optional:
+- tqdm
+
+## Version constraints
+- Use reasonable lower bounds (e.g. `>=`) for stability
+- Do not fully pin exact versions unless necessary
+- Do not leave everything unversioned
+
+## Do NOT include
+- matplotlib
+- pandas
+- scikit-learn
+- opencv
+- notebooks
+- any unused ML or data-science libraries
+
+## Output format
+Return only the contents of `requirements.txt`, nothing else.
+No explanations.
