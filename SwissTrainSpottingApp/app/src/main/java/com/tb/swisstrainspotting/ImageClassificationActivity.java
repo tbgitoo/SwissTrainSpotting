@@ -49,6 +49,7 @@ public class ImageClassificationActivity extends AppCompatActivity {
     private OnnxClassifier genericClassifier;
     private OnnxClassifier specializedClassifier;
     private ClassificationRouter.AllowedSet allowedSet;
+    private ProfileConfig profileConfig;
 
     private ExecutorService inferenceExecutor;
     private int classificationGeneration = 0;
