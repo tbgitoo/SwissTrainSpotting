@@ -64,7 +64,7 @@ No additional assets. Routing rules are derived from loaded metadata and a confi
 
 ## 3. Phase split
 
-Phased delivery: **5A** (single reference model) → **5B** (profile-based loading) → **5C** (multi-model coexistence) → **5D** (routing).
+Phased delivery: **5A** (single reference model) → **5B** (profile-based loading) → **5C** (multi-model coexistence) → **5D** (routing) → **5E** (allowed-set externalization).
 
 ### Phase 5A — reference model
 Validate Android inference path using MobileNetV2.
@@ -120,18 +120,69 @@ Routing / presentation only; **not model loading.**
 - If **yes** (in-scope): present the specialized classifier result as the direct classification (label + confidence).
 - If **no** (out-of-scope): present the specialized result conditionally / hypothetically via UI text such as:
   - "Doesn't look like a train; if it were a train, the closest class would be: Re420."
-- The allowed set is defined by the specialized profile's metadata.
+- The allowed set is specialized-profile specific; Phase 5E externalizes it into explicit asset files.
 
 #### Validation — Phase 5D routing scenarios
 
 1. **Applicable case** — Generic top prediction falls within the specialized profile's allowed set. Assert that the UI presents the specialized result as a direct classification (label + confidence) with no conditional framing.
 
 2. **Non-applicable case** — Generic top prediction does NOT fall within the allowed set. Assert that:
-   - the specialized classifier was still computed (non-null result);
-   - the UI presents the specialized result as conditional / hypothetical;
-   - the generic result is also surfaced to the user.
+    - the specialized classifier was still computed (non-null result);
+    - the UI presents the specialized result as conditional / hypothetical;
+    - the generic result is also surfaced to the user.
 
 3. **No execution gating** — Out-of-scope generic results must never prevent the specialized classifier from running. Verify that inference on both models executes regardless of the generic output.
+
+### Phase 5E — Allowed-set externalization into per-profile assets
+Move the routing applicability / allowed-set policy out of Java and into explicit text assets. **No new routing behavior** — only externalizes the condition that 5D already evaluates.
+
+**Conceptual rule:** The allowed set is NOT a property of the specialized model alone. It describes the relation between:
+- the generic MobileNetV2 label space, and
+- the specialized downstream classifier profile.
+
+The asset naming reflects both sides of that relation: `<profile>_allowed_mobilenetv2_labels.txt`.
+
+**Required assets:**
+
+```
+app/src/main/assets/hymenoptera_allowed_mobilenetv2_labels.txt
+app/src/main/assets/swiss_trains_allowed_mobilenetv2_labels.txt
+```
+
+**Contents (one label per line, these are MobileNetV2 / ImageNet class names):**
+
+`hymenoptera_allowed_mobilenetv2_labels.txt`:
+```
+bee
+ant
+fly
+```
+
+`swiss_trains_allowed_mobilenetv2_labels.txt`:
+```
+bullet train
+electric locomotive
+steam locomotive
+freight car
+passenger car
+streetcar
+trolleybus
+```
+
+**Implementation:**
+- At runtime, the active specialized profile ID (e.g. `hymenoptera`, `swiss_trains`) selects the corresponding asset by convention.
+- Read lines from the asset into a set; if the asset is absent or empty, treat this as a configuration error or fall back to conditional-only routing.
+- When 5D evaluates routing applicability, check whether the generic MobileNetV2 top prediction label is present in the loaded allowed set for the active profile.
+
+#### Validation — Phase 5E
+
+1. **Correct asset selection** — For each known profile ID (`hymenoptera`, `swiss_trains`), assert the matching `_allowed_mobilenetv2_labels.txt` asset is loaded by name (no cross-profile contamination).
+
+2. **Routing follows asset contents** — A generic prediction that matches a label in the allowed set produces direct presentation; one that does not match produces conditional/hypothetical presentation, per 5D semantics.
+
+3. **Different profiles have different allowed sets** — Verify the two required profiles load distinct allowed sets and produce different routing outcomes for at least one shared test input where the generic predictions differ across those labels.
+
+4. **5D semantics unchanged** — Both classifiers always run regardless of allowed-set membership; inference is never skip-gated by the generic result.
 
 ---
 
@@ -284,6 +335,13 @@ Phase 5D done when:
 - out-of-scope generic results present the specialized result as conditional / hypothetical
 - specialized classifier output is always computed, retained, and displayed regardless of the generic prediction
 
+Phase 5E done when:
+- profile-specific allowed MobileNetV2 label assets are used instead of Java hard-coded label lists
+- Hymenoptera and SwissTrains use different allowed-set assets
+- routing applicability follows the loaded asset contents
+- 5D direct vs conditional presentation semantics remain unchanged
+- specialized inference is still never execution-gated by the generic result
+
 ---
 
 ## 13. Implementation steps
@@ -294,6 +352,7 @@ Phase 5D done when:
 4. profile-based model loading (5B)
 5. multi-model coexistence (5C)
 6. routing logic (5D)
+7. allowed-set externalization into assets (5E)
 
 ---
 

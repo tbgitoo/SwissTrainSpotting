@@ -1,0 +1,7 @@
+bullet train
+electric locomotive
+steam locomotive
+freight car
+passenger car
+streetcar
+trolleybus

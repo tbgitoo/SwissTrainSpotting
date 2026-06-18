@@ -1,0 +1,100 @@
+Use and respect these skills while performing this task:
+- android-testing
+- android-dependency-closure
+- safe-java-edit
+- safe-java-rewrite
+
+You are editing an existing project plan for the SwissTrainSpotting Android app.
+
+Read first:
+- plans/module_05/implementation_plan.md
+- ../plans/01_architecture.md
+- AGENTS.md
+
+Task:
+Surgically add a new Phase 5E section to the Module 5 implementation plan (i.e. plans/module_05/implementation_plan.md).
+
+You write the updated plan to plans/module_05/implementation_plan.md 
+
+Important context:
+- Phase 5A, 5B, 5C, and 5D already exist.
+- Phase 5D is already implemented conceptually as presentation-aware routing:
+  - generic classifier always runs first
+  - specialized classifier also always runs
+  - generic result determines whether specialized output is presented directly or conditionally
+- Do NOT rewrite or redefine Phase 5D.
+- Phase 5E is a narrow refinement that externalizes the routing applicability / allowed-set policy into explicit asset files.
+
+Conceptual rule for 5E:
+The allowed set is NOT a property of the downstream specialized model alone.
+It describes the relation between:
+- the generic MobileNetV2 label space, and
+- the specialized downstream classifier profile.
+
+Therefore the asset naming must reflect both sides of that relation.
+
+What Phase 5E must do:
+- Keep Phase 5D routing semantics unchanged.
+- Move the specialized-profile allowed/compatible label set out of Java and into explicit text assets.
+- Use one asset file per specialized profile.
+- Each asset file contains generic MobileNetV2 labels, one label per line.
+- These assets determine whether the specialized result is presented directly or conditionally.
+- This is routing-policy externalization only, not new routing behavior.
+
+Required asset filenames:
+- hymenoptera_allowed_mobilenetv2_labels.txt
+- swiss_trains_allowed_mobilenetv2_labels.txt
+
+Required first-pass asset contents to include explicitly in the new Phase 5E text:
+
+For hymenoptera_allowed_mobilenetv2_labels.txt:
+- bee
+- ant
+- fly
+
+For swiss_trains_allowed_mobilenetv2_labels.txt:
+- bullet train
+- electric locomotive
+- steam locomotive
+- freight car
+- passenger car
+- streetcar
+- trolleybus
+
+What to update in the plan:
+1. Add a new Phase 5E section after Phase 5D.
+2. Add a short description that 5E externalizes routing applicability rules into profile-specific MobileNetV2 allowed-label assets.
+3. Mention that the asset naming is convention-based and explicitly tied to:
+   - specialized profile ID
+   - MobileNetV2 generic label space
+4. Add a short validation/testing subsection for 5E that covers:
+   - correct asset loaded for the active specialized profile
+   - routing follows the contents of that asset file
+   - different specialized profiles can use different allowed sets without Java hard-coded label lists
+   - 5D semantics remain unchanged (specialized inference still runs regardless of allowed-set membership)
+5. Update the Phase list / phased delivery line if needed so 5E appears after 5D.
+6. Update acceptance criteria to add a Phase 5E done-when block.
+
+Required acceptance criteria for 5E:
+- profile-specific allowed MobileNetV2 label assets are used instead of Java hard-coded label lists
+- Hymenoptera and SwissTrains use different allowed-set assets
+- routing applicability follows the loaded asset contents
+- 5D direct vs conditional presentation semantics remain unchanged
+- specialized inference is still never execution-gated by the generic result
+
+Strict constraints:
+- Add Phase 5E only.
+- Do NOT modify the meaning of Phase 5D.
+- Do NOT rewrite Phase 5A, 5B, or 5C.
+- Do NOT redesign architecture.
+- Do NOT add implementation code.
+- Keep wording concise, technical, and consistent with the existing plan.
+- Preserve existing structure and heading style as much as possible.
+
+Output:
+- In the chat: return only the revised portion of the plan that includes:
+  - the updated phased delivery line if changed,
+  - the new Phase 5E section,
+  - the new Phase 5E acceptance criteria,
+  - and any strictly necessary implementation-step update.
+- On file: update plans/module_05/implementation_plan.md

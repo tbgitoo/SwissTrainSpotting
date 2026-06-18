@@ -1,0 +1,143 @@
+Use and respect these skills while performing this task:
+- android-testing
+- android-dependency-closure
+- packed-vs-planar
+- safe-java-edit
+- safe-java-rewrite
+
+You are working on the SwissTrainSpotting Android app.
+
+Read and follow these project documents before editing:
+- plans/module_05/implementation_plan.md
+- ../plans/01_architecture.md
+- AGENTS.md
+
+Repository boundary rule:
+- Only read, create, or modify files inside the current repository root.
+- Do not touch sibling directories, parent directories, other repositories, or absolute paths outside the repo.
+- Do not use destructive commands with suppressed output.
+- Do not delete existing files.
+- If structure needs adjustment, refactor in place instead of delete-and-recreate.
+
+Current known state:
+1. Phase 5A is implemented and validated.
+2. Phase 5B is implemented and validated.
+3. Phase 5C is implemented and validated.
+4. Phase 5D is implemented and validated.
+5. Current 5D routing semantics must remain unchanged:
+   - generic MobileNetV2 classifier runs first,
+   - specialized classifier also always runs,
+   - generic result determines whether specialized output is presented directly or conditionally,
+   - specialized execution must never be skipped based on generic output.
+
+Task:
+Implement Phase 5E only.
+
+Goal:
+Externalize the specialized-profile routing applicability / allowed-set policy into explicit asset files.
+
+Important conceptual rule:
+The allowed set is NOT a property of the downstream specialized model alone.
+It describes the relation between:
+- the generic MobileNetV2 label space, and
+- the specialized downstream classifier profile.
+
+Therefore:
+- the allowed-set asset filename must reflect both sides of that relation,
+- and the file contents must be MobileNetV2 / ImageNet labels, not specialized labels.
+
+Required assets:
+Create and use these files in `app/src/main/assets/`:
+
+1. `hymenoptera_allowed_mobilenetv2_labels.txt`
+Contents:
+- bee
+- ant
+- fly
+
+2. `swiss_trains_allowed_mobilenetv2_labels.txt`
+Contents:
+- bullet train
+- electric locomotive
+- steam locomotive
+- freight car
+- passenger car
+- streetcar
+- trolleybus
+
+Required implementation:
+1. Add a small loader for allowed-set assets.
+   - One label per line
+   - Ignore blank lines
+   - Trimming whitespace is OK
+   - Keep implementation minimal and explicit
+
+2. Load the allowed-set asset by naming convention from the active specialized profile ID:
+   - `hymenoptera` -> `hymenoptera_allowed_mobilenetv2_labels.txt`
+   - `swiss_trains` -> `swiss_trains_allowed_mobilenetv2_labels.txt`
+
+3. Replace any Java hard-coded Phase 5D allowed-set definition with the loaded asset-based set.
+
+4. Keep Phase 5D routing semantics unchanged:
+   - specialized inference must still always run
+   - allowed-set membership affects presentation mode only
+
+5. If the allowed-set asset is missing or empty:
+   - do NOT silently treat it as allow-all
+   - handle it conservatively (configuration error or conditional-only fallback)
+   - do not weaken 5D semantics
+
+Strong constraints:
+- Implement only Phase 5E.
+- Do not redesign Phase 5D.
+- Do not change 5A–5C behavior.
+- Do not change model loading architecture.
+- Do not change preprocessing.
+- Do not change session lifecycle.
+- Do not add broad configuration frameworks or registries.
+- Keep changes narrow, local, and readable.
+- Prefer one small loader/helper over spreading asset-reading logic around the Activity.
+
+Testing requirements:
+Add/update tests so Phase 5E is explicitly validated.
+
+Required tests:
+1. Correct asset selection
+   - active profile `hymenoptera` loads `hymenoptera_allowed_mobilenetv2_labels.txt`
+   - active profile `swiss_trains` loads `swiss_trains_allowed_mobilenetv2_labels.txt`
+
+2. Asset content loading
+   - loaded allowed sets match the expected line contents for both profiles
+
+3. Routing follows asset contents
+   - generic label in the loaded allowed set -> direct specialized presentation
+   - generic label not in the loaded allowed set -> conditional specialized presentation
+
+4. 5D semantics unchanged
+   - specialized classifier still runs regardless of allowed-set membership
+   - allowed set affects presentation mode only, not execution gating
+
+5. No Java hard-coded list dependency remains
+   - routing applicability is driven by loaded asset contents
+
+Testing guidance:
+- Prefer small focused tests for the loader and routing logic
+- Reuse existing routing seams where possible
+- Do not repeat 5B/5C tests
+- Do not re-test metadata parsing, label loading, ONNX correctness, or coexistence unless directly needed by 5E verification
+
+Implementation guidance:
+- Keep the loader simple
+- Keep the naming convention explicit
+- Keep the code readable rather than clever
+- Long explicit names are preferred over short cryptic names
+- Avoid speculative abstractions
+
+Output requirements:
+- Modify only files needed for minimal Phase 5E support and tests
+- Return:
+  1. changed files
+  2. summary of implementation changes
+  3. tests added / updated
+  4. any tiny production-code change made outside allowed-set loading / routing support and why it was necessary
+  5. confirmation that 5A–5D behavior was preserved
