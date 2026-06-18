@@ -1,0 +1,86 @@
+Implement a surgical refinement of Module 5D/5E in this repository.
+
+Before changing anything, read:
+- AGENTS.md
+- plans/01_architecture.md
+- plans/module_05/implementation_plan.md
+
+Use these skills:
+- android-testing
+- android-dependency-closure
+
+Goal:
+Make conditional/out-of-scope UI messaging domain-aware based on the active specialized classifier profile, so that the current generic hard-coded train phrasing disappears. Example target behavior:
+- Hymenoptera profile: "Not Hymenoptera; if classified within Hymenoptera: ants (99.0%)"
+- SwissTrains profile: "Not a train; if classified within SwissTrains: Re420 (99.0%)" or equivalent specialized label
+
+Important architectural rule:
+- Do NOT put this domain display name into the Python-generated model metadata JSON.
+- Treat this as app-side profile configuration, separate from ONNX export metadata.
+- Keep allowed-label assets exactly as they are conceptually: pair-specific relations between MobileNetV2 and the specialized classifier.
+- Keep model/profile prefixes exactly aligned with existing conventions: `hymenoptera` and `swiss_trains`.
+
+Required new assets:
+Create exactly these two files in app/src/main/assets/ :
+- hymenoptera_profile_config.json
+- swiss_trains_profile_config.json
+
+Each file must minimally define the specialized profile identity and domain-aware fallback messaging data. Keep the schema minimal and explicit. At minimum it must support:
+- profile_id
+- domain_display_name
+- optional negative/direct wording fields if needed for clean UI composition
+
+Constraints:
+- Do NOT redesign Module 5 architecture
+- Do NOT modify Python export scripts
+- Do NOT create a new phase or a broad new abstraction layer
+- Do NOT hard-code profile-specific fallback text in Activity/UI classes
+- Do NOT break existing 5A–5E behavior
+- Do NOT remove or rename existing assets such as:
+  - hymenoptera_allowed_mobilenetv2_labels.txt
+  - swiss_trains_allowed_mobilenetv2_labels.txt
+  - hymenoptera_model_metadata.json
+  - hymenoptera_labels.json
+  - mobilenetv2.onnx
+  - imagenet_classes.txt
+
+Implementation requirements:
+1. Add a small app-side loader / config seam for specialized profile config assets.
+2. Resolve the active specialized profile (`hymenoptera` or `swiss_trains`) to the matching profile config JSON by naming convention only.
+3. Use this config when composing conditional/out-of-scope UI text.
+4. Keep direct/in-scope routing semantics unchanged.
+5. Keep generic classifier output and specialized classifier output behavior unchanged except for corrected wording.
+6. The current nonsense wording must disappear. In particular, Hymenoptera fallback messaging must not mention trains.
+
+Testing requirements:
+Add/update tests so this behavior is enforced.
+
+A. Unit / small integration tests
+- correct asset selection for `hymenoptera_profile_config.json` and `swiss_trains_profile_config.json`
+- parsed config values are correct
+- message composition for out-of-scope specialized result is domain-aware
+- no cross-profile contamination
+
+B. Keystone UI test (Espresso / instrumentation)
+Create or update an instrumentation test that drives the relevant result presentation path and asserts the displayed phrase matches the active specialized profile.
+At minimum:
+- for active profile `hymenoptera`, assert the UI contains "Not Hymenoptera" (or the exact configured wording) and does NOT contain "train" in that fallback sentence
+- if feasible with current fixtures/seams, also add a corresponding `swiss_trains` assertion path
+
+C. Keep existing tests passing
+Do not delete good existing tests. Extend the suite minimally and cleanly.
+
+Implementation style:
+- Java + XML only
+- minimal/surgical diff
+- prefer explicit names over clever names
+- no architectural drift
+- no placeholder TODOs left behind
+
+Deliverables:
+- new asset files:
+  - app/src/main/assets/hymenoptera_profile_config.json
+  - app/src/main/assets/swiss_trains_profile_config.json
+- minimal production code changes to load and use them
+- tests covering loader + UI phrase correctness
+- short summary of files changed and why

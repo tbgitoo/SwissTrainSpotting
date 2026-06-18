@@ -119,8 +119,10 @@ Routing / presentation only; **not model loading.**
 - Check whether the generic top prediction belongs to a predefined **allowed set** for which the specialized model is applicable (e.g. train-related ImageNet categories).
 - If **yes** (in-scope): present the specialized classifier result as the direct classification (label + confidence).
 - If **no** (out-of-scope): present the specialized result conditionally / hypothetically via UI text such as:
-  - "Doesn't look like a train; if it were a train, the closest class would be: Re420."
-- The allowed set is specialized-profile specific; Phase 5E externalizes it into explicit asset files.
+    - "Not Hymenoptera; if classified within Hymenoptera: ant."
+    - "Not a train; if classified within Trains: Re420."
+- The allowed set defines the relation between the generic MobileNetV2 label space and the specialized classifier, and is externalized into explicit asset files per profile.
+- The specialized classifier profile itself provides a domain display name (e.g. "Hymenoptera", "SwissTrains"), used for domain-aware conditional result messaging.
 
 #### Validation — Phase 5D routing scenarios
 
