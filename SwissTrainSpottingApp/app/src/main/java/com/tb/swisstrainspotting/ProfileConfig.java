@@ -18,6 +18,7 @@ import java.nio.charset.StandardCharsets;
  * <ul>
  *   <li>{@code "profile_id"} — machine-readable identifier</li>
  *   <li>{@code "domain_display_name"} — human-readable domain label used in conditional UI messaging</li>
+ *   <li>{@code "out_of_scope_prefix"} — domain-aware negative prefix for out-of-scope fallback text</li>
  * </ul>
  */
 public final class ProfileConfig {
@@ -26,10 +27,12 @@ public final class ProfileConfig {
 
     private final String profileId;
     private final String domainDisplayName;
+    private final String outOfScopePrefix;
 
-    private ProfileConfig(String profileId, String domainDisplayName) {
+    private ProfileConfig(String profileId, String domainDisplayName, String outOfScopePrefix) {
         this.profileId = profileId != null ? profileId : "";
         this.domainDisplayName = domainDisplayName != null ? domainDisplayName : "";
+        this.outOfScopePrefix = outOfScopePrefix != null ? outOfScopePrefix : "";
     }
 
     public String getProfileId() {
@@ -38,6 +41,10 @@ public final class ProfileConfig {
 
     public String getDomainDisplayName() {
         return domainDisplayName;
+    }
+
+    public String getOutOfScopePrefix() {
+        return outOfScopePrefix;
     }
 
     /** Build the asset path from a profile ID using the naming convention. */
@@ -70,7 +77,8 @@ public final class ProfileConfig {
             JSONObject json = new JSONObject(sb.toString());
             String id = json.optString("profile_id", "");
             String displayName = json.optString("domain_display_name", "");
-            return new ProfileConfig(id, displayName);
+            String outOfScopePrefix = json.optString("out_of_scope_prefix", "");
+            return new ProfileConfig(id, displayName, outOfScopePrefix);
         } catch (IOException e) {
             throw new IOException("Failed to load profile config: " + assetPath, e);
         }

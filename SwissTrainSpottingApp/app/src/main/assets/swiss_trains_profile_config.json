@@ -1,4 +1,5 @@
 {
   "profile_id": "swiss_trains",
-  "domain_display_name": "Swiss Trains"
+  "domain_display_name": "SwissTrains",
+  "out_of_scope_prefix": "Not a train"
 }

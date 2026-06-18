@@ -18,8 +18,6 @@
     <string name="classifier_init_failed">Could not load classification model</string>
     <string name="generic_result_label">Generic classification: %1$s</string>
     <string name="specialized_direct_result">%1$s (%2$.1f%%)</string>
-    <string name="specialized_conditional_prefix">%1$s — conditional result:</string>
-    <string name="combined_direct_result">%3$s\n%1$s — %2$.1f%%</string>
-    <string name="combined_conditional_result">%1$s — %2$s (%3$.1f%%)</string>
+    <string name="specialized_conditional_result">%1$s; if classified within %2$s: %3$s (%4$.1f%%)</string>
     <string name="routing_error">Could not load specialized classifier: %s</string>
 </resources>

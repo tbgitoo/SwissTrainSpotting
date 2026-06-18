@@ -78,8 +78,15 @@ public class ImageClassificationActivity extends AppCompatActivity {
             // Phase 5E: allowed-set loaded from asset by profile ID, not from JSON metadata.
             java.util.Set<String> labelSet = AllowedSetLoader.load(getApplicationContext(), profileId);
             allowedSet = new ClassificationRouter.AllowedSet(labelSet.toArray(new String[0]));
+
+            // App-side domain config for conditional messaging.
+            try {
+                profileConfig = ProfileConfig.load(getApplicationContext(), profileId);
+            } catch (IOException | JSONException ignored) {
+                // Graceful degradation: domain display name falls back to empty.
+            }
         } catch (IOException | JSONException e) {
-            tvClassificationResult.setText(R.string.routing_error + ": " + e.getMessage());
+            tvClassificationResult.setText(getString(R.string.routing_error, e.getMessage()));
         }
 
         galleryPickerLauncher = registerForActivityResult(
@@ -287,34 +294,11 @@ public class ImageClassificationActivity extends AppCompatActivity {
     }
 
     void applyRoutedResult(RoutedClassificationResult routedResult) {
-        tvClassificationResult.setText(formatRoutedResult(routedResult));
+        tvClassificationResult.setText(formatRoutedResult(routedResult, profileConfig));
     }
 
-    String formatRoutedResult(RoutedClassificationResult routedResult) {
-        if (routedResult == null) {
-            throw new IllegalArgumentException("Routed result must not be null");
-        }
-
-        ClassificationResult specializedResult = routedResult.getSpecializedResult();
-        if (routedResult.getRoutingMode() == RoutingMode.DIRECT) {
-            return getString(
-                    R.string.specialized_direct_result,
-                    specializedResult.getLabel(),
-                    specializedResult.getConfidence() * 100f
-            );
-        }
-
-        String genericText = getString(
-                R.string.generic_result_label,
-                routedResult.getGenericResult().getLabel()
-        );
-        String conditionalText = getString(
-                R.string.combined_conditional_result,
-                getString(R.string.specialized_conditional_prefix),
-                specializedResult.getLabel(),
-                specializedResult.getConfidence() * 100f
-        );
-        return genericText + "\n" + conditionalText;
+    String formatRoutedResult(RoutedClassificationResult routedResult, ProfileConfig config) {
+        return RoutedResultFormatter.format(this, routedResult, config);
     }
 
     private boolean shouldApplyClassificationResult(int generation) {

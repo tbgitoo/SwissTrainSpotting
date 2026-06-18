@@ -135,9 +135,38 @@ public class ImageClassificationPhaseDTest {
                 TextView resultView = activity.findViewById(R.id.tv_classification_result);
                 String text = resultView.getText().toString();
                 assertTrue(text.contains("Generic classification: volcano"));
-                assertTrue(text.contains("Doesn't look like a train"));
+                assertTrue(text.contains("Not Hymenoptera"));
+                assertTrue(text.contains("if classified within Hymenoptera"));
                 assertTrue(text.contains("ants"));
                 assertTrue(text.contains("71.2%"));
+                assertTrue(!text.contains("Doesn't look like a train"));
+                assertTrue(!text.toLowerCase().contains("train"));
+            });
+        }
+    }
+
+    @Test
+    public void routedConditionalResult_swissTrainsProfile_usesTrainDomainWording() throws Exception {
+        Intent intent = createIntentWithFixture(FIXTURE_BASELINE);
+        Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
+        ProfileConfig swissTrainsConfig = ProfileConfig.load(appContext, "swiss_trains");
+
+        try (ActivityScenario<ImageClassificationActivity> scenario = ActivityScenario.launch(intent)) {
+            scenario.onActivity(activity -> {
+                RoutedClassificationResult routedResult = new RoutedClassificationResult(
+                        new ClassificationResult(980, "volcano", 0.63f),
+                        new ClassificationResult(0, "Re420", 0.99f),
+                        RoutingMode.CONDITIONAL
+                );
+
+                String text = activity.formatRoutedResult(routedResult, swissTrainsConfig);
+
+                assertTrue(text.contains("Generic classification: volcano"));
+                assertTrue(text.contains("Not a train"));
+                assertTrue(text.contains("if classified within SwissTrains"));
+                assertTrue(text.contains("Re420"));
+                assertTrue(text.contains("99.0%"));
+                assertTrue(!text.contains("Not Hymenoptera"));
             });
         }
     }
