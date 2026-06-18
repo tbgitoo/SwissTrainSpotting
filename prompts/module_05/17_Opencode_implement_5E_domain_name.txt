@@ -2,7 +2,7 @@ Implement a surgical refinement of Module 5D/5E in this repository.
 
 Before changing anything, read:
 - AGENTS.md
-- plans/01_architecture.md
+- ../plans/01_architecture.md
 - plans/module_05/implementation_plan.md
 
 Use these skills:
