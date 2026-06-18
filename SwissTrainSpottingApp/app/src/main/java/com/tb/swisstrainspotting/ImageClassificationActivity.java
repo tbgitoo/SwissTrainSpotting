@@ -63,8 +63,6 @@ public class ImageClassificationActivity extends AppCompatActivity {
 
         inferenceExecutor = Executors.newSingleThreadExecutor();
 
-        allowedSet = new ClassificationRouter.AllowedSet();
-
         try {
             genericClassifier = new OnnxClassifier(getApplicationContext());
         } catch (IOException e) {
@@ -73,10 +71,14 @@ public class ImageClassificationActivity extends AppCompatActivity {
 
         try {
             ModelProfile specialtyProfile = ModelProfile.load(getApplicationContext(), "hymenoptera");
-            allowedSet = ClassificationRouter.fromModelProfile(specialtyProfile);
             specializedClassifier = new OnnxClassifier(getApplicationContext(), specialtyProfile);
+            String profileId = specialtyProfile.getId();
+
+            // Phase 5E: allowed-set loaded from asset by profile ID, not from JSON metadata.
+            java.util.Set<String> labelSet = AllowedSetLoader.load(getApplicationContext(), profileId);
+            allowedSet = new ClassificationRouter.AllowedSet(labelSet.toArray(new String[0]));
         } catch (IOException | JSONException e) {
-            tvClassificationResult.setText(R.string.classifier_init_failed);
+            tvClassificationResult.setText(R.string.routing_error + ": " + e.getMessage());
         }
 
         galleryPickerLauncher = registerForActivityResult(
