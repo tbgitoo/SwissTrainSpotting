@@ -1,0 +1,145 @@
+Read these files first and treat them as authoritative:
+
+- ../plans/01_architecture.md
+- AGENTS.md
+- plans/module_05/implementation_plan.md
+- plans/module_06/implementation_plan.md
+
+Also inspect the current implementation state of:
+- app/src/main/java/com/tb/swisstrainspotting/ImageClassificationActivity.java
+- app/src/main/java/com/tb/swisstrainspotting/OcrResult.java
+- app/src/main/java/com/tb/swisstrainspotting/OcrAnalyzer.java
+- app/src/main/java/com/tb/swisstrainspotting/MlKitOcrAnalyzer.java
+- app/src/main/java/com/tb/swisstrainspotting/OcrTextNormalizer.java
+- app/src/main/res/layout/activity_image_classification.xml
+- app/src/main/res/values/strings.xml
+
+Also inspect existing test structure and conventions under:
+- app/src/test/java/
+- app/src/androidTest/java/
+
+Use relevant repository skills if present:
+- android-testing
+- android-dependency-closure
+
+Task:
+Implement **Phase 6D only** of Module 6 — Testing & Validation for OCR.
+
+Goal:
+Add the smallest useful set of tests that validates the OCR module behavior in a credible, maintainable way, without redesigning the OCR feature or broadening the repository unnecessarily.
+
+Required scope:
+1. Add JVM unit tests for `OcrTextNormalizer`
+2. Add instrumentation tests for OCR UI behavior in `ImageClassificationActivity`, using a stub/fake OCR analyzer rather than depending on real ML Kit runtime behavior
+3. Validate the key Module 6 behaviors:
+   - empty OCR stays hidden
+   - non-empty OCR is shown
+   - OCR does not overwrite classification result text
+   - OCR failure or empty result does not crash the app
+   - OCR integration remains auxiliary and non-blocking in behavior
+
+Do NOT implement:
+- new OCR production features
+- new layout redesign
+- analyzer refactors beyond tiny testability seams if absolutely necessary
+- ML Kit runtime integration tests against the real recognizer
+- broad refactoring of `ImageClassificationActivity`
+- changes to ONNX inference logic
+- changes to routing logic
+- Phase 6A/6B/6C redesign
+- new activities, fragments, ViewModels, Compose, or Kotlin
+
+Testing strategy constraints:
+- Prefer deterministic tests over ambitious or flaky tests
+- Use a stub/fake `OcrAnalyzer` for instrumentation tests
+- Do not rely on network, cloud, or Play Services runtime state
+- Do not attempt OCR accuracy benchmarking
+- Do not create a large custom test framework
+- Keep names explicit and review-friendly
+
+Required unit test coverage for `OcrTextNormalizer`:
+- blank input -> empty
+- whitespace-only input -> empty
+- leading/trailing whitespace trimmed
+- repeated internal whitespace collapsed
+- multi-line input normalized according to the current implementation rule
+- already clean input preserved
+- null handling tested explicitly if the implementation exposes it
+
+Required instrumentation/UI test coverage:
+1. empty OCR result keeps OCR section hidden
+2. non-empty OCR result shows OCR section and displays OCR text
+3. OCR text appears only in the OCR section, not inside the classification result TextView
+4. OCR failure-equivalent path (empty/null or fake failure behavior) does not break the activity
+5. if feasible without broad refactoring: delayed OCR result does not prevent classification text from appearing
+
+Important implementation requirements:
+- Follow the current implementation contract, not an imagined one
+- Keep test code explicit
+- Keep test names descriptive
+- Respect current package and project conventions unless a very small structural improvement is clearly justified
+- If a small test seam is needed, keep it minimal and local
+- Do not "improve" production code unless required for testability, and if so:
+  - make the smallest possible change
+  - explain it explicitly
+  - do not change behavior
+
+Preferred testability approach:
+- If `ImageClassificationActivity` currently hardcodes `new MlKitOcrAnalyzer()`, introduce the smallest safe seam that allows instrumentation tests to inject or substitute a fake/stub analyzer
+- Keep this seam narrow and local
+- Do not redesign the activity around dependency injection frameworks
+
+Naming guidance:
+- Prioritize examiner traceability and explicit module attribution over minimalist naming.
+- Test filenames must make Module 6 and Phase 6D easy to identify directly from the repository listing.
+- Prefer filenames such as:
+  - `Module6Phase6D_OcrTextNormalizerUnitTest`
+  - `Module6Phase6D_OcrUiInstrumentedTest`
+- If instrumentation tests are split by concern, use explicit filenames such as:
+  - `Module6Phase6D_OcrUiVisibilityInstrumentedTest`
+  - `Module6Phase6D_OcrNonBlockingInstrumentedTest`
+- Inside the test files, use behavior-focused method names such as:
+  - `normalize_blankInput_returnsEmpty`
+  - `normalize_whitespaceOnlyInput_returnsEmpty`
+  - `applyOcrResult_nonEmpty_showsOcrSection`
+  - `applyOcrResult_empty_hidesOcrSection`
+  - `ocrText_doesNotOverwriteClassificationResult`
+- Do not use vague names like `UtilsTest`, `IntegrationTest`, or `OcrTest` without module/phase attribution.
+
+Files allowed to create or modify:
+- app/src/test/java/.../Module6Phase6D_OcrTextNormalizerUnitTest.java
+- app/src/androidTest/java/.../Module6Phase6D_OcrUiInstrumentedTest.java
+- production files only if a minimal test seam is required for instrumentation testing
+
+If you modify production files for testability:
+- keep the diff tiny
+- avoid renaming unrelated things
+- avoid architectural drift
+- explain exactly why the change was needed
+
+Before making changes:
+1. Inspect the current test conventions and package structure
+2. Inspect how `ImageClassificationActivity` currently creates and uses `OcrAnalyzer`
+3. Determine the smallest injection/stubbing seam needed
+4. Keep the resulting test suite as small and robust as possible
+
+First briefly state:
+- which test files you plan to add
+- whether a production-code seam is needed for testability
+- which production files, if any, must be touched
+
+Then implement directly.
+
+At the end, report:
+- files created/modified
+- which behaviors are now tested
+- whether any production code was adjusted for testability
+- what is still intentionally untested
+- any temporary assumptions made for the test setup
+
+Very important:
+Do not broaden this into general repository cleanup.
+Do not add speculative tests.
+Do not create fragile tests that depend on real OCR output from ML Kit.
+Do not refactor the app just to make testing “cleaner”.
+Choose the smallest credible testing solution that closes Module 6 Phase 6D.

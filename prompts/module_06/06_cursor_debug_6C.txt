@@ -1,0 +1,98 @@
+Read these files first and treat them as authoritative:
+
+- ../plans/01_architecture.md
+- AGENTS.md
+- plans/module_05/implementation_plan.md
+- plans/module_06/implementation_plan.md
+
+Also inspect the current implementation state of:
+- app/src/main/java/com/tb/swisstrainspotting/ImageClassificationActivity.java
+- app/src/main/java/com/tb/swisstrainspotting/OcrResult.java
+- app/src/main/java/com/tb/swisstrainspotting/OcrAnalyzer.java
+- app/src/main/java/com/tb/swisstrainspotting/MlKitOcrAnalyzer.java
+- app/src/main/java/com/tb/swisstrainspotting/OcrTextNormalizer.java
+- app/src/main/res/layout/activity_image_classification.xml
+- app/src/main/res/values/strings.xml
+
+Task:
+Perform a **debug-only diagnostic pass** for Module 6 OCR.
+
+Problem context:
+- OCR UI section does not appear even for a simple, high-contrast text image
+- Classification still works
+- The likely failure is somewhere in:
+  1. OCR trigger path
+  2. OCR analyzer / ML Kit call
+  3. OCR text normalization
+  4. OCR UI binding / visibility logic
+
+Your job:
+1. Inspect the current OCR flow end-to-end
+2. Add **minimal temporary debug instrumentation**
+3. Identify the most likely failure point
+4. Make only the smallest correction if there is a clearly localized bug
+5. Do not redesign the feature
+
+Important constraints:
+- This is a debugging pass, not a rewrite
+- Do NOT broaden into Phase 6D
+- Do NOT refactor unrelated code
+- Do NOT redesign the activity
+- Do NOT add new features
+- Do NOT add permanent debug UI unless absolutely necessary
+- Prefer Logcat/debug logging over visible UI hacks
+- Keep all temporary debugging instrumentation clearly marked with `OCR_DEBUG`
+
+Required debugging instrumentation:
+Add temporary logging (or equivalent minimal diagnostics) at these points:
+
+A) OCR trigger
+- when `startOcrInBackground(...)` is entered
+- generation value
+- bitmap basic properties if useful (width/height, null/recycled)
+
+B) OCR analyzer call
+- before calling OCR recognition
+- after raw ML Kit recognition returns
+- log raw recognized text before normalization
+- log normalized result after normalization
+- log exceptions with stack trace
+
+C) OCR result application
+- log when `applyOcrResult(...)` is called
+- log whether result is null / empty / non-empty
+- log whether OCR UI section is being shown or hidden
+
+D) Session guard behavior
+- if OCR result is discarded due to generation/lifecycle guard, log that explicitly
+
+Diagnostic objective:
+Determine which of these cases is actually happening:
+1. OCR never starts
+2. OCR starts but throws
+3. OCR returns raw text, but normalization collapses it to empty
+4. OCR result reaches activity, but UI section remains hidden due to binding/layout logic
+5. OCR result is discarded as stale due to session guard
+6. OCR section exists but layout constraints prevent visible display
+
+Fixing policy:
+- If you find a clearly localized bug (for example: OCR UI never set to visible, or normalizer drops all lines incorrectly), fix it
+- Keep the fix surgical and explain it
+- If the root cause is not yet certain, keep the patch diagnostic only and report findings instead of speculative changes
+
+Files allowed to modify:
+- app/src/main/java/com/tb/swisstrainspotting/ImageClassificationActivity.java
+- app/src/main/java/com/tb/swisstrainspotting/MlKitOcrAnalyzer.java
+- app/src/main/java/com/tb/swisstrainspotting/OcrTextNormalizer.java
+- app/src/main/res/layout/activity_image_classification.xml
+- app/src/main/res/values/strings.xml
+
+Do not modify anything else unless absolutely required for compile correctness.
+
+At the end, report:
+- files modified
+- exact debug instrumentation added
+- which failure case is most likely
+- whether a localized fix was made
+- what remains to verify at runtime
+- which temporary debug lines should later be removed

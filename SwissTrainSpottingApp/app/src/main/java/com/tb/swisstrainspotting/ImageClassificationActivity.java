@@ -60,6 +60,9 @@ public class ImageClassificationActivity extends AppCompatActivity {
     private OcrResult lastOcrResult;
     private int classificationGeneration = 0;
 
+    // Phase 6D testability seam: allows instrumentation tests to inject a stub OCR analyzer.
+    static OcrAnalyzer ocrAnalyzerStub = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -73,7 +76,11 @@ public class ImageClassificationActivity extends AppCompatActivity {
 
         inferenceExecutor = Executors.newSingleThreadExecutor();
         ocrExecutor = Executors.newSingleThreadExecutor();
-        ocrAnalyzer = new MlKitOcrAnalyzer();
+        if (ocrAnalyzerStub != null) {
+            ocrAnalyzer = ocrAnalyzerStub;
+        } else {
+            ocrAnalyzer = new MlKitOcrAnalyzer();
+        }
 
         try {
             genericClassifier = new OnnxClassifier(getApplicationContext());
@@ -365,9 +372,13 @@ public class ImageClassificationActivity extends AppCompatActivity {
     void applyRoutedResult(RoutedClassificationResult routedResult) {
         tvClassificationResult.setText(formatRoutedResult(routedResult, profileConfig));
     }
-
     String formatRoutedResult(RoutedClassificationResult routedResult, ProfileConfig config) {
         return RoutedResultFormatter.format(this, routedResult, config);
+    }
+
+    // Phase 6D: testability seam setter — allows instrumentation tests to inject a stub analyzer.
+    public static void setOcrAnalyzerForTesting(OcrAnalyzer stub) {
+        ocrAnalyzerStub = stub;
     }
 
     private boolean shouldApplySessionResult(int generation) {

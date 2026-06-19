@@ -42,6 +42,7 @@ dependencies {
     implementation libs.play.services.mlkit.text.recognition
     implementation libs.play.services.mlkit.text.recognition.common
     testImplementation libs.junit
+    testImplementation libs.mockito.core
     androidTestImplementation libs.espresso.core
     androidTestImplementation libs.ext.junit
 }
