@@ -52,6 +52,9 @@ public class ImageClassificationActivity extends AppCompatActivity {
     private ProfileConfig profileConfig;
 
     private ExecutorService inferenceExecutor;
+    private ExecutorService ocrExecutor;
+    private OcrAnalyzer ocrAnalyzer;
+    private OcrResult lastOcrResult;
     private int classificationGeneration = 0;
 
     @Override
@@ -63,6 +66,8 @@ public class ImageClassificationActivity extends AppCompatActivity {
         tvClassificationResult = findViewById(R.id.tv_classification_result);
 
         inferenceExecutor = Executors.newSingleThreadExecutor();
+        ocrExecutor = Executors.newSingleThreadExecutor();
+        ocrAnalyzer = new MlKitOcrAnalyzer();
 
         try {
             genericClassifier = new OnnxClassifier(getApplicationContext());
@@ -162,6 +167,15 @@ public class ImageClassificationActivity extends AppCompatActivity {
             inferenceExecutor.shutdownNow();
             inferenceExecutor = null;
         }
+        if (ocrExecutor != null) {
+            ocrExecutor.shutdownNow();
+            ocrExecutor = null;
+        }
+        if (ocrAnalyzer != null) {
+            ocrAnalyzer.close();
+            ocrAnalyzer = null;
+        }
+        lastOcrResult = null;
         if (genericClassifier != null) {
             genericClassifier.close();
             genericClassifier = null;
@@ -264,7 +278,9 @@ public class ImageClassificationActivity extends AppCompatActivity {
         }
 
         final int generation = ++classificationGeneration;
+        lastOcrResult = null;
         tvClassificationResult.setText(R.string.classifying);
+        startOcrInBackground(bitmap, generation);
 
         inferenceExecutor.execute(() -> {
             try {
@@ -277,20 +293,55 @@ public class ImageClassificationActivity extends AppCompatActivity {
                 );
 
                 runOnUiThread(() -> {
-                    if (!shouldApplyClassificationResult(generation)) {
+                    if (!shouldApplySessionResult(generation)) {
                         return;
                     }
                     applyRoutedResult(routedResult);
                 });
             } catch (RuntimeException e) {
                 runOnUiThread(() -> {
-                    if (!shouldApplyClassificationResult(generation)) {
+                    if (!shouldApplySessionResult(generation)) {
                         return;
                     }
                     tvClassificationResult.setText(R.string.classification_failed);
                 });
             }
         });
+    }
+
+    private void startOcrInBackground(Bitmap bitmap, int generation) {
+        if (ocrExecutor == null || ocrAnalyzer == null || bitmap == null || bitmap.isRecycled()) {
+            return;
+        }
+
+        ocrExecutor.execute(() -> {
+            OcrResult result;
+            try {
+                result = ocrAnalyzer.recognize(bitmap);
+            } catch (RuntimeException e) {
+                result = OcrResult.empty();
+            }
+            if (result == null) {
+                result = OcrResult.empty();
+            }
+
+            final OcrResult ocrResult = result;
+            runOnUiThread(() -> {
+                if (!shouldApplySessionResult(generation)) {
+                    return;
+                }
+                applyOcrResult(ocrResult);
+            });
+        });
+    }
+
+    void applyOcrResult(OcrResult result) {
+        if (result == null || result.isEmpty()) {
+            lastOcrResult = null;
+            return;
+        }
+        lastOcrResult = result;
+        // Phase 6C will bind lastOcrResult to OCR TextViews.
     }
 
     void applyRoutedResult(RoutedClassificationResult routedResult) {
@@ -301,7 +352,7 @@ public class ImageClassificationActivity extends AppCompatActivity {
         return RoutedResultFormatter.format(this, routedResult, config);
     }
 
-    private boolean shouldApplyClassificationResult(int generation) {
+    private boolean shouldApplySessionResult(int generation) {
         return generation == classificationGeneration && !isFinishing() && !isDestroyed();
     }
 

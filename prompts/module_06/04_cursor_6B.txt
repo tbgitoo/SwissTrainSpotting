@@ -1,0 +1,88 @@
+Read these files first and treat them as authoritative:
+
+- ../plans/01_architecture.md
+- AGENTS.md
+- plans/module_02/implementation_plan.md
+- plans/module_05/implementation_plan.md
+- plans/module_06/module_6_full_plan.md
+
+Also inspect the current implementation state of:
+- app/src/main/java/com/tb/swisstrainspotting/ImageClassificationActivity.java
+- app/src/main/java/com/tb/swisstrainspotting/OcrResult.java
+- app/src/main/java/com/tb/swisstrainspotting/OcrAnalyzer.java
+- app/src/main/java/com/tb/swisstrainspotting/MlKitOcrAnalyzer.java
+- app/src/main/java/com/tb/swisstrainspotting/OcrTextNormalizer.java
+
+Use relevant repository skills if present:
+- android-dependency-closure
+- android-testing
+- any existing Android lifecycle/threading guidance skill
+
+Task:
+Implement **Phase 6B only** of Module 6 — OCR, based exactly on the updated OCR plan and the current repository state.
+
+Phase 6B scope only:
+1. Wire OCR execution into `ImageClassificationActivity`
+2. Trigger OCR in parallel with classification after a valid upright display `Bitmap` is ready
+3. Reuse the existing generation guard pattern so stale OCR results are discarded
+4. Keep OCR fully independent from the classification critical path
+5. Prepare OCR result application hooks for later UI binding, but do not implement Phase 6C layout/string work beyond the minimum compile-safe placeholders already needed by the current codebase
+
+Do NOT implement:
+- XML layout changes unless absolutely required to keep the activity compiling and even then keep them minimal
+- strings.xml changes unless absolutely required to keep the activity compiling and even then keep them minimal
+- instrumentation tests
+- broad refactors of activity architecture
+- routing logic changes
+- ONNX inference redesign
+- preprocessing changes
+- OCR-dependent classification logic
+- ViewModel/Fragment/Compose/Kotlin changes
+- new activities or navigation changes
+
+Important implementation requirements:
+- Preserve current classification behavior from Module 5
+- Classification must not wait for OCR
+- OCR must run on a separate `ocrExecutor`
+- OCR completion must not directly mutate UI from ML Kit callbacks
+- Only final OCR result application may hop back to the main thread
+- Reuse the existing generation/lifecycle guard pattern already present for classification
+- If the current guard method name is classification-specific, you may introduce a very small neutral helper only if clearly beneficial and without broad refactoring
+- OCR failure must never affect classification result display
+- Stale OCR results after image change, activity destruction, or recreation must be discarded
+- Keep OCR integration explicit and easy to review
+
+Expected implementation behavior:
+- After a new valid display bitmap is available, start:
+  - classification as today
+  - OCR in parallel on `ocrExecutor`
+- OCR should call the existing `OcrAnalyzer`
+- OCR result should be handed to a small activity-level result application method (for example `applyOcrResult(...)`), even if UI binding is still minimal at this phase
+- Any current absence of OCR UI elements should be handled conservatively without broad Phase 6C work
+- Do not invent asynchronous abstractions beyond what is needed
+
+Before modifying code:
+1. Inspect the existing `ImageClassificationActivity` flow carefully
+2. Identify the exact place where a valid upright display bitmap is ready and classification is triggered
+3. Reuse existing executor / generation / lifecycle patterns wherever possible
+4. Prefer the smallest correct patch over clever restructuring
+
+Deliverables:
+- Modify only the files actually required for Phase 6B
+- Keep the patch local and reviewable
+- If an absolutely minimal compile-safe hook is needed in layout or resources, keep it tiny and clearly explain why
+
+At the end, report:
+- files modified
+- exact integration point used in `ImageClassificationActivity`
+- how OCR execution is started
+- how stale result protection works
+- what was intentionally not implemented because it belongs to Phase 6C/6D
+- any tiny assumptions made due to current repo state
+
+Very important:
+Do not redesign the activity.
+Do not broaden this into full OCR feature completion.
+Do not silently implement Phase 6C.
+Do not “improve” unrelated code.
+If ambiguity arises, choose the most conservative option that preserves current behavior and keeps OCR auxiliary and non-blocking.
