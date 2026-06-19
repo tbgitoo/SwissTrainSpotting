@@ -1,0 +1,66 @@
+You are acting as a senior Android engineer reviewing an OCR module implementation plan.
+
+Task:
+Validate the provided Module 6 — OCR plan for correctness, robustness, and Android-specific pitfalls.
+
+Important:
+- This is a **review task**, NOT a redesign task.
+- Do NOT rewrite the plan.
+- Do NOT propose alternative architectures unless strictly required to fix a real issue.
+- Focus on identifying **real risks, mistakes, ambiguities, or missing pieces**.
+- If something is correct, explicitly confirm it as correct.
+
+Context:
+- Java + XML Android app (no Kotlin, no Compose)
+- minSdk 24
+- Multi-activity app with `MainActivity` (entry) and `ImageClassificationActivity` (result screen)
+- OCR uses ML Kit Text Recognition (on-device only)
+- OCR is **non-critical**, **best-effort**, and must not affect ONNX inference or UI stability
+- Existing architecture already includes:
+  - Bitmap acquisition (Module 2)
+  - Preprocessing + ONNX inference (Modules 3–5)
+  - Executor-based background processing
+  - generation-based guards for async updates
+
+Instructions for your review:
+
+1. **Android correctness**
+   - Check threading model (Executors, UI thread usage)
+   - Check lifecycle handling (Activity destruction, resource cleanup)
+   - Check ML Kit usage assumptions (InputImage, recognizer lifecycle)
+   - Check Bitmap handling (safety, reuse, memory risks)
+
+2. **Integration correctness**
+   - Verify OCR is correctly decoupled from the inference pipeline
+   - Verify no hidden coupling or race conditions were introduced
+   - Verify UI update logic is safe and consistent
+
+3. **Dependency and setup**
+   - Validate ML Kit integration approach (Gradle, permissions, model usage)
+   - Check for missing setup steps or incorrect assumptions
+
+4. **Failure handling**
+   - Look for unhandled edge cases (null bitmap, slow OCR, lifecycle races, task cancellation)
+   - Verify that OCR cannot crash or block the main flow
+
+5. **Testing strategy**
+   - Evaluate whether the proposed tests are sufficient and realistic
+   - Identify any important missing test scenario
+
+6. **Clarity and ambiguity**
+   - Identify any part of the plan that is unclear or could lead to incorrect implementation
+
+Output format:
+
+- ✅ **Correct design choices** (short bullet list)
+- ⚠️ **Issues or risks** (only real, concrete issues — no hypothetical overengineering)
+- 🔧 **Minimal required changes** (only if needed to fix issues)
+- 🔍 **Optional improvements** (clearly marked as optional, not required)
+
+Constraints:
+- Do NOT suggest feature expansion (no search, copy, routing, etc.)
+- Do NOT suggest refactoring other modules
+- Do NOT introduce new architectural layers
+- Stay within the given plan’s structure and goals
+
+Now review the following OCR implementation plan:
