@@ -43,15 +43,20 @@ public class Module6Phase6D_OcrUiInstrumentedTest {
     private static final String STUB_OCR_TEXT = "STUB-OCR-RE420";
     private static final long UI_WAIT_TIMEOUT_MS = 15_000L;
 
+    @FunctionalInterface
+    private interface ImageClassificationActivityAction {
+        void run(ImageClassificationActivity activity) throws Throwable;
+    }
+
     @After
     public void tearDown() {
         ImageClassificationActivity.setOcrAnalyzerForTesting(null);
     }
 
     @Test
-    public void applyOcrResult_empty_hidesOcrSection() throws IOException {
-        try (ActivityScenario<ImageClassificationActivity> scenario = launchWithFixture()) {
-            scenario.onActivity(activity -> {
+    public void applyOcrResult_empty_hidesOcrSection() throws Throwable {
+        try (ActivityScenario<?> scenario = launchWithFixture()) {
+            onImageClassificationActivity(scenario, activity -> {
                 activity.applyOcrResult(OcrResult.empty());
 
                 View ocrSection = activity.findViewById(R.id.ll_ocr_section);
@@ -61,9 +66,9 @@ public class Module6Phase6D_OcrUiInstrumentedTest {
     }
 
     @Test
-    public void applyOcrResult_nonEmpty_showsOcrSection() throws IOException {
-        try (ActivityScenario<ImageClassificationActivity> scenario = launchWithFixture()) {
-            scenario.onActivity(activity -> {
+    public void applyOcrResult_nonEmpty_showsOcrSection() throws Throwable {
+        try (ActivityScenario<?> scenario = launchWithFixture()) {
+            onImageClassificationActivity(scenario, activity -> {
                 activity.applyOcrResult(new OcrResult(STUB_OCR_TEXT));
 
                 View ocrSection = activity.findViewById(R.id.ll_ocr_section);
@@ -75,9 +80,9 @@ public class Module6Phase6D_OcrUiInstrumentedTest {
     }
 
     @Test
-    public void ocrText_doesNotOverwriteClassificationResult() throws IOException {
-        try (ActivityScenario<ImageClassificationActivity> scenario = launchWithFixture()) {
-            scenario.onActivity(activity -> {
+    public void ocrText_doesNotOverwriteClassificationResult() throws Throwable {
+        try (ActivityScenario<?> scenario = launchWithFixture()) {
+            onImageClassificationActivity(scenario, activity -> {
                 String classificationText = "Classification stays separate";
                 TextView classificationView = activity.findViewById(R.id.tv_classification_result);
                 classificationView.setText(classificationText);
@@ -94,7 +99,7 @@ public class Module6Phase6D_OcrUiInstrumentedTest {
     }
 
     @Test
-    public void ocrFailureEquivalentPath_doesNotCrashActivity() throws Exception {
+    public void ocrFailureEquivalentPath_doesNotCrashActivity() throws Throwable {
         ImageClassificationActivity.setOcrAnalyzerForTesting(new OcrAnalyzer() {
             @Override
             public OcrResult recognize(Bitmap bitmap) {
@@ -106,9 +111,9 @@ public class Module6Phase6D_OcrUiInstrumentedTest {
             }
         });
 
-        try (ActivityScenario<ImageClassificationActivity> scenario = launchWithFixture()) {
+        try (ActivityScenario<?> scenario = launchWithFixture()) {
             assertTrue(waitForClassificationResult(scenario));
-            scenario.onActivity(activity -> {
+            onImageClassificationActivity(scenario, activity -> {
                 assertFalse(activity.isFinishing());
                 assertFalse(activity.isDestroyed());
                 View ocrSection = activity.findViewById(R.id.ll_ocr_section);
@@ -118,7 +123,7 @@ public class Module6Phase6D_OcrUiInstrumentedTest {
     }
 
     @Test
-    public void stubReturningEmpty_keepsOcrHidden_afterImageLoad() throws Exception {
+    public void stubReturningEmpty_keepsOcrHidden_afterImageLoad() throws Throwable {
         ImageClassificationActivity.setOcrAnalyzerForTesting(new OcrAnalyzer() {
             @Override
             public OcrResult recognize(Bitmap bitmap) {
@@ -130,11 +135,11 @@ public class Module6Phase6D_OcrUiInstrumentedTest {
             }
         });
 
-        try (ActivityScenario<ImageClassificationActivity> scenario = launchWithFixture()) {
+        try (ActivityScenario<?> scenario = launchWithFixture()) {
             assertTrue(waitForClassificationResult(scenario));
             assertTrue(waitForOcrSectionHidden(scenario));
 
-            scenario.onActivity(activity -> {
+            onImageClassificationActivity(scenario, activity -> {
                 View ocrSection = activity.findViewById(R.id.ll_ocr_section);
                 assertEquals(View.GONE, ocrSection.getVisibility());
             });
@@ -142,7 +147,7 @@ public class Module6Phase6D_OcrUiInstrumentedTest {
     }
 
     @Test
-    public void stubReturningText_showsOcrAfterImageLoad() throws Exception {
+    public void stubReturningText_showsOcrAfterImageLoad() throws Throwable {
         ImageClassificationActivity.setOcrAnalyzerForTesting(new OcrAnalyzer() {
             @Override
             public OcrResult recognize(Bitmap bitmap) {
@@ -154,11 +159,11 @@ public class Module6Phase6D_OcrUiInstrumentedTest {
             }
         });
 
-        try (ActivityScenario<ImageClassificationActivity> scenario = launchWithFixture()) {
+        try (ActivityScenario<?> scenario = launchWithFixture()) {
             assertTrue(waitForClassificationResult(scenario));
             assertTrue(waitForOcrSectionVisible(scenario));
 
-            scenario.onActivity(activity -> {
+            onImageClassificationActivity(scenario, activity -> {
                 TextView ocrResult = activity.findViewById(R.id.tv_ocr_result);
                 assertEquals(STUB_OCR_TEXT, ocrResult.getText().toString());
             });
@@ -166,7 +171,7 @@ public class Module6Phase6D_OcrUiInstrumentedTest {
     }
 
     @Test
-    public void delayedOcrResult_doesNotBlockClassificationText() throws Exception {
+    public void delayedOcrResult_doesNotBlockClassificationText() throws Throwable {
         CountDownLatch ocrStarted = new CountDownLatch(1);
         ImageClassificationActivity.setOcrAnalyzerForTesting(new OcrAnalyzer() {
             @Override
@@ -185,11 +190,11 @@ public class Module6Phase6D_OcrUiInstrumentedTest {
             }
         });
 
-        try (ActivityScenario<ImageClassificationActivity> scenario = launchWithFixture()) {
+        try (ActivityScenario<?> scenario = launchWithFixture()) {
             assertTrue(waitForClassificationResult(scenario));
             assertTrue(ocrStarted.await(5L, TimeUnit.SECONDS));
 
-            scenario.onActivity(activity -> {
+            onImageClassificationActivity(scenario, activity -> {
                 TextView classificationView = activity.findViewById(R.id.tv_classification_result);
                 String classifying = activity.getString(R.string.classifying);
                 String classificationText = classificationView.getText().toString();
@@ -204,7 +209,7 @@ public class Module6Phase6D_OcrUiInstrumentedTest {
 
             assertTrue(waitForOcrSectionVisible(scenario));
 
-            scenario.onActivity(activity -> {
+            onImageClassificationActivity(scenario, activity -> {
                 TextView classificationView = activity.findViewById(R.id.tv_classification_result);
                 TextView ocrResult = activity.findViewById(R.id.tv_ocr_result);
 
@@ -214,7 +219,23 @@ public class Module6Phase6D_OcrUiInstrumentedTest {
         }
     }
 
-    private static ActivityScenario<ImageClassificationActivity> launchWithFixture() throws IOException {
+    private static void onImageClassificationActivity(
+            ActivityScenario<?> scenario,
+            ImageClassificationActivityAction action) throws Throwable {
+        final Throwable[] error = new Throwable[1];
+        scenario.onActivity(activity -> {
+            try {
+                action.run((ImageClassificationActivity) activity);
+            } catch (Throwable t) {
+                error[0] = t;
+            }
+        });
+        if (error[0] != null) {
+            throw error[0];
+        }
+    }
+
+    private static ActivityScenario<?> launchWithFixture() throws IOException {
         Context testContext = InstrumentationRegistry.getInstrumentation().getContext();
         Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
         Uri imageUri = copyFixtureToAppCache(testContext, appContext, FIXTURE_BASELINE);
@@ -223,15 +244,16 @@ public class Module6Phase6D_OcrUiInstrumentedTest {
         return ActivityScenario.launch(intent);
     }
 
-    private static boolean waitForClassificationResult(
-            ActivityScenario<ImageClassificationActivity> scenario) throws InterruptedException {
+    private static boolean waitForClassificationResult(ActivityScenario<?> scenario)
+            throws InterruptedException, Throwable {
         long deadline = System.currentTimeMillis() + UI_WAIT_TIMEOUT_MS;
         AtomicReference<String> classifyingLabel = new AtomicReference<>();
-        scenario.onActivity(activity -> classifyingLabel.set(activity.getString(R.string.classifying)));
+        onImageClassificationActivity(scenario,
+                activity -> classifyingLabel.set(activity.getString(R.string.classifying)));
 
         while (System.currentTimeMillis() < deadline) {
             AtomicReference<String> currentText = new AtomicReference<>();
-            scenario.onActivity(activity -> {
+            onImageClassificationActivity(scenario, activity -> {
                 TextView classificationView = activity.findViewById(R.id.tv_classification_result);
                 currentText.set(classificationView.getText().toString());
             });
@@ -247,23 +269,23 @@ public class Module6Phase6D_OcrUiInstrumentedTest {
         return false;
     }
 
-    private static boolean waitForOcrSectionVisible(
-            ActivityScenario<ImageClassificationActivity> scenario) throws InterruptedException {
+    private static boolean waitForOcrSectionVisible(ActivityScenario<?> scenario)
+            throws InterruptedException, Throwable {
         return waitForOcrSectionVisibility(scenario, View.VISIBLE);
     }
 
-    private static boolean waitForOcrSectionHidden(
-            ActivityScenario<ImageClassificationActivity> scenario) throws InterruptedException {
+    private static boolean waitForOcrSectionHidden(ActivityScenario<?> scenario)
+            throws InterruptedException, Throwable {
         return waitForOcrSectionVisibility(scenario, View.GONE);
     }
 
     private static boolean waitForOcrSectionVisibility(
-            ActivityScenario<ImageClassificationActivity> scenario,
-            int expectedVisibility) throws InterruptedException {
+            ActivityScenario<?> scenario,
+            int expectedVisibility) throws InterruptedException, Throwable {
         long deadline = System.currentTimeMillis() + UI_WAIT_TIMEOUT_MS;
         while (System.currentTimeMillis() < deadline) {
             AtomicBoolean matches = new AtomicBoolean(false);
-            scenario.onActivity(activity -> {
+            onImageClassificationActivity(scenario, activity -> {
                 View ocrSection = activity.findViewById(R.id.ll_ocr_section);
                 matches.set(ocrSection.getVisibility() == expectedVisibility);
             });
