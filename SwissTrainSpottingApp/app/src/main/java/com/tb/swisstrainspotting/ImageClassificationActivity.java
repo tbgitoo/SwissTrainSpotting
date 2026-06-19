@@ -40,6 +40,9 @@ public class ImageClassificationActivity extends AppCompatActivity {
 
     private ImageView iPreview;
     private TextView tvClassificationResult;
+    private View llOcrSection;
+    private TextView tvOcrLabel;
+    private TextView tvOcrResult;
     private ActivityResultLauncher<Intent> galleryPickerLauncher;
     private Uri currentCameraUri;
     private Uri currentImageUri;
@@ -64,6 +67,9 @@ public class ImageClassificationActivity extends AppCompatActivity {
 
         iPreview = findViewById(R.id.ivPlaceholder);
         tvClassificationResult = findViewById(R.id.tv_classification_result);
+        llOcrSection = findViewById(R.id.ll_ocr_section);
+        tvOcrLabel = findViewById(R.id.tv_ocr_label);
+        tvOcrResult = findViewById(R.id.tv_ocr_result);
 
         inferenceExecutor = Executors.newSingleThreadExecutor();
         ocrExecutor = Executors.newSingleThreadExecutor();
@@ -280,6 +286,11 @@ public class ImageClassificationActivity extends AppCompatActivity {
         final int generation = ++classificationGeneration;
         lastOcrResult = null;
         tvClassificationResult.setText(R.string.classifying);
+        
+        if (llOcrSection != null) {
+            llOcrSection.setVisibility(View.GONE);
+        }
+        
         startOcrInBackground(bitmap, generation);
 
         inferenceExecutor.execute(() -> {
@@ -338,10 +349,17 @@ public class ImageClassificationActivity extends AppCompatActivity {
     void applyOcrResult(OcrResult result) {
         if (result == null || result.isEmpty()) {
             lastOcrResult = null;
+            runOnUiThread(() -> {
+                if (llOcrSection != null) llOcrSection.setVisibility(View.GONE);
+            });
             return;
         }
         lastOcrResult = result;
-        // Phase 6C will bind lastOcrResult to OCR TextViews.
+        tvOcrLabel.setText(R.string.ocr_label_experimental);
+        tvOcrResult.setText(result.getText());
+        if (llOcrSection != null) {
+            llOcrSection.setVisibility(View.VISIBLE);
+        }
     }
 
     void applyRoutedResult(RoutedClassificationResult routedResult) {

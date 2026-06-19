@@ -20,4 +20,6 @@
     <string name="specialized_direct_result">%1$s (%2$.1f%%)</string>
     <string name="specialized_conditional_result">%1$s; if classified within %2$s: %3$s (%4$.1f%%)</string>
     <string name="routing_error">Could not load specialized classifier: %s</string>
+    <string name="ocr_label_experimental">OCR (experimental)</string>
+    <string name="ocr_result_empty">No text detected</string>
 </resources>

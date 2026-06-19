@@ -1,0 +1,111 @@
+Read these files first and treat them as authoritative:
+
+- ../plans/01_architecture.md
+- AGENTS.md
+- plans/module_05/implementation_plan.md
+- plans/module_06/implementation_plan.md
+
+Also inspect the current implementation state of:
+- app/src/main/java/com/tb/swisstrainspotting/ImageClassificationActivity.java
+- app/src/main/java/com/tb/swisstrainspotting/OcrResult.java
+- app/src/main/java/com/tb/swisstrainspotting/OcrAnalyzer.java
+- app/src/main/java/com/tb/swisstrainspotting/MlKitOcrAnalyzer.java
+- app/src/main/res/layout/activity_image_classification.xml
+- app/src/main/res/values/strings.xml
+
+Use relevant repository skills if present:
+- android-dependency-closure
+- android-testing
+
+Task:
+Implement **Phase 6C only** of Module 6 — OCR UI integration, exactly following the Module 6 plan and the current repository state.
+
+Phase 6C scope only:
+1. Add the OCR UI section to `activity_image_classification.xml`
+2. Add required OCR strings to `strings.xml`
+3. Bind OCR section visibility and text in `ImageClassificationActivity`
+4. Keep OCR section hidden when no usable OCR text is available
+5. Keep classification result behavior unchanged
+
+Do NOT implement:
+- instrumentation tests
+- unit tests
+- OCR analyzer changes
+- executor/threading redesign
+- OCR startup logic changes unless a tiny compile-safe adjustment is absolutely required
+- broad layout redesign
+- styling cleanup beyond what is needed for correct integration
+- extra OCR UX such as “No text detected”
+- routing changes
+- ONNX inference changes
+- new activities/fragments/ViewModels/Compose/Kotlin
+
+Required UI behavior:
+- Add a dedicated OCR container section:
+  - `ll_ocr_section`
+  - `tv_ocr_label`
+  - `tv_ocr_result`
+- Place the OCR section below `tv_classification_result` and above the image preview, consistent with the current layout structure
+- Default OCR section to `android:visibility="gone"`
+- On a non-empty OCR result:
+  - show OCR section
+  - display experimental label
+  - display OCR text
+- On empty/null OCR result:
+  - hide OCR section
+- On new image load:
+  - hide OCR section before OCR result arrives
+- Do not write OCR text into the classification result TextView
+- Do not alter classification text formatting or meaning
+
+Required string/resource behavior:
+- Add user-visible OCR strings to `strings.xml`
+- No hardcoded user-visible OCR text in Java
+- Keep wording simple and explicit
+- Use an “experimental” label as specified in the plan
+
+Implementation constraints:
+- Use the smallest possible patch
+- Preserve current layout semantics
+- If `activity_image_classification.xml` uses `ConstraintLayout`, integrate the OCR section conservatively and avoid breaking existing constraints
+- Prefer a single OCR container view (`LinearLayout` vertical) over separately managed floating TextViews
+- Keep IDs explicit and stable
+- Do not rename unrelated views or methods
+- Do not improve unrelated UI while touching the layout
+
+Activity binding requirements:
+- Add only the minimum new view fields required for Phase 6C
+- Initialize OCR views in `onCreate`
+- Update `applyOcrResult(...)` to bind the OCR section
+- Ensure OCR section is hidden on empty/null result
+- Ensure OCR section is also hidden when a new classification session starts
+- Keep current `lastOcrResult` behavior unless a tiny local adjustment improves clarity without changing semantics
+
+Before modifying files:
+1. Inspect the current layout carefully
+2. Identify the smallest safe insertion point for the OCR section
+3. Preserve current classification and preview behavior
+4. Keep the diff local and reviewable
+
+Files allowed to modify:
+- app/src/main/java/com/tb/swisstrainspotting/ImageClassificationActivity.java
+- app/src/main/res/layout/activity_image_classification.xml
+- app/src/main/res/values/strings.xml
+
+Do not modify other files unless absolutely required for compile correctness, and if so, explain exactly why.
+
+At the end, report:
+- files modified
+- OCR view IDs added
+- strings added
+- where OCR section is shown/hidden
+- how new image load resets OCR visibility
+- anything intentionally left for Phase 6D
+- any tiny assumptions made due to current layout structure
+
+Very important:
+Do not broaden this into full OCR feature completion.
+Do not add tests yet.
+Do not redesign the layout.
+Do not silently refactor unrelated code.
+If ambiguity arises, choose the most conservative solution that preserves current UI behavior and makes OCR a simple auxiliary display section.
