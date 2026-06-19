@@ -9,6 +9,8 @@ appcompat = "1.7.1"
 material = "1.14.0"
 activityKtx = "1.13.0"
 constraintlayout = "2.2.1"
+playServicesMlkitTextRecognitionCommon = "19.1.0"
+playServicesMlkitTextRecognition = "19.0.1"
 
 [libraries]
 exifinterface = { module = "androidx.exifinterface:exifinterface", version.ref = "exifinterface" }
@@ -20,6 +22,9 @@ material = { group = "com.google.android.material", name = "material", version.r
 activity-ktx = { group = "androidx.activity", name = "activity-ktx", version.ref = "activityKtx" }
 constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 onnxruntime-android = { group = "com.microsoft.onnxruntime", name = "onnxruntime-android", version.ref = "onnxruntimeAndroid" }
+play-services-mlkit-text-recognition-common = { group = "com.google.android.gms", name = "play-services-mlkit-text-recognition-common", version.ref = "playServicesMlkitTextRecognitionCommon" }
+play-services-mlkit-text-recognition = { group = "com.google.android.gms", name = "play-services-mlkit-text-recognition", version.ref = "playServicesMlkitTextRecognition" }
+
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

@@ -1,0 +1,105 @@
+Read these files first and treat them as authoritative:
+
+- ../plans/01_architecture.md
+- AGENTS.md
+- plans/module_02/implementation_plan.md
+- plans/module_05/implementation_plan.md
+- plans/module_06/module_6_full_plan.md
+
+Use these repository skills if present:
+- android-dependency-closure
+- android-testing
+
+Task:
+Implement **Phase 6A only** of Module 6 — OCR, exactly following the Module 6 plan.
+
+Phase 6A scope only:
+1. Add the ML Kit Text Recognition dependency via the existing Gradle version catalog and `app/build.gradle`
+2. Create `OcrResult`
+3. Create `OcrAnalyzer` interface
+4. Create `MlKitOcrAnalyzer` implementing `OcrAnalyzer`
+5. Create `OcrTextNormalizer` as a small pure helper unless inlining is clearly simpler without reducing clarity
+
+Do NOT implement:
+- Activity wiring
+- OCR execution from `ImageClassificationActivity`
+- XML layout changes
+- strings.xml changes
+- instrumentation tests
+- UI binding
+- lifecycle integration beyond what is required inside the analyzer itself
+- any routing / ONNX / preprocessing modifications
+
+Implementation requirements:
+- Java only, no Kotlin
+- Stay within existing architecture and package structure
+- Do not redesign existing modules
+- Do not create new activities, fragments, ViewModels, services, or navigation
+- Do not add cloud OCR or any network dependency
+- Do not modify Module 3 or Module 5 logic
+- Do not couple OCR to ONNX inference
+
+Required implementation details:
+- `OcrResult` must be a small immutable value object representing normalized OCR text, with explicit empty semantics
+- `OcrAnalyzer` must be a small interface seam that allows stubbing/faking in later tests
+- `MlKitOcrAnalyzer` must:
+  - wrap ML Kit Text Recognition for on-device OCR only
+  - accept an upright `Bitmap`
+  - return `OcrResult`
+  - lazy-create and reuse one `TextRecognizer`
+  - expose `close()`
+  - apply OCR-local safety scaling for oversized bitmaps before recognition
+- `OcrTextNormalizer` must:
+  - trim
+  - collapse excessive whitespace
+  - normalize whitespace-only input to empty
+  - join recognized lines/blocks into one stable display string using spaces
+- Keep names explicit rather than clever
+
+Important threading note:
+- Phase 6A should prepare for controlled background execution, but must not yet wire executors or activity callbacks
+- Do not implement listener-driven UI flow here
+- If `MlKitOcrAnalyzer` needs to bridge ML Kit `Task` completion internally, do so in a way that can later be called from a background executor without leaking UI concerns into this phase
+
+Bitmap safety requirement:
+- Do not use the 224x224 ONNX preprocessing path
+- Operate on upright display bitmap input
+- If bitmap is excessively large for safe OCR processing, create an OCR-local scaled copy only
+- Do not mutate the original bitmap
+- Keep the scaling rule explicit and documented in code comments
+
+Dependency-closure requirement:
+- If you add any imports, ensure Gradle dependencies are updated accordingly
+- Keep version catalog naming consistent with project style
+- No unused dependencies
+
+Deliverables:
+Create only the minimal files needed for Phase 6A:
+- app/src/main/java/com/tb/swisstrainspotting/OcrResult.java
+- app/src/main/java/com/tb/swisstrainspotting/OcrAnalyzer.java
+- app/src/main/java/com/tb/swisstrainspotting/MlKitOcrAnalyzer.java
+- app/src/main/java/com/tb/swisstrainspotting/OcrTextNormalizer.java   (if used)
+- update gradle/libs.versions.toml
+- update app/build.gradle
+
+Testing in this phase:
+- Add a small pure JVM unit test only if it helps validate `OcrTextNormalizer`
+- Do not add instrumentation tests yet unless absolutely necessary
+- Do not invent test scaffolding for later phases
+
+Implementation style:
+- Keep code explicit and easy to review
+- Prefer straightforward methods and descriptive names
+- Add concise comments only where needed for non-obvious OCR/ML Kit decisions
+- Do not add speculative abstractions
+
+Before making changes:
+1. Briefly inspect the existing package structure and Gradle version catalog usage
+2. Follow existing naming/style conventions
+3. Minimize edits outside Phase 6A scope
+
+At the end, report:
+- files created/modified
+- short summary of what was implemented
+- any small assumptions made
+- any follow-up needed for Phase 6B, but do not implement it

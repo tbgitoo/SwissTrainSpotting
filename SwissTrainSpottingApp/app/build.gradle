@@ -39,6 +39,8 @@ dependencies {
     implementation libs.constraintlayout
     implementation libs.material
     implementation libs.onnxruntime.android
+    implementation libs.play.services.mlkit.text.recognition
+    implementation libs.play.services.mlkit.text.recognition.common
     testImplementation libs.junit
     androidTestImplementation libs.espresso.core
     androidTestImplementation libs.ext.junit
