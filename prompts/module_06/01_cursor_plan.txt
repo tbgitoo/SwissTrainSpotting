@@ -1,0 +1,91 @@
+Read and follow `plans/01_architecture.md` as the authoritative project plan.
+
+Task:
+Draft a concrete implementation plan for **Module 6 — OCR** for the SwissTrainSpotting Android app.
+
+Read these before drafting the Module 6 OCR plan:
+
+- ../plans/01_architecture.md
+- AGENTS.md
+- plans/module_01/implementation_plan.md
+- plans/module_02/implementation_plan.md
+- plans/module_05/implementation_plan.md
+
+Optional:
+- Module 3 plan only if needed to understand bitmap/image-flow ownership or image contract details.
+
+Use these relevant skills if present in the repository:
+- android-testing
+- android-dependency-closure
+
+Use Android lifecycle/threading guidance from repo skills if such a skill already exists.
+Do not use packed-vs-planar or ONNX-specific skills unless a real dependency emerges from reading the module plans.
+
+
+Important context from the architecture:
+- Stack: Java + XML Android app
+- Launcher activity (MainActivity) with a secondary ImageClassificationActivity for result display
+- Existing pipeline already includes:
+  - image acquisition
+  - bitmap handling
+  - ONNX inference
+  - classification result display
+- OCR uses **ML Kit Text Recognition**
+- OCR is **local-only**
+- OCR is **not part of the critical classification path**
+- OCR output is **best-effort only**
+- Success criterion is **good enough to work reliably**, not “minimal at all costs”
+- OCR must never cause crashes or block the main classification flow
+
+Your job is to produce a **module plan only**, not implementation code.
+
+Requirements for the plan:
+1. Do **not** redesign the overall architecture.
+2. Do **not** change the existing module boundaries unless absolutely necessary.
+3. Treat OCR as an **auxiliary asynchronous feature** layered onto the existing image/result flow.
+4. Assume OCR should run on the same acquired/imported image already used by inference.
+5. OCR may return empty text; that is acceptable behavior.
+6. The OCR result should be displayed in the UI only if available, without disrupting classification output.
+7. The plan must be realistic for Android Java + XML and ML Kit integration.
+
+
+
+
+Produce the plan in the same style as the rest of the project planning, with clearly labeled sections:
+
+- **Purpose**
+- **Inputs / outputs**
+- **Dependencies**
+- **Architectural placement**
+- **Step-by-step workflow**
+- **Classes / responsibilities**
+- **UI integration**
+- **Threading / lifecycle considerations**
+- **Failure handling / fallback behavior**
+- **Testing strategy**
+- **Milestone / definition of done**
+
+Planning expectations:
+- Be specific enough that implementation can follow directly afterward.
+- Include likely Android integration points (e.g. where OCR is triggered, where result is stored, where UI is updated).
+- Include any required Gradle/library additions at planning level.
+- Include whether OCR should use the full bitmap or a derived bitmap, and justify briefly.
+- Include handling for empty OCR output, low-quality text, and OCR failure.
+- Include how OCR should coexist with ONNX inference without blocking or coupling to it.
+- Prefer simple, explicit class responsibilities over clever abstractions.
+
+Constraints:
+- No backend
+- No persistence
+- No cloud OCR
+- No new screens
+- No feature creep such as text-driven routing or OCR-dependent logic
+- Do not make OCR a prerequisite for classification
+- Do not propose Kotlin
+- Do not introduce Compose
+- Do not introduce a second activity unless absolutely unavoidable (it should not be)
+
+Output format:
+Return a clean Markdown module plan for **Module 6 — OCR** only, suitable for inclusion under `plans/` as a new or updated module section.
+
+If there are small ambiguities, resolve them conservatively in favor of robustness and implementation simplicity.
