@@ -349,9 +349,9 @@ public class ImageClassificationActivity extends AppCompatActivity {
     void applyOcrResult(OcrResult result) {
         if (result == null || result.isEmpty()) {
             lastOcrResult = null;
-            runOnUiThread(() -> {
-                if (llOcrSection != null) llOcrSection.setVisibility(View.GONE);
-            });
+            if (llOcrSection != null) {
+                llOcrSection.setVisibility(View.GONE);
+            }
             return;
         }
         lastOcrResult = result;

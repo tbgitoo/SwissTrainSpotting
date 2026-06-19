@@ -3,6 +3,8 @@ package com.tb.swisstrainspotting;
 import android.graphics.Bitmap;
 import android.util.Log;
 
+import com.google.android.gms.tasks.Tasks;
+
 import com.google.mlkit.vision.common.InputImage;
 import com.google.mlkit.vision.text.Text;
 import com.google.mlkit.vision.text.TextRecognition;
@@ -43,15 +45,14 @@ public class MlKitOcrAnalyzer implements OcrAnalyzer {
 
         Text visionText;
         try {
-            // Using ML Kit v17 sync API (.getResult()) on a background thread.
-            // OCR-local scaling ensures we stay within ML Kit's memory limits.
             InputImage image = InputImage.fromBitmap(ocrBitmap, 0);
-            getRecognizer().process(image);
-            visionText = getRecognizer().process(image).getResult();
+            // process() returns an async Task; block on ocrExecutor thread until complete.
+            visionText = Tasks.await(getRecognizer().process(image));
             if (visionText == null) {
                 return OcrResult.empty();
             }
-            return new OcrResult(OcrTextNormalizer.normalize(visionText));
+            String normalized = OcrTextNormalizer.normalize(visionText);
+            return normalized.isEmpty() ? OcrResult.empty() : new OcrResult(normalized);
         } catch (Exception e) {
             Log.w(TAG, "ML Kit OCR failed", e);
             return OcrResult.empty();

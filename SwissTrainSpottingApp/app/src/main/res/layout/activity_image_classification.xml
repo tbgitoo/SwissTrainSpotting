@@ -71,7 +71,7 @@
 
         <TextView
             android:id="@+id/tv_ocr_result"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
             android:paddingStart="16dp"
@@ -89,7 +89,7 @@
         android:scaleType="centerCrop"
         android:src="@android:drawable/ic_menu_gallery"
         android:contentDescription="@string/placeholder_image_content_description"
-        app:layout_constraintTop_toBottomOf="@+id/tv_classification_result"
+        app:layout_constraintTop_toBottomOf="@+id/ll_ocr_section"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
