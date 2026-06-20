@@ -1,0 +1,80 @@
+Task: Add or refine concise, high-value JavaDoc for the remaining key Android classes.
+
+Working directory:
+- SwissTrainSpottingApp/
+
+Read first:
+- AGENTS.md
+- ../plans/01_architecture.md
+- plans/module_02/implementation_plan.md
+- plans/module_05/implementation_plan.md
+- plans/module_06/implementation_plan.md
+- ../plans/module_07/implementation_plan.md
+
+Target classes only:
+- MainActivity
+- MlKitOcrAnalyzer
+- OcrAnalyzer
+- OcrResult
+- OcrTextNormalizer
+- LogitsParser
+- ModelConfig
+- AcquisitionMode
+- RoutingMode
+- RoutedResultFormatter
+
+Goal:
+Document the remaining important helper, OCR, parsing, and entry-point classes without overdocumenting them.
+
+Important intent:
+The goal is NOT to restate obvious code.
+The goal is to explain architectural role, important contracts, and non-obvious behavior that a future maintainer would not reliably infer from code alone.
+
+Focus especially on:
+- which parts belong to the OCR auxiliary path vs the classification critical path
+- what MainActivity is responsible for vs what ImageClassificationActivity handles
+- what MlKitOcrAnalyzer guarantees and what remains best-effort
+- what OcrAnalyzer abstracts
+- how OCR text normalization is intended to behave
+- what LogitsParser assumes about logits and labels
+- what ModelConfig centralizes
+- what AcquisitionMode and RoutingMode mean semantically in app flow / presentation flow
+- what RoutedResultFormatter is responsible for, and what it is NOT responsible for
+
+Cleanup rule:
+If a target class already has JavaDoc, improve or simplify it rather than stacking more on top.
+There must be at most one class-level JavaDoc block per class.
+Remove duplicate or redundant JavaDoc if present.
+Reduce phase-history wording if it does not help a future maintainer.
+
+Method-level documentation:
+Only document methods that are:
+- public
+- integration-relevant
+- non-obvious in behavior
+- contract-sensitive
+- important to OCR, parsing, formatting, or app navigation flow
+
+Do NOT:
+- document trivial enum constants unless their meaning is not obvious
+- document trivial getters/setters
+- add decorative comments
+- change logic, signatures, imports, or formatting unnecessarily
+- invent behavior not present in code or plans
+
+Style:
+- concise
+- technical
+- maintainer-oriented
+- grounded in code + plans
+- no fluff
+- no boilerplate AI tone
+
+Additional rule:
+Prefer fewer, better JavaDoc blocks over broad coverage.
+If a class is already obvious from code and only trivial documentation would be added, keep documentation minimal.
+
+Deliverable:
+- modify only the target files above
+- JavaDoc only
+- at the end, summarize which files were updated and mention any duplicate JavaDoc blocks that were removed 
