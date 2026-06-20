@@ -31,6 +31,24 @@ import java.util.concurrent.Executors;
 
 import org.json.JSONException;
 
+/**
+ * Classification screen: acquires an image, runs generic + specialized ONNX inference with
+ * presentation-aware routing, and optionally extracts text via ML Kit OCR.
+ *
+ * <p>Lifecycle: on {@link #onDestroy()} all executors and classifiers are shut down;
+ * active classification generations are discarded via a session counter so stale callbacks
+ * never reach the UI after rotation or activity teardown.
+ *
+ * <p>Threading: preprocessing and inference run on {@code inferenceExecutor} (single-thread);
+ * OCR runs on {@code ocrExecutor}. Results always flow back through {@code runOnUiThread}.
+ *
+ * <p>Image acquisition supports both gallery pick (photo picker) and camera capture.
+ * EXIF orientation is corrected before inference; the working Bitmap lives in memory only.
+ *
+ * <p>Cross-module contract: consumes planar NCHW {@code float[]} from {@link ImagePreprocessor},
+ * delegates to {@link OnnxClassifier} for both generic (MobileNetV2) and profile-scoped models,
+ * and uses {@link ClassificationRouter} with a per-profile allowed set for result presentation.
+ */
 public class ImageClassificationActivity extends AppCompatActivity {
 
     public static final String EXTRA_ACQUISITION_MODE = "acquisition_mode";

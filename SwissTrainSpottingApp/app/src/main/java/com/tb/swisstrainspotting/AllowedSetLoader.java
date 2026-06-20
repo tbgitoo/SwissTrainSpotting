@@ -12,11 +12,15 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Loads allowed-set MobileNetV2 labels from a profile-specific text asset.
+ * Loads phase-5E allowed-set artifacts — plain-text files listing which generic ImageNet /
+ * MobileNetV2 predictions are in-scope for a given specialized classifier.
  *
- * <p>The expected file path is {@code <profileId>_allowed_mobilenetv2_labels.txt} in app assets.
- * Contains one generic ImageNet / MobileNetV2 label per line — these are the generic top-predictions
- * that are "in-scope" for a given specialized classifier's routing logic.
+ * <p>Asset name convention: {@code <profileId>_allowed_mobilenetv2_labels.txt}.
+ * The file contents are ImageNet class names (not the specialized profile's own labels),
+ * and serve as the bridge between the generic classifier's output space and the specialized
+ * model's applicability domain. Both families must share a label vocabulary for this to work;
+ * if the Python export already embeds {@code compatible_generic_labels} in metadata,
+ * that path bypasses this loader entirely (see {@link ModelProfile#readAllowedSet}).
  */
 public final class AllowedSetLoader {
 
@@ -25,7 +29,8 @@ public final class AllowedSetLoader {
     private AllowedSetLoader() {}
 
     /**
-     * Build the asset file path for a profile's allowed-set using the naming convention.
+     * Build the asset file path for a profile's allowed-set using the naming convention:
+     * {@code <profileId>_allowed_mobilenetv2_labels.txt}.
      */
     public static String createAssetPath(String profileId) {
         return profileId + SUFFIX;

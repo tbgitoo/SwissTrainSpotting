@@ -4,15 +4,17 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Phase 5D routing logic.
+ * Presentation-aware routing between Module 5C (multi-model inference) and Module 5D (result presentation).
  *
- * <p>Determines whether a specialized classification result should be presented:
- * <ul>
- *   <li><b>Directly</b> when the generic classifier's top prediction falls within the allowed set (in-scope).</li>
- *   <li><b>Conditionally/hypothetically</b> when the generic prediction is outside the allowed set (out-of-scope).</li>
- * </ul>
+ * <p>Never gates or skips inference: both generic and specialized {@link InferenceRunner} implementations
+ * execute unconditionally with the same preprocessed tensor. If no allowed set is present, all results
+ * route as {@link RoutingMode#DIRECT}. Otherwise, the generic classifier's top prediction label determines
+ * whether the specialized result is presented directly (in-scope) or conditionally/hypothetically
+ * (out-of-scope).
  *
- * The specialized classifier runs unconditionally regardless of the generic result.
+ * <p><b>Thread model:</b> fully synchronous with no internal threading — designed to be called from
+ * within {@link ImageClassificationActivity}'s background executor and marshaled to the UI thread by
+ * the caller.
  */
 public final class ClassificationRouter {
 

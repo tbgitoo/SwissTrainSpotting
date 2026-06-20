@@ -17,12 +17,23 @@ import ai.onnxruntime.OrtException;
 import ai.onnxruntime.OrtSession;
 import ai.onnxruntime.TensorInfo;
 
+
 /**
- * ONNX Runtime inference for Phase 5A MobileNetV2 reference model.
+ * Encapsulates a long-lived ONNX Runtime session for a single model profile.
  *
- * <p>Accepts planar NCHW {@code float[]} input from {@link ImagePreprocessor}.
- * Creates one long-lived {@link OrtSession} at construction time and reuses it
- * for all {@link #classify(float[])} calls.
+ * <p><b>Session lifecycle:</b> one {@link OrtSession} is created at construction via the
+ * singleton {@link OrtEnvironment#getEnvironment()} and reused for every {@link #classify(float[])}
+ * call. The caller must invoke {@link #close()} when the session is no longer needed to free
+ * native ONNX resources. Idempotent close is guaranteed.
+ *
+ * <p><b>Threading:</b> inference itself has no internal synchronization — callers must ensure
+ * that preprocessed tensors are produced off the main thread (typically via an {@code ExecutorService}
+ * inside {@link ImageClassificationActivity}).
+ *
+ * <p><b>Input contract:</b> expects a planar NCHW array of length 150&nbsp;528 (3 × 224 × 224)
+ * as produced by {@link ImagePreprocessor}. The shape is validated at entry in every call. Output
+ * validation enforces rank-2 logits, finite values, and correct float buffer semantics for
+ * both packed (float[][]) and planar ({@code FloatBuffer}) ONNX tensor layouts.
  */
 public class OnnxClassifier implements AutoCloseable {
 

@@ -3,11 +3,15 @@ package com.tb.swisstrainspotting;
 import android.graphics.Bitmap;
 
 /**
- * Seam for OCR text recognition.
+ * Abstraction over any on-device OCR engine used by the auxiliary OCR path.
  *
- * <p>Implementations may use any on-device OCR engine. Consumers call
- * {@link #recognize(Bitmap)} and receive an {@link OcrResult}. When done, callers should
- * invoke {@link #close()} to release resources (e.g., ML Kit {@code TextRecognizer}).
+ * <p>This interface is the seam between module-level infrastructure (executor lifecycle,
+ * bitmap ownership, session tokens) in {@code ImageClassificationActivity} and a concrete
+ * implementation. It ensures that future switches (e.g., Google ML Kit ⇐⇒ another engine)
+ * require no changes in the activity code beyond wiring a new impl.
+ *
+ * <p>Implementations must treat the input bitmap as read-only. Returning {@code null} from
+ * {@link #recognize(Bitmap)} is forbidden — always return {@link OcrResult#empty()} instead.
  */
 public interface OcrAnalyzer extends AutoCloseable {
 

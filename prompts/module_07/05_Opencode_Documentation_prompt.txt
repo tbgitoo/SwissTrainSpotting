@@ -1,0 +1,67 @@
+Task: Add or refine concise, high-value JavaDoc for a small batch of Android classes.
+
+Working directory:
+- SwissTrainSpottingApp/
+
+Read first:
+- AGENTS.md
+- ../plans/01_architecture.md
+- plans/module_05/implementation_plan.md
+- plans/module_06/implementation_plan.md
+- ../plans/module_07/implementation_plan.md
+
+Target classes only:
+- ModelProfile
+- LabelLoader
+- AllowedSetLoader
+- ProfileConfig
+- RoutedResultFormatter
+- ClassificationResult
+- RoutedClassificationResult
+
+Goal:
+Document the metadata / config / presentation seam around model profiles and routed classification results.
+
+Important intent:
+The goal is NOT to restate obvious code.
+The goal is to explain architectural role, asset/config conventions, and cross-module contracts that are not immediately obvious from code alone.
+
+Focus especially on:
+- how Python-exported metadata/config is consumed on Android
+- asset naming conventions and profile-driven loading
+- distinction between generic labels, specialized labels, and allowed-set routing
+- what is immutable config vs what is runtime result data
+- what RoutedResultFormatter is responsible for in presentation terms
+- what callers should assume about label formats and profile metadata
+
+Cleanup rule:
+If a target class already has JavaDoc, improve or simplify it rather than stacking more on top.
+There must be at most one class-level JavaDoc block per class.
+Remove duplicate or redundant JavaDoc if present.
+Reduce phase-history wording if it does not help a future maintainer.
+
+Method-level documentation:
+Only document methods that are:
+- public
+- integration-relevant
+- non-obvious in behavior
+- important to asset/config loading or result interpretation
+
+Do NOT:
+- document trivial getters/setters unless they carry non-obvious semantics
+- add decorative comments
+- change logic, signatures, imports, or formatting unnecessarily
+- invent behavior not present in code or plans
+
+Style:
+- concise
+- technical
+- maintainer-oriented
+- grounded in code + plans
+- no fluff
+- no boilerplate AI tone
+
+Deliverable:
+- modify only the target files above
+- JavaDoc only
+- at the end, summarize which files were updated and mention any duplicate JavaDoc blocks that were removed 

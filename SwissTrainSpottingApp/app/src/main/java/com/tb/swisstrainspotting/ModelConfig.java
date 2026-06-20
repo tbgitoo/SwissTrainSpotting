@@ -1,7 +1,15 @@
 package com.tb.swisstrainspotting;
 
 /**
- * Phase 5A configuration constants for the reference MobileNetV2 model.
+ * Constants for the Phase 5A generic MobileNetV2 reference model only.
+ *
+ * <p>These values apply solely to the ImageNet-supplied reference assets (mobilenetv2.onnx,
+ * imagenet_classes.txt) that validate the inference pipeline before any specialized model is loaded.
+ * They are the hardcoded fallback in {@link ModelProfile#load(android.content.Context, String)} and
+ * serve as the baseline against which exported profiles (via {@code _model_metadata.json}) are compared.
+ *
+ * <p>From Phase 5B onward, new profiles should not add parallel constants here. Instead, they drive
+ * these values from their own metadata assets so that switching models requires only config changes.
  */
 public final class ModelConfig {
 

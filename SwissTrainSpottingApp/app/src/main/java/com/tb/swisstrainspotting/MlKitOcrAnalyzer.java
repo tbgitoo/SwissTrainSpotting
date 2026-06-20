@@ -12,16 +12,18 @@ import com.google.mlkit.vision.text.TextRecognizer;
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions;
 
 /**
- * On-device OCR backed by ML Kit Text Recognition (v17+).
+ * On-device OCR powered by ML Kit Text Recognition, implementing {@link OcrAnalyzer}.
  *
- * <p>Lazy-creates one {@link TextRecognizer} on first use and reuses it for all calls.
- * Callers must invoke {@link #close()} when the analyzer is no longer needed to release
- * the underlying native resources.
+ * <p>Lifecycle: lazy-creates one {@link TextRecognizer} on first call, reuses it for all subsequent invocations.
+ * Callers must invoke {@link #close()} when the analyzer is discarded (e.g., activity teardown) to release native resources.
+ * Calling methods after close throws {@link IllegalStateException}.
  *
- * <h3>Bitmap safety</h3>
- * Accepts an upright display Bitmap (same orientation as shown to the user).
- * If the bitmap exceeds 2048 pixels in width or height, a downsampled copy is created
- * for OCR-only purposes; the original Bitmap is never mutated or replaced.
+ * <p>Bitmap contract: accepts the upright display Bitmap (same orientation as shown to the user).
+ * If either dimension exceeds 2048px, a scaled copy is created for OCR — the original is never mutated or replaced.
+ * The scaled bitmap is recycled in a finally block; callers own the original.
+ *
+ * <p>Failure guarantee: any exception during recognition returns {@link OcrResult#empty()} and logs at WARN level.
+ * This ensures OCR never crashes the app or blocks the classification critical path.
  */
 public class MlKitOcrAnalyzer implements OcrAnalyzer {
 

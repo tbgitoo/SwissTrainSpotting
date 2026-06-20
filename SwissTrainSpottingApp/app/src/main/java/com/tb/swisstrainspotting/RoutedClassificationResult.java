@@ -1,8 +1,19 @@
 package com.tb.swisstrainspotting;
 
 /**
- * Holds a generic classifier result alongside a specialized classifier result,
- * together with the routing mode determined by Phase 5D logic.
+ * Holds both classifier outputs alongside the routing decision that determines how to present them.
+ *
+ * <p>In production (Phase 5D+), two classifiers always run: a generic MobileNetV2 and a
+ * specialized profile-trained model. This type carries both results plus the {@link RoutingMode}
+ * that was determined by checking whether the generic prediction falls within the specialized
+ * profile's allowed set. The routing mode controls presentation semantics in {@link RoutedResultFormatter}:
+ * <ul>
+ *   <li><b>DIRECT</b> — the image is in-scope; show only the specialized result.</li>
+ *   <li><b>CONDITIONAL</b> — out-of-scope; show both generic and a conditional specialized line.</li>
+ * </ul>
+ *
+ * This class carries data, not decision logic. Callers should not infer routing correctness from
+ * its contents alone — use it to drive the formatter or test assertion of known outcomes.
  */
 public final class RoutedClassificationResult {
 

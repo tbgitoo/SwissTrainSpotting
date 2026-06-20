@@ -11,15 +11,17 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 
 /**
- * Loads app-side profile configuration from assets.
+ * Immutable, app-side presentation config for a specialized classifier profile.
  *
- * <p>Each specialized profile has a config file at
- * {@code <profileId>_profile_config.json} containing:
- * <ul>
- *   <li>{@code "profile_id"} — machine-readable identifier</li>
- *   <li>{@code "domain_display_name"} — human-readable domain label used in conditional UI messaging</li>
- *   <li>{@code "out_of_scope_prefix"} — domain-aware negative prefix for out-of-scope fallback text</li>
- * </ul>
+ * <p>This class is <em>not</em> Python metadata. It carries purely Android-facing text
+ * — domain display name and out-of-scope prefix strings — that control how conditional
+ * (non-direct) classification messages are composed in the UI. Written to assets as
+ * {@code <profileId>_profile_config.json} by hand or automation between training profiles.
+ *
+ * <p>Use alongside {@link ModelProfile}, which describes the model artifacts themselves.
+ * Together they answer two questions: <em>"which model does inference?"</em> (ModelProfile)
+ * and <em>"how do we phrase the result when the generic classifier says this image is out of scope?"</em>
+ * (ProfileConfig).
  */
 public final class ProfileConfig {
 

@@ -3,7 +3,16 @@ package com.tb.swisstrainspotting;
 import java.util.List;
 
 /**
- * Pure Java helper for parsing ONNX logits into a ClassificationResult.
+ * Stateless logits → top-1 classifier parser operating on the exported ONNX contract.
+ *
+ * <p>Affiliation: Module 5 inference pipeline. This class is agnostic to profile, label format,
+ * or routing — it produces {@link ClassificationResult} from raw tensor output. Label lookup
+ * (including JSON index ordering vs plain-text) is handled by the caller via the optional
+ * {@code labels} parameter; if provided, each index maps directly to its class name.
+ *
+ * <p>Stable softmax: subtracts the max logit from every element before exponentiating to avoid
+ * overflow. Confidence is the argmax probability (not a cross-entropy score), meaning it represents
+ * the model's output-space weight for the predicted class — not calibration quality.
  */
 public final class LogitsParser {
 
@@ -11,31 +20,23 @@ public final class LogitsParser {
     }
 
     /**
-     * Parse a flat logits array into a ClassificationResult without label lookup.
+     * Parse logits into the top-1 classification result without label lookup.
      *
-     * @param logits flat logits array from ONNX output tensor
-     * @return ClassificationResult with classIndex and confidence; label is null
+     * <p>Sets classIndex to argmax(logits) and confidence to the stable softmax probability of that index.
+     * The returned result's {@code label} field is null — callers should use the overloaded
+     * variant with a labels list for human-readable output.
      */
     public static ClassificationResult parse(float[] logits) {
         return parse(logits, null);
     }
 
     /**
-     * Parse a flat logits array into a ClassificationResult.
+     * Parse logits into the top-1 classification result with possible label lookup.
      *
-     * <p>Contract:
-     * <ul>
-     *   <li>logits must be non-null and non-empty</li>
-     *   <li>all values must be finite (not NaN, not Infinity)</li>
-     *   <li>classIndex = argmax(logits)</li>
-     *   <li>confidence = stable softmax probability of the argmax class</li>
-     *   <li>when labels is non-null, map index to label or fail if out of range</li>
-     * </ul>
-     *
-     * @param logits flat logits array from ONNX output tensor
-     * @param labels optional label list for index lookup; may be null
-     * @return ClassificationResult with classIndex, optional label, and confidence
-     * @throws IllegalArgumentException if logits is null, empty, non-finite, or index out of range
+     * <p>Core contract: validates logits are non-null, non-empty, and finite; computes argmax for classIndex;
+     * applies stable softmax (subtracts max before exp to avoid overflow) for confidence as the predicted-class
+     * probability — this reflects output-space weight, not calibration quality. If {@code labels} is provided,
+     * maps argmax index to label via flat list indexing; throws if the index falls outside [0, labels.size()).
      */
     public static ClassificationResult parse(float[] logits, List<String> labels) {
         if (logits == null || logits.length == 0) {

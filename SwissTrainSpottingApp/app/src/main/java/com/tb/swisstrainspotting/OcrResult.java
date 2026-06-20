@@ -1,11 +1,11 @@
 package com.tb.swisstrainspotting;
 
 /**
- * Immutable, normalized OCR result representing recognized text from a single image.
+ * Immutable holder for OCR text from the auxiliary image-pass (Module 6).
  *
- * <p>A blank {@code OcrResult} signals that no usable text was found or that the
- * OCR text contained only whitespace. Callers should check {@link #isEmpty()} to
- * decide whether to display or suppress OCR content in the UI.
+ * <p>Distinguishes "no text found" from "text was recognized" via {@link #isEmpty()}.
+ * An empty result means either no usable text was detected or the recognized text was
+ * whitespace-only — both are normal outcomes in low-quality images; they do not indicate errors.
  */
 public final class OcrResult {
 

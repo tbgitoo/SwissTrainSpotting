@@ -1,7 +1,13 @@
 package com.tb.swisstrainspotting;
 
 /**
- * Immutable result of a single classification inference.
+ * Immutable, single-label classification output from one ONNX inference pass.
+ *
+ * <p>This is the minimal runtime data type — produced after logits parsing (argmax over
+ * exported class count) and label lookup via a class index. It carries exactly what callers
+ * need to display: which class was predicted, its string name, and confidence. It does not
+ * carry any routing or profile metadata; that lives in {@link RoutedClassificationResult} and
+ * related config classes.
  */
 public final class ClassificationResult {
 

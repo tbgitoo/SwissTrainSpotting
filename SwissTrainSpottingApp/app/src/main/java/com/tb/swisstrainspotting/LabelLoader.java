@@ -16,19 +16,28 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Loads label text from an asset file.
+ * Reads label text from an assets file and returns an immutable, index-preserving list.
+ *
+ * <p>Autodetects the label format by file extension:
+ * files ending in {@code _labels.json} are parsed per the Python export schema
+ * ({@code classes[].index} → display name), producing a dense index-ordered list.
+ * All other assets are treated as plain-text (one label per line).
+ *
+ * <p>The returned list maps flat index to label directly: {@code list.get(i)} is the label
+ * for class index {@code i}. This invariant holds for both formats, so callers can pass this
+ * list straight to a logits parser without further transformation.
  */
 public final class LabelLoader {
 
     private LabelLoader() {}
 
     /**
-     * Load labels line-by-line from the given asset file path.
+     * Load labels from an asset, auto-detected as either plain-text or exported JSON format.
      *
-     * @param context   application or activity context with asset access
-     * @param assetPath path relative to src/main/assets/
-     * @return immutable list of label strings (one per non-empty trimmed line)
-     * @throws IOException if the asset cannot be read or contains no valid labels
+     * <p>Extension-based dispatch: files ending in {@code _labels.json} use the
+     * {@link #loadJsonLabels(Context, String)} path (index-ordered dense list). Everything else
+     * goes through line-by-line loading. Callers do not need to know the distinction — the
+     * returned list maps flat class index to label for both formats.
      */
     public static List<String> loadLabels(Context context, String assetPath) throws IOException {
         if (context == null) {

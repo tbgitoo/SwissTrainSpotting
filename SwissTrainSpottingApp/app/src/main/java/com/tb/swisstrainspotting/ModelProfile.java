@@ -4,12 +4,42 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+
 /**
- * Phase 5B: model-profile description loaded from asset metadata.
+ * Immutable description of a model family (ONNX artifact bundle) consumed at runtime.
  *
- * <p>A profile binds the ONNX model file, labels file (plain-text or JSON),
- * input/output node names, and num_classes — all driven by metadata when present
- * rather than hard-coded constants.
+ * <p>Each profile maps to one set of Python-exported assets — an ONNX model, a label file,
+ * and {@code _model_metadata.json} metadata produced by the {@code model/} pipeline.
+ * Android reads these assets from the app's {@code assets/} folder at start-up or lazily;
+ * this class does not mutate its source JSON.
+ *
+ * <h3>Asset lifecycle</h3>
+ * The exported metadata schema contains: {@code model_file}, {@code labels_file},
+ * {@code input_name}, {@code output_name}, {@code num_classes}, and
+ * {@code compatible_generic_labels}. Android uses these values verbatim — node names,
+ * label path, and class count are <em>not</em> re-hardcoded on the Java side.
+ * A factory method ({@link #load android.content.Context, String}) resolves the metadata file
+ * by convention: {@code <prefix>_model_metadata.json}, falling back to hardcoded MobileNetV2
+ * defaults when no metadata file exists.
+ *
+ * <h3>Label formats</h3>
+ * {@value #LABEL_FORMAT_PLAIN_TEXT} labels are one-per-line text files (Phase 5A ImageNet).
+ * {@value #LABEL_FORMAT_JSON} labels follow the exported schema with {@code classes[].index}
+ * mapping — loaded by {@link LabelLoader} which dispatches on file extension.
+ * Two model families may have entirely separate label formats and this class is agnostic to
+ * that choice beyond passing it through.
+ *
+ * <h3>Allowed set vs profile config</h3>
+ * {@link #getAllowedSet()} contains ImageNet / MobileNetV2 class names — i.e., generic-labels
+ * in scope for routing to this specialized classifier. It is orthogonal to
+ * {@link ProfileConfig}, which carries the human-facing domain display name and UI text prefixes.
+ * Both live on Android; the allowed set originates from Python metadata's
+ * {@code compatible_generic_labels} field, not from Java code.
+ *
+ * <h3>Immutable config, not runtime data</h3>
+ * This class is configuration — it never changes after construction and is safe to share
+ * across threads. It describes <em>which</em> model to load and <em>how</em>, whereas
+ * {@link ClassificationResult} describes <em>what</em> was predicted at runtime.
  */
 public final class ModelProfile {
 
@@ -73,8 +103,13 @@ public final class ModelProfile {
     // -----------------------------------------------------------------------
 
     /**
-     * Build a profile from metadata JSON asset.
-     * Reads: model_file, labels_file, input_name, output_name, num_classes, dataset_profile.
+     * Assemble a profile from already-parsed {@code _model_metadata.json} content.
+     *
+     * <p>Required field: {@code dataset_profile} (the unique profile identifier).
+     * Optional fields with defaults: {@code input_name} → "input", {@code output_name} → "output".
+     * The label format is always set to {@value #LABEL_FORMAT_JSON} for exported profiles.
+     *
+     * @throws JSONException if {@code dataset_profile} is missing or non-string
      */
     public static ModelProfile fromMetadata(org.json.JSONObject json) throws JSONException {
         String id = safeString(json, "dataset_profile");
@@ -97,7 +132,32 @@ public final class ModelProfile {
     }
 
     /**
-     * Build a profile for the Phase 5A generic MobileNetV2 reference family.
+     * Read the allowed set from metadata/config.
+     *
+     * <p>Phase 5D uses {@code compatible_generic_labels} to define which generic MobileNetV2
+     * top-prediction labels are considered in-scope for this specialized model. This is distinct
+     * from the specialized model's own {@code class_ids}.
+     */
+    private static java.util.Set<String> readAllowedSet(JSONObject json) throws JSONException {
+        java.util.Set<String> allowed = new java.util.HashSet<>();
+        JSONArray idArray = json.optJSONArray("compatible_generic_labels");
+        if (idArray != null) {
+            for (int i = 0; i < idArray.length(); i++) {
+                String id = idArray.getString(i);
+                if (id != null && !id.isEmpty()) {
+                    allowed.add(id);
+                }
+            }
+        }
+        return allowed;
+    }
+
+    /**
+     * Build a profile for the Phase 5A generic MobileNetV2 reference family with hardcoded labels.
+     *
+     * <p>This path bypasses metadata entirely — model, labels, and I/O node names use constants
+     * from the original ImageNet baseline. Use only when no exported profile metadata exists
+     * (fallback in {@link #load(android.content.Context, String)}).
      */
     public static ModelProfile mobileNetV2(String inputNode, String outputNode) {
         return new ModelProfile(
@@ -113,6 +173,12 @@ public final class ModelProfile {
 
     /**
      * Load a profile from a metadata JSON asset in the app's assets folder.
+     *
+     * <p>Reads the full JSON at once via UTF-8, delegates to {@link #fromMetadata(JSONObject)}.
+     * Throws through whatever {@code JSONException} occurs during parsing — no restructuring.
+     *
+     * @param context    application or activity context with asset access
+     * @param assetPath  path relative to {@code assets/} (e.g. {@code "hymenoptera_model_metadata.json"})
      */
     public static ModelProfile fromMetadataAsset(android.content.Context context, String assetPath) throws JSONException, java.io.IOException {
         try (java.io.InputStream is = context.getAssets().open(assetPath);
@@ -128,15 +194,17 @@ public final class ModelProfile {
     }
 
     /**
-     * Metadata-aware helper to load a profile.
-     * Checks for a metadata file named {@code <prefix>_model_metadata.json} where
-     * prefix is the active model type identifier (e.g. "hymenoptera", "mobilenetv2").
-     * Falls back to Phase 5A defaults if no metadata is present.
+     * Load a profile by convention: resolve {@code <prefix>_model_metadata.json} from assets,
+     * parse it to a {@link ModelProfile}, or fall back to hardcoded MobileNetV2 defaults
+     * when the metadata file is absent.
      *
-     * @param context        application or activity context with asset access
-     * @param modelPrefix    prefix used for file naming (e.g., "hymenoptera")
-     *                       or the literal model filename when no prefix pattern applies
-     * @return loaded ModelProfile
+     * <p>This is the standard entry point for production use. Callers pass a profile identifier
+     * such as {@code "hymenoptera"} or {@code "swiss_trains"}. If no exported metadata exists,
+     * the method silently returns the ImageNet generic profile — callers should not assume the
+     * returned model is always specialized.
+     *
+     * @param context      application or activity context with asset access
+     * @param modelPrefix  e.g. {@code "hymenoptera"} — appended with {"_model_metadata.json"} to form the asset path
      */
     public static ModelProfile load(android.content.Context context, String modelPrefix) throws JSONException, java.io.IOException {
         String metadataAsset = modelPrefix + "_model_metadata.json";
@@ -151,7 +219,7 @@ public final class ModelProfile {
     }
 
     // -----------------------------------------------------------------------
-    // JSON helpers
+    // JSON helpers (private)
     // -----------------------------------------------------------------------
 
     private static JSONObject requiredObject(JSONObject json, String key) throws JSONException {
@@ -173,35 +241,6 @@ public final class ModelProfile {
         Object val = json.opt(key);
         return (val instanceof Number) ? ((Number) val).longValue() : fallback;
     }
-
-    // -----------------------------------------------------------------------
-    // Allowed-set support for Phase 5D routing
-    // -----------------------------------------------------------------------
-
-    /**
-     * Read the allowed set from metadata/config.
-     *
-     * <p>Phase 5D uses {@code compatible_generic_labels} to define which generic MobileNetV2
-     * top-prediction labels are considered in-scope for this specialized model. This is distinct
-     * from the specialized model's own {@code class_ids}.
-     */
-    private static java.util.Set<String> readAllowedSet(JSONObject json) throws JSONException {
-        java.util.Set<String> allowed = new java.util.HashSet<>();
-        JSONArray idArray = json.optJSONArray("compatible_generic_labels");
-        if (idArray != null) {
-            for (int i = 0; i < idArray.length(); i++) {
-                String id = idArray.getString(i);
-                if (id != null && !id.isEmpty()) {
-                    allowed.add(id);
-                }
-            }
-        }
-        return allowed;
-    }
-
-    // -----------------------------------------------------------------------
-    // JSON helpers
-    // -----------------------------------------------------------------------
 
     private static String requiredString(JSONObject json, String key) throws JSONException {
         Object val = json.opt(key);

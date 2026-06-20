@@ -1,0 +1,87 @@
+Task: Add concise JavaDoc to a small set of core Android classes.
+
+Working directory:
+- SwissTrainSpottingApp/
+
+Read first:
+- AGENTS.md
+- ../plans/01_architecture.md
+- plans/module_05/implementation_plan.md
+- plans/module_06/implementation_plan.md
+- ../plans/module_07/implementation_plan.md
+
+Target classes only:
+- ImageClassificationActivity
+- OnnxClassifier
+- ImagePreprocessor
+- ModelProfile
+- ClassificationRouter
+
+Goal:
+Add JavaDoc to these classes, focusing on public-facing and integration-relevant classes and methods.
+
+Important intent:
+The goal is NOT to mechanically restate the code.
+The goal is to capture plan-level insight and architectural intent that a maintainer would NOT reliably infer from code alone.
+
+Focus especially on:
+- lifecycle role
+- threading expectations
+- data contract boundaries
+- asset/config dependencies
+- invariants that must stay aligned with the Python/export side
+- optional vs critical-path behavior
+- why a component exists in the overall app architecture
+
+Method-level documentation:
+Only document methods that are:
+- public
+- protected
+- integration-relevant
+- non-obvious in behavior
+- lifecycle-sensitive
+- threading-sensitive
+- contract-sensitive
+
+Do NOT:
+- document trivial private helpers
+- add decorative or generic comments
+- restate obvious getters/setters
+- change logic, signatures, imports, or formatting unnecessarily
+- invent behavior not present in code or plans
+
+If a class already has JavaDoc:
+- improve or simplify it rather than stacking more on top
+- keep at most one class-level JavaDoc block
+- remove duplicate or redundant JavaDoc if present
+
+What the JavaDoc should contain:
+For classes:
+- short responsibility statement
+- where the class fits in the app flow
+- important constraints (threading, assets, optionality, lifecycle)
+
+For methods:
+- what the method does in architectural terms
+- key inputs/outputs where non-obvious
+- side effects or expectations
+- threading assumptions if relevant
+- when behavior is intentionally best-effort or non-critical
+
+Style:
+- concise
+- technical
+- useful to a future maintainer
+- grounded in actual implementation + plans
+- no fluff
+- no boilerplate AI tone
+
+If code and plan differ:
+- prefer the code
+- only use plan material to clarify intent where the code alone is ambiguous
+- do not “correct” the code to match the plans
+
+Deliverable:
+- modify only the target files above
+- JavaDoc only
+- at the end, provide a short summary listing which classes were documented and any duplicate JavaDoc blocks that were removed

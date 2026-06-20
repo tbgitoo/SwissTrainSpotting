@@ -3,16 +3,18 @@ package com.tb.swisstrainspotting;
 import com.google.mlkit.vision.text.Text;
 
 /**
- * Pure helper that normalizes OCR output from ML Kit {@link Text} into a consistent,
- * display-ready string.
+ * Pure helper that normalizes OCR output from ML Kit {@link Text} into a flat, display-ready string.
  *
- * <p>Applies the following transformations:
+ * <p>Applies three transformations in sequence:
  * <ol>
- *   <li>Collapse each text block and each sub-block into trimmed, space-separated lines.</li>
- *   <li>Join all non-empty lines with a single space to produce one output string.</li>
- *   <li>Trim the final result.</li>
- *   <li>If the result is empty (whitespace-only OCR input), return an empty string.</li>
+ *   <li>Collapse each text block and sub-block to trimmed, internal-whitespace-collapsed lines.</li>
+ *   <li>Join all non-empty lines with a single space (preserving read-order across blocks).</li>
+ *   <li>Trim the final result; return empty string when nothing remains.</li>
  * </ol>
+ *
+ * <p><b>Contract:</b> this method never throws. Null {@code visionText}, whitespace-only text, or an empty
+ * block list all produce an empty string. The output preserves read-order but does not implement sentence
+ * segmentation, line-break preservation, or language detection — it is a best-effort normalization for display.
  */
 public final class OcrTextNormalizer {
 

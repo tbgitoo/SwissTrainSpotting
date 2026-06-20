@@ -3,6 +3,21 @@ package com.tb.swisstrainspotting;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 
+/**
+ * Converts an upright Bitmap into the planar NCHW {@code float[]} tensor expected by ONNX models.
+ *
+ * <p>Pipeline: stretch-resize to 224×224 → ARGB int buffer → per-channel normalization using
+ * ImageNet mean/std → write to NCHW layout (channel-major, spatial-linear within each plane).
+ *
+ * <p><b>Packed-to-planar contract:</b> reads packed ARGB pixels via {@code Bitmap.getPixels()},
+ * converts RGB to [0,1] range, applies {@code (x − mean) / std} per channel, and stores in an
+ * output array of length 150&nbsp;528 where index  C×224×224 + y×224 + x holds the value for
+ * channel C at pixel (y, x). This matches the Python preprocessing order exactly.
+ *
+ * <p>Caller is responsible for supplying an upright Bitmap (EXIF rotation corrected before
+ * invocation, typically by {@link ImageClassificationActivity}). Returns a fresh array — the
+ * caller owns it and must close any ONNX tensors built from it.
+ */
 public final class ImagePreprocessor {
 
     public static final int INPUT_WIDTH = 224;

@@ -118,9 +118,12 @@ public class ImageClassificationPhaseDTest {
         }
     }
 
+
     @Test
-    public void routedConditionalResult_surfacesGenericAndHypotheticalSpecializedText() throws IOException {
+    public void routedConditionalResult_surfacesGenericAndHypotheticalSpecializedText() throws Exception {
         Intent intent = createIntentWithFixture(FIXTURE_BASELINE);
+        Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
+        ProfileConfig hymenopteraConfig = ProfileConfig.load(appContext, "hymenoptera");
 
         try (ActivityScenario<ImageClassificationActivity> scenario = ActivityScenario.launch(intent)) {
             scenario.onActivity(activity -> {
@@ -130,10 +133,8 @@ public class ImageClassificationPhaseDTest {
                         RoutingMode.CONDITIONAL
                 );
 
-                activity.applyRoutedResult(routedResult);
+                String text = activity.formatRoutedResult(routedResult, hymenopteraConfig);
 
-                TextView resultView = activity.findViewById(R.id.tv_classification_result);
-                String text = resultView.getText().toString();
                 assertTrue(text.contains("Generic classification: volcano"));
                 assertTrue(text.contains("Not Hymenoptera"));
                 assertTrue(text.contains("if classified within Hymenoptera"));
@@ -144,6 +145,7 @@ public class ImageClassificationPhaseDTest {
             });
         }
     }
+
 
     @Test
     public void routedConditionalResult_swissTrainsProfile_usesTrainDomainWording() throws Exception {
