@@ -1,0 +1,108 @@
+You are working from the repository root, which contains both:
+
+- `model/`
+- `SwissTrainSpottingApp/`
+
+Read these files first and treat them as authoritative:
+
+- `plans/01_architecture.md`
+- `model/plans/module_04/implementation_plan.md`   (or the current Module 4 plan file if named differently)
+- `SwissTrainSpottingApp/plans/module_05/implementation_plan.md`
+- `SwissTrainSpottingApp/AGENTS.md`
+
+Also inspect the current implementation state of the relevant Android/runtime files needed to understand how specialized model selection currently works, including where applicable:
+
+- `SwissTrainSpottingApp/app/src/main/assets/`
+- `SwissTrainSpottingApp/app/src/main/java/com/tb/swisstrainspotting/ModelProfile.java`
+- `SwissTrainSpottingApp/app/src/main/java/com/tb/swisstrainspotting/ProfileConfig.java`
+- `SwissTrainSpottingApp/app/src/main/java/com/tb/swisstrainspotting/OnnxClassifier.java`
+- `SwissTrainSpottingApp/app/src/main/java/com/tb/swisstrainspotting/ClassificationRouter.java`
+- any other current Android files that determine how the generic model and specialized profile model are selected or loaded
+
+Task:
+Generate a practical Markdown guide file for **Module 4B (SwissTrain safari dataset preparation, training, export, verification, and Android integration)**.
+
+Important:
+- Create a real `.md` file in the repo.
+- Write it from the point of view of a developer returning from the train safari with new Swiss train photos.
+- The guide must be practical and operational, not theoretical.
+- It must reflect the current repository reality, not only the plan in abstraction.
+
+Output file:
+- Create `README_4B_training_swiss_trains.md`
+
+Purpose of the guide:
+Explain clearly:
+1. where the safari images must be placed
+2. how class folders should be named
+3. how image files may be named
+4. how to activate and use the existing Python pipeline for `swiss_trains`
+5. how to run:
+   - dataset discovery
+   - split generation
+   - training
+   - ONNX export
+   - ONNX verification
+6. which artifacts are produced
+7. how to copy those artifacts into the Android assets tree
+8. crucially: how to switch the Android app’s **specialized profile model** from Hymenoptera to SwissTrains **without removing Hymenoptera from the repo/assets**
+9. which files / assets / config points in Android determine that switch
+10. what the final acceptance check is for Module 4B
+
+Very important:
+- Do NOT assume that simply copying `swiss_trains.*` artifacts is sufficient.
+- Inspect the current Android-side model/profile loading logic and explain exactly what must be changed (or confirmed) so that the app uses `swiss_trains` as the specialized project model while still keeping:
+  - the generic baseline model
+  - the hymenoptera reference artifacts
+- If the current Android logic already supports both profiles and only requires a profile/config selection, say so explicitly.
+- If a specific asset/config/file name controls the active specialized profile, document it explicitly.
+- Do not invent architecture that is not present in the repo.
+- Do not modify Android code in this task unless a tiny documentation-only clarification file is absolutely necessary.
+- The primary deliverable is the Markdown guide file.
+
+Required structure of the Markdown guide:
+Use clear sections such as:
+
+- `# Module 4B — SwissTrain Safari Guide`
+- `## Purpose`
+- `## Short answer: how model switching works`
+- `## Where to place Swiss train images`
+- `## Class folder naming rules`
+- `## Image filename guidance`
+- `## Minimum dataset expectations`
+- `## Exact training/export command sequence`
+- `## Produced artifacts`
+- `## How to copy artifacts into Android assets`
+- `## How to switch the Android specialized model from hymenoptera to swiss_trains`
+- `## Final acceptance checklist`
+
+Documentation requirements:
+- Commands must be copy-paste friendly
+- Paths must be repo-relative and concrete
+- Mention the project-local virtual environment in `model/.venv`
+- Explain that the pipeline switch is done via `--profile swiss_trains`
+- Explain that the generic model stays in place
+- Explain what remains reference-only versus what becomes the active project-specialized model
+- If the Android side uses a profile registry / allowed-set / config file / asset naming convention, document the exact switching mechanism based on current repo contents
+- Be explicit about whether Hymenoptera remains present only as a reference profile or is still loadable by the app
+- Keep the guide concise but complete enough to use directly after the safari
+
+Additional constraints:
+- Do not produce a generic ML tutorial
+- Do not rewrite Module 4 code
+- Do not speculate about future architecture
+- Do not remove Hymenoptera
+- Do not say “copy artifacts and done” unless inspection of the current Android code really proves that nothing else is needed
+- If there is uncertainty in the current repo about how switching is implemented, state that explicitly and document the exact files a human must inspect/change
+
+Before writing the file:
+1. Inspect the current repo structure from the root
+2. Confirm the actual Module 4 profile names and paths
+3. Confirm how the Android app currently references specialized model/profile assets
+4. Then write the Markdown guide file
+
+At the end, report:
+- the file path created
+- a short summary of what the guide covers
+- the exact Android-side switching mechanism documented
+- any small uncertainties discovered in the repo
