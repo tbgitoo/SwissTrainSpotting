@@ -310,6 +310,7 @@ data/hymenoptera_data/
 export
 
 data/to _complete/
+data/to_complete/
 data/splits/swiss_trains_val_manifest.json
 
 

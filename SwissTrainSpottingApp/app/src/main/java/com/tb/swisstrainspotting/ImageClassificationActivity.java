@@ -89,7 +89,7 @@ public class ImageClassificationActivity extends AppCompatActivity {
         }
 
         try {
-            ModelProfile specialtyProfile = ModelProfile.load(getApplicationContext(), "hymenoptera");
+            ModelProfile specialtyProfile = ModelProfile.load(getApplicationContext(), "swiss_trains");
             specializedClassifier = new OnnxClassifier(getApplicationContext(), specialtyProfile);
             String profileId = specialtyProfile.getId();
 
