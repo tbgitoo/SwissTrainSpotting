@@ -1,0 +1,90 @@
+Task: Create the implementation plan for Module 7.
+
+Target file:
+- plans/module_07/implementation_plan.md
+
+Context:
+- Read these first:
+  - plans/01_architecture.md
+  - AGENTS.md
+- Module 7 already exists in the global plan
+- It is a ROOT-LEVEL / project-wide module
+- No dedicated implementation plan exists yet
+- Do not modify code
+- Do not modify the global plan unless strictly necessary for consistency
+- This task is only to create the dedicated Module 7 implementation plan
+
+Module 7 concept:
+Module 7 is the finalization module of the project and combines three related concerns:
+A) documentation for future reuse
+   - JavaDoc on Android side
+   - Python docstrings on model side
+B) structural review / organization
+   - proposal-level review of package / folder structure
+   - actual restructuring is expected to be manual / IDE-driven, not agent-executed
+C) packaging / distribution readiness
+   - Android APK preparation / installation readiness
+   - actual APK generation is expected to be manual in Android Studio
+   - the useful deliverable here is a concise Markdown checklist, not a command-line build pipeline
+   - Python is documented for reuse, not packaged for deployment
+
+Important scope rules:
+- This is ONE module, not separate Python and Android modules
+- Keep the plan at project level, while clearly distinguishing Python-side vs Android-side responsibilities where needed
+- Do NOT invent backend, CI/CD, Play Store publication, persistence, cloud sync, or any other scope expansion
+- Do NOT claim that package restructuring was fully implemented if it was only reviewed or proposed
+- Do NOT define a full command-line APK generation or signing workflow
+- Prefer realistic, conservative planning
+- Treat Android Studio as the execution environment for manual refactor / packaging steps where appropriate
+
+Requested structure of the implementation plan:
+1. Title and status
+2. Depends on
+3. Reference docs
+4. Purpose
+5. Inputs / outputs
+6. Dependencies
+7. Architectural placement
+8. Step-by-step workflow
+9. Testing / validation
+10. Done when
+
+Please make the workflow concrete but proportionate. Use these phases:
+- Phase 7A — Documentation
+- Phase 7B — Structural review
+- Phase 7C — Packaging readiness
+
+Guidance for each phase:
+- 7A Documentation:
+  - identify public classes / methods and important helpers
+  - add concise JavaDoc / Python docstrings
+  - use existing plans/code as context
+  - no behavior changes
+- 7B Structural review:
+  - inspect current Android and Python organization
+  - propose improved package/folder structure
+  - actual restructuring remains manual / IDE-driven
+  - the plan may include generation of a short .md checklist for manual cleanup
+- 7C Packaging readiness:
+  - review Android app readiness for manual APK generation in Android Studio
+  - identify anything that should be checked before packaging
+  - generate a short .md checklist for manual packaging / installation steps
+  - do not define command-line build steps and do not pretend packaging is agent-driven
+
+Important deliverables:
+- The implementation plan itself: `plans/module_07/implementation_plan.md`
+- Within the plan, explicitly describe checklist-style outputs for:
+  - structural cleanup review
+  - Android packaging / installation readiness
+
+Style:
+- concise
+- technical
+- conservative
+- no fluff
+- no fake completeness
+- aligned with the tone of the other implementation plans
+
+Deliverable:
+Create `plans/module_07/implementation_plan.md` only.
+At the end, provide a short summary of the module scope and phases.

@@ -1,0 +1,6 @@
+After review of the actual implementation, I think to finalize the project, in addition to end-to-end testing, there should be a few elements more: code documentation, repackaging (preferentially in Android-Studio) and apk packaging for distribution and installability. Can update the general plan for this? Please propose a replacement for the current module 7 description, which appears now a bit minimalistic:
+
+### Module 7 — Testing & Validation
+- Purpose: Ensure system works end-to-end
+- Milestone: Full pipeline works without crash
+

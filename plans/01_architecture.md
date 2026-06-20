@@ -90,9 +90,14 @@ Note: OCR is not part of the critical path and may be skipped.
 
 ---
 
-### Module 7 — Testing & Validation
-- Purpose: Ensure system works end-to-end
-- Milestone: Full pipeline works without crash
+### Module 7 — Finalization (Testing & Packaging)
+- Purpose: Ensure system correctness and prepare the application for reuse and distribution
+- Output:
+  - validated end-to-end behavior
+  - documented code (JavaDoc / Python docstrings)
+  - reviewed project structure (proposal level)
+  - installable APK
+- Milestone: Application runs end-to-end on device and can be packaged and reused
 
 ---
 
