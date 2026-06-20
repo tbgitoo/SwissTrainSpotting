@@ -185,7 +185,12 @@ def main() -> int:
         },
     }
     torch.save(checkpoint, checkpoint_path)
-    print(f"Saved checkpoint: {checkpoint_path}")
+    try:
+        rel_path = Path(checkpoint_path).resolve().relative_to(Path.cwd())
+    except ValueError:
+        rel_path = Path(checkpoint_path).name  # fallback to filename only
+
+    print(f"Saved checkpoint: {rel_path}")
     print(f"Best validation accuracy: {best_acc:.4f}")
     return 0
 

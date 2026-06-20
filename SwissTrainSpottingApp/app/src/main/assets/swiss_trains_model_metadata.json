@@ -1,0 +1,60 @@
+{
+  "version": 2,
+  "dataset_profile": "swiss_trains",
+  "model_file": "swiss_trains.onnx",
+  "labels_file": "swiss_trains_labels.json",
+  "backbone": "mobilenet_v2",
+  "num_classes": 7,
+  "class_ids": [
+    "bls",
+    "dpz",
+    "eurofima",
+    "ic2000",
+    "icn",
+    "regio_express",
+    "tl_metro"
+  ],
+  "input_name": "input",
+  "output_name": "output",
+  "input_shape": [
+    1,
+    3,
+    224,
+    224
+  ],
+  "input_dtype": "float32",
+  "layout": "NCHW",
+  "color_order": "RGB",
+  "crop": "none",
+  "resize": {
+    "width": 224,
+    "height": 224,
+    "method": "bilinear_stretch"
+  },
+  "normalize": {
+    "scale_to_0_1": true,
+    "mean": [
+      0.485,
+      0.456,
+      0.406
+    ],
+    "std": [
+      0.229,
+      0.224,
+      0.225
+    ]
+  },
+  "output": {
+    "type": "logits",
+    "shape": [
+      1,
+      "num_classes"
+    ],
+    "softmax": "applied_in_app"
+  },
+  "opset_version": 17,
+  "exported_at": "2026-06-20T09:22:07.290035+00:00",
+  "pytorch_version": "2.12.0",
+  "torchvision_version": "0.27.0",
+  "onnx_version": "1.22.0"
+}

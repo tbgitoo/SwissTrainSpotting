@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "dataset_profile": "swiss_trains",
+  "classes": [
+    {
+      "index": 0,
+      "id": "bls",
+      "display_name": "bls"
+    },
+    {
+      "index": 1,
+      "id": "dpz",
+      "display_name": "dpz"
+    },
+    {
+      "index": 2,
+      "id": "eurofima",
+      "display_name": "eurofima"
+    },
+    {
+      "index": 3,
+      "id": "ic2000",
+      "display_name": "ic2000"
+    },
+    {
+      "index": 4,
+      "id": "icn",
+      "display_name": "icn"
+    },
+    {
+      "index": 5,
+      "id": "regio_express",
+      "display_name": "regio_express"
+    },
+    {
+      "index": 6,
+      "id": "tl_metro",
+      "display_name": "tl_metro"
+    }
+  ]
+}
