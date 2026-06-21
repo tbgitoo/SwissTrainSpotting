@@ -1,4 +1,4 @@
-package com.tb.swisstrainspotting;
+package com.tb.swisstrainspotting.module05.phaseE;
 
 import static org.junit.Assert.*;
 

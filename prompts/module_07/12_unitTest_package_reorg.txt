@@ -1,0 +1,124 @@
+Task: perform a first-pass physical reorganization of local unit test classes into module/phase packages, based on plans/module_07/unit_test_mapping.txt.
+
+This is round 1 only.
+The purpose of this round is:
+- move local unit test classes into module/phase-aligned packages
+- keep existing class names and file names unchanged
+- avoid class splitting for now
+- handle mixed-phase classes conservatively by moving them to the earliest phase in which they appear
+- generate a report of mixed-phase or ambiguous classes that may need later cleanup
+
+Repository context
+- Local unit tests are under:
+  app/src/test/java/com/tb/swisstrainspotting
+- Mapping file already exists at:
+  plans/module_07/unit_test_mapping.txt
+- For this task, the mapping file is the source of truth.
+- Module 04 does not belong in the Java / Android unit test project and must not be introduced.
+
+Goal
+Reorganize local unit test classes physically into subpackages under:
+
+app/src/test/java/com/tb/swisstrainspotting/
+
+using this target structure style:
+
+- module01/phaseA/
+- module01/phaseB/
+- ...
+- module02/phaseA/
+- module02/phaseB/
+- ...
+- module03/phaseA/
+- module03/phaseB/
+- ...
+- module05/phaseA/
+- module05/phaseB/
+- module05/phaseC/
+- module05/phaseD/
+- module05/phaseE/
+- module06/phaseA/
+- module06/phaseB/
+- module06/phaseC/
+- module06/phaseD/
+- etc., but only as actually needed by existing mapped unit tests
+
+Important rules
+- Do NOT rename classes.
+- Do NOT rename files.
+- Do NOT split classes in this round.
+- Do NOT rewrite test logic.
+- Do NOT change assertions, test bodies, annotations, or method names.
+- Do NOT reorganize production code.
+- Do NOT modify Gradle or unrelated project files unless strictly required by package changes.
+- Only make the minimal package/import/file moves necessary for this first-pass reorganization.
+- Preserve compilation as far as package moves require import/package declaration updates.
+
+Classification rule for this round
+For each test class, gather all rows in plans/module_07/unit_test_mapping.txt belonging to that class.
+
+Case 1: class is mapped only to one module and one phase
+- move the class to that exact module/phase package
+
+Case 2: class is mapped to multiple phases within the same module
+- move the whole class to the earliest phase in which it appears
+- phase order is alphabetical: A before B before C before D before E ...
+- do NOT split the class yet
+- record this class as a mixed-phase class requiring later split
+
+Case 3: class is mapped to multiple modules
+- do NOT attempt complicated restructuring
+- leave the class in place unless there is a clearly dominant mapping and the file content strongly supports a safe move
+- record it clearly in the report
+- be conservative
+
+UNKNOWN handling
+- If a class has UNKNOWN rows only, do not invent a destination.
+- Leave the class in place.
+- Record it in the report.
+- If a class has both UNKNOWN and at least one concrete module/phase, use the same conservative rule as above.
+- Do not force ExampleUnitTest into any module/phase. Treat it as an unmapped placeholder unless the code clearly proves otherwise.
+
+Required method
+1. Parse plans/module_07/unit_test_mapping.txt.
+2. Group entries by test_class.
+3. Determine the target package for each class according to the rules above.
+4. Create the needed package directories under:
+   app/src/test/java/com/tb/swisstrainspotting/
+5. Move each local unit test class file into its target package.
+6. Update package declarations and imports as needed.
+7. Keep filenames and class names unchanged.
+8. Create a report of all classes whose contained test methods map to more than one phase, more than one module, or UNKNOWN.
+
+Output files
+1. Perform the codebase reorganization itself.
+2. Create this report file:
+   plans/module_07/unit_test_mixed_or_ambiguous_classes_round1.txt
+
+Contents of the report file:
+- header line:
+  test_class, modules_found, phases_found, chosen_module, chosen_phase, note
+- one line per class that was not a clean one-module-one-phase mapping
+- for mixed-phase same-module classes, note should say:
+  moved to earliest phase for round 1; class split needed in round 2
+- for UNKNOWN-only classes, note should say:
+  left in place; unmapped or placeholder
+- for more complex ambiguous cases, explain briefly and conservatively
+
+Final response requirements
+At the end, report:
+- which files were moved
+- which classes were identified as mixed-phase or ambiguous
+- which classes were left unchanged due to UNKNOWN or ambiguity
+- exact path of the created report file
+
+Quality bar
+- Be conservative.
+- Do not over-engineer.
+- Prefer a safe first-pass structure over a “perfect” but risky refactor.
+- This round is physical organization only, not semantic refinement.
+
+Final instruction
+Do not make any changes outside:
+- app/src/test/java/com/tb/swisstrainspotting
+- plans/module_07/unit_test_mixed_or_ambiguous_classes_round1.txt

@@ -1,4 +1,4 @@
-package com.tb.swisstrainspotting;
+package com.tb.swisstrainspotting.module05.phaseB;
 
 import com.tb.swisstrainspotting.onnx.LabelLoader;
 

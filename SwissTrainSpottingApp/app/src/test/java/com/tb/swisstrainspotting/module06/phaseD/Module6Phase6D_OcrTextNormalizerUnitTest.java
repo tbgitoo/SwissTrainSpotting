@@ -1,4 +1,4 @@
-package com.tb.swisstrainspotting;
+package com.tb.swisstrainspotting.module06.phaseD;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;

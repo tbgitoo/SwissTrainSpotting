@@ -1,4 +1,4 @@
-package com.tb.swisstrainspotting;
+package com.tb.swisstrainspotting.module05.phaseD;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;

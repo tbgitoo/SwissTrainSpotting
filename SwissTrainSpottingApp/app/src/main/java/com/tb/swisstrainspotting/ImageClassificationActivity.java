@@ -400,10 +400,10 @@ public class ImageClassificationActivity extends AppCompatActivity {
         }
     }
 
-    void applyRoutedResult(RoutedClassificationResult routedResult) {
+    public void applyRoutedResult(RoutedClassificationResult routedResult) {
         tvClassificationResult.setText(formatRoutedResult(routedResult, profileConfig));
     }
-    String formatRoutedResult(RoutedClassificationResult routedResult, ProfileConfig config) {
+    public String formatRoutedResult(RoutedClassificationResult routedResult, ProfileConfig config) {
         return RoutedResultFormatter.format(this, routedResult, config);
     }
 

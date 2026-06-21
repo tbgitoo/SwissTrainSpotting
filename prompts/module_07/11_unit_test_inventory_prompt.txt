@@ -1,0 +1,99 @@
+Task: enumerate and classify all Java/Kotlin local unit tests by module + phase, and write a text file.
+
+This is a classification / repertorization task only.
+Do not refactor, move, rename, or rewrite tests.
+
+Context
+- Repository contains an Android project with local unit tests under:
+  app/src/test/java/com/tb/swisstrainspotting
+  (If that exact path does not exist, inspect the real existing src/test path under app/src/test/java/... and use that actual path. Do not guess beyond what exists in the repo.)
+- These unit tests were historically organized by tested classes / technical concerns, not by project modules.
+- I now need a complete mapping of every individual local unit test to:
+  - module (01, 02, 03, 05, 06)
+  - phase within that module (A, B, C, etc.)
+- Module 04 is a Python module and is intentionally absent from the Java / Android unit test project. Do not assign Java/Kotlin unit tests to module 04.
+- The module plans to use are:
+  - plans/module_01/implementation_plan.md
+  - plans/module_02/implementation_plan.md
+  - plans/module_03/implementation_plan.md
+  - plans/module_05/implementation_plan.md
+  - plans/module_06/implementation_plan.md
+
+Goal
+Create a text file with the columns:
+
+test_class, test_function, module, phase
+
+This is an enumeration / classification task only.
+
+Important constraints
+- DO NOT modify Java/Kotlin/XML source files.
+- DO NOT rename tests.
+- DO NOT move tests.
+- DO NOT create or edit packages.
+- DO NOT rewrite or refactor the test suite.
+- DO NOT infer new modules or phases that are not grounded in the implementation plans.
+- DO NOT classify tests under phases whose purpose is “writing tests” / “test creation” / “testing phase itself” when the actual test content clearly belongs to some earlier functional phase.
+- The output must be based on actual inspection of:
+  1. the implementation plans
+  2. the actual local unit test classes and functions
+- Do not perform any changes outside creating the output file.
+
+Required method
+1. Read all listed implementation plans carefully and extract the module phases exactly as defined there.
+2. Build an internal phase map for modules 01, 02, 03, 05, and 06.
+3. Scan all local unit test classes and all individual test functions under the src/test package tree.
+4. For each individual test function:
+   - identify its test class
+   - inspect the test name and body
+   - inspect the production code it targets if needed
+   - determine which module and which implementation phase the test most directly validates
+5. Use the functional feature/behavior under test as the primary classification criterion.
+6. If a plan contains a dedicated “testing” phase, do NOT mechanically assign all tests there. Instead, map each test to the underlying functional phase it verifies.
+7. If classification is ambiguous, choose the best-supported mapping based on plan wording and tested behavior, and keep going.
+8. If a test truly cannot be mapped confidently, mark module and/or phase as:
+   UNKNOWN
+   But use UNKNOWN sparingly and only when genuinely unavoidable.
+
+Unit-test-specific interpretation rules
+- Focus on local JVM unit tests under app/src/test, not instrumented tests under app/src/androidTest.
+- If a unit test validates a small helper or parser that clearly supports a larger feature, classify it by the larger functional phase it supports, not merely by “utility”.
+- If a test class contains test methods belonging to different phases, still classify each test function individually.
+- Nested test classes should be recorded with their full class identity, for example:
+  OuterTest$InnerTest
+- Parameterized or helper-driven tests should still be represented per actual test function name where possible.
+
+Output requirements
+- Create a plain text file at:
+  plans/module_07/unit_test_mapping.txt
+- If plans/module_07 does not yet exist, create that directory and only that directory.
+- First line must be the header exactly:
+  test_class, test_function, module, phase
+- Then one line per individual test function.
+- Use module values like:
+  01, 02, 03, 05, 06, UNKNOWN
+- Use phase values like:
+  A, B, C, D, etc., or UNKNOWN
+- Keep the file stable, clean, and machine-readable as simple comma-separated text.
+- Sort output by:
+  1. module
+  2. phase
+  3. test_class
+  4. test_function
+
+What I want back in the final response
+- A short summary of what you did
+- The path of the generated file
+- A brief note listing any tests that had to be marked UNKNOWN, if any
+
+Quality bar
+- Be conservative and evidence-based.
+- Use the plans, not superficial filename matching alone.
+- Prefer the actual behavior under test over class naming accidents.
+- This is classification work only, not restructuring work.
+
+Final instruction
+Only create/update:
+plans/module_07/unit_test_mapping.txt
+
+Do not make any code or package changes anywhere else in the repository.

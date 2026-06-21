@@ -1,4 +1,4 @@
-package com.tb.swisstrainspotting;
+package com.tb.swisstrainspotting.module02.phaseD;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -11,17 +11,14 @@ import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.TextView;
 
 import androidx.core.content.FileProvider;
 import androidx.test.core.app.ActivityScenario;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
 
-import com.tb.swisstrainspotting.onnx.ClassificationResult;
-import com.tb.swisstrainspotting.onnx.RoutedClassificationResult;
-import com.tb.swisstrainspotting.onnx.RoutingMode;
-import com.tb.swisstrainspotting.ui.ProfileConfig;
+import com.tb.swisstrainspotting.ImageClassificationActivity;
+import com.tb.swisstrainspotting.R;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,7 +29,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 @RunWith(AndroidJUnit4.class)
-public class ImageClassificationPhaseDTest {
+public class ImageDisplayTest {
 
     private static final String FIXTURE_BASELINE = "Landscape_1.jpg";
     private static final String FIXTURE_EXIF_90 = "Landscape_6.jpg";
@@ -99,84 +96,7 @@ public class ImageClassificationPhaseDTest {
         }
     }
 
-    @Test
-    public void routedDirectResult_isPresentedWithoutConditionalFraming() throws IOException {
-        Intent intent = createIntentWithFixture(FIXTURE_BASELINE);
 
-        try (ActivityScenario<ImageClassificationActivity> scenario = ActivityScenario.launch(intent)) {
-            scenario.onActivity(activity -> {
-                RoutedClassificationResult routedResult = new RoutedClassificationResult(
-                        new ClassificationResult(466, "train", 0.91f),
-                        new ClassificationResult(1, "bees", 0.875f),
-                        RoutingMode.DIRECT
-                );
-
-                activity.applyRoutedResult(routedResult);
-
-                TextView resultView = activity.findViewById(R.id.tv_classification_result);
-                String text = resultView.getText().toString();
-                assertTrue(text.contains("bees"));
-                assertTrue(text.contains("87.5%"));
-                assertTrue(!text.contains("Doesn't look like a train"));
-                assertTrue(!text.contains("Generic classification:"));
-            });
-        }
-    }
-
-
-    @Test
-    public void routedConditionalResult_surfacesGenericAndHypotheticalSpecializedText() throws Exception {
-        Intent intent = createIntentWithFixture(FIXTURE_BASELINE);
-        Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        ProfileConfig hymenopteraConfig = ProfileConfig.load(appContext, "hymenoptera");
-
-        try (ActivityScenario<ImageClassificationActivity> scenario = ActivityScenario.launch(intent)) {
-            scenario.onActivity(activity -> {
-                RoutedClassificationResult routedResult = new RoutedClassificationResult(
-                        new ClassificationResult(980, "volcano", 0.63f),
-                        new ClassificationResult(0, "ants", 0.712f),
-                        RoutingMode.CONDITIONAL
-                );
-
-                String text = activity.formatRoutedResult(routedResult, hymenopteraConfig);
-
-                assertTrue(text.contains("Generic classification: volcano"));
-                assertTrue(text.contains("Not Hymenoptera"));
-                assertTrue(text.contains("if classified within Hymenoptera"));
-                assertTrue(text.contains("ants"));
-                assertTrue(text.contains("71.2%"));
-                assertTrue(!text.contains("Doesn't look like a train"));
-                assertTrue(!text.toLowerCase().contains("train"));
-            });
-        }
-    }
-
-
-    @Test
-    public void routedConditionalResult_swissTrainsProfile_usesTrainDomainWording() throws Exception {
-        Intent intent = createIntentWithFixture(FIXTURE_BASELINE);
-        Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        ProfileConfig swissTrainsConfig = ProfileConfig.load(appContext, "swiss_trains");
-
-        try (ActivityScenario<ImageClassificationActivity> scenario = ActivityScenario.launch(intent)) {
-            scenario.onActivity(activity -> {
-                RoutedClassificationResult routedResult = new RoutedClassificationResult(
-                        new ClassificationResult(980, "volcano", 0.63f),
-                        new ClassificationResult(0, "Re420", 0.99f),
-                        RoutingMode.CONDITIONAL
-                );
-
-                String text = activity.formatRoutedResult(routedResult, swissTrainsConfig);
-
-                assertTrue(text.contains("Generic classification: volcano"));
-                assertTrue(text.contains("Not a train"));
-                assertTrue(text.contains("if classified within SwissTrains"));
-                assertTrue(text.contains("Re420"));
-                assertTrue(text.contains("99.0%"));
-                assertTrue(!text.contains("Not Hymenoptera"));
-            });
-        }
-    }
 
     private static Intent createIntentWithFixture(String assetName) throws IOException {
         Context testContext = InstrumentationRegistry.getInstrumentation().getContext();
