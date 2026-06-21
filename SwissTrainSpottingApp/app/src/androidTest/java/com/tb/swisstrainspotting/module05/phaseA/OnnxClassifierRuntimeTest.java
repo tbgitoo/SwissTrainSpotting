@@ -28,7 +28,7 @@ import java.util.List;
  * <p>Requires {@code mobilenetv2.onnx} and {@code imagenet_classes.txt} in assets.
  */
 @RunWith(AndroidJUnit4.class)
-public class OnnxClassifierInstrumentedTest {
+public class OnnxClassifierRuntimeTest {
 
     private static final float CONFIDENCE_TOLERANCE = 1e-5f;
 

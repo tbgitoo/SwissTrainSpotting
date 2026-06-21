@@ -39,7 +39,7 @@ import java.util.List;
  * {@code hymenoptera.onnx}, {@code hymenoptera_labels.json}.
  */
 @RunWith(AndroidJUnit4.class)
-public class OnnxMultiClassifierTest {
+public class OnnxMultiClassifierCapabilityTest {
 
     private static final float CONFIDENCE_TOLERANCE = 1e-5f;
 

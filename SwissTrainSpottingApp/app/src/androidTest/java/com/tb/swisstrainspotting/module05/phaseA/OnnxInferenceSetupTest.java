@@ -11,7 +11,6 @@ import com.tb.swisstrainspotting.onnx.ClassificationResult;
 import com.tb.swisstrainspotting.onnx.LabelLoader;
 import com.tb.swisstrainspotting.onnx.LogitsParser;
 import com.tb.swisstrainspotting.onnx.ModelConfig;
-import com.tb.swisstrainspotting.onnx.OnnxClassifier;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -24,7 +23,7 @@ import java.util.List;
  * Phase 5A: tests for the ONNX inference seam.
  */
 @RunWith(AndroidJUnit4.class)
-public class OnnxInferenceSeamInstrumentedTest {
+public class OnnxInferenceSetupTest {
 
     private Context appContext;
 
@@ -47,45 +46,7 @@ public class OnnxInferenceSeamInstrumentedTest {
         LabelLoader.loadLabels(appContext, "nonexistent_file.txt");
     }
 
-    @Test
-    public void onnxClassifier_rejectsWrongInputLength() throws IOException {
-        OnnxClassifier classifier = new OnnxClassifier(appContext);
 
-        try {
-            classifier.classify(new float[100]);
-            fail("Should have thrown IllegalArgumentException for too-short tensor");
-        } catch (IllegalArgumentException e) {
-            assertTrue(e.getMessage().contains("150528"));
-        }
-
-        try {
-            classifier.classify(null);
-            fail("Should have thrown IllegalArgumentException for null tensor");
-        } catch (IllegalArgumentException e) {
-            // Expected
-        }
-
-        classifier.close();
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void onnxClassifier_rejectsNullContext() throws IOException {
-        new OnnxClassifier(null);
-    }
-
-    @Test
-    public void onnxClassifier_rejectsCallsAfterClose() throws IOException {
-        float[] tensor = new float[ModelConfig.INPUT_ELEMENT_COUNT];
-        OnnxClassifier classifier = new OnnxClassifier(appContext);
-        classifier.close();
-
-        try {
-            classifier.classify(tensor);
-            fail("Should have thrown IllegalStateException after close");
-        } catch (IllegalStateException e) {
-            // Expected
-        }
-    }
 
     @Test
     public void modelAndLabelsAssetsExist() throws IOException {

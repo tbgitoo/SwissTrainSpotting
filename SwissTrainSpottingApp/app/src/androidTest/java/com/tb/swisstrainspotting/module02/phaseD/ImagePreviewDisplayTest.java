@@ -29,7 +29,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 @RunWith(AndroidJUnit4.class)
-public class ImageDisplayTest {
+public class ImagePreviewDisplayTest {
 
     private static final String FIXTURE_BASELINE = "Landscape_1.jpg";
     private static final String FIXTURE_EXIF_90 = "Landscape_6.jpg";

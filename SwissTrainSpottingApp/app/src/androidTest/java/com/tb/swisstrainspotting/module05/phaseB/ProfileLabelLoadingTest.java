@@ -19,7 +19,7 @@ import java.util.List;
  * Phase 5B: tests for loading Hymenoptera-specific model labels via LabelLoader.
  */
 @RunWith(AndroidJUnit4.class)
-public class HymenopteraLabelLoaderInstrumentedTest {
+public class ProfileLabelLoadingTest {
 
     private Context appContext() {
         return InstrumentationRegistry.getInstrumentation().getTargetContext();

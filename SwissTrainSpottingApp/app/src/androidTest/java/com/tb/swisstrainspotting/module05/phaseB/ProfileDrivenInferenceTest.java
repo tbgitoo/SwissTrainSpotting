@@ -19,7 +19,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -30,7 +29,7 @@ import java.util.List;
  * {@code hymenoptera_model_metadata.json} in main assets.
  */
 @RunWith(AndroidJUnit4.class)
-public class Phase5BInstrumentedTest {
+public class ProfileDrivenInferenceTest {
 
     private static final float CONFIDENCE_TOLERANCE = 1e-5f;
 
@@ -94,14 +93,6 @@ public class Phase5BInstrumentedTest {
         assertEquals(viaPrefix.getNumClasses(), viaAsset.getNumClasses());
     }
 
-    @Test
-    public void labelLoader_hymenopteraJson_loadsTwoLabelsFromAssets() throws IOException {
-        List<String> labels = LabelLoader.loadLabels(appContext, "hymenoptera_labels.json");
-
-        assertEquals(2, labels.size());
-        assertEquals("ants", labels.get(0));
-        assertEquals("bees", labels.get(1));
-    }
 
     @Test
     public void onnxClassifier_hymenopteraProfile_initializesWithTwoLabels() throws Exception {

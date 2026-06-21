@@ -12,7 +12,7 @@ import static org.junit.Assert.*;
 import com.tb.swisstrainspotting.imageprocess.ImagePreprocessor;
 
 @RunWith(AndroidJUnit4.class)
-public class ImagePreprocessorResizeAndSpatialInstrumentedTest {
+public class ImagePreprocessorResizeAndSpatialTest {
 
     // Helper: compute the expected normalized value for a given channel value [0,255]
     private static float normalize(int rawChannel, int channelIndex) {

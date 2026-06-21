@@ -26,7 +26,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @RunWith(AndroidJUnit4.class)
-public class Phase5EInstrumentedTest {
+public class AllowedSetRoutingTest {
 
     private Context appContext;
 

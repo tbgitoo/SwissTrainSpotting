@@ -21,7 +21,7 @@ import org.junit.runner.RunWith;
 import java.io.IOException;
 
 @RunWith(AndroidJUnit4.class)
-public class ProfileConfigInstrumentedTest {
+public class ProfileConfigAwareOutputTest {
 
     private Context appContext;
 

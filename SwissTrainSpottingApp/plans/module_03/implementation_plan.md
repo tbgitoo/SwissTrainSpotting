@@ -137,7 +137,7 @@ All intermediate computations must be performed in float precision (float32), no
 ## 4. Proposed implementation seam
 
 ### Class
-`com.tb.swisstrainspotting.imageprocess.ImagePreprocessor`
+`com.tb.swisstrainspottin.ImagePreprocessor`
 
 ### Public API (minimal)
 ```java

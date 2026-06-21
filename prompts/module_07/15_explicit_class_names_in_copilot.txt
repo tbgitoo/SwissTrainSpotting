@@ -1,0 +1,1 @@
+For each test file, defined semantically precise, minimal class name, renamed via Android Studio refactor if change necessary.

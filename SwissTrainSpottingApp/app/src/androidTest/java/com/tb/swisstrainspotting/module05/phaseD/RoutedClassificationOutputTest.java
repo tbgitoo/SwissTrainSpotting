@@ -5,12 +5,7 @@ import static org.junit.Assert.assertTrue;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
-import android.view.View;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.core.content.FileProvider;
@@ -34,7 +29,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 @RunWith(AndroidJUnit4.class)
-public class ImageClassificationPhaseDTest {
+public class RoutedClassificationOutputTest {
 
     private static final String FIXTURE_BASELINE = "Landscape_1.jpg";
     private static final String FIXTURE_EXIF_90 = "Landscape_6.jpg";

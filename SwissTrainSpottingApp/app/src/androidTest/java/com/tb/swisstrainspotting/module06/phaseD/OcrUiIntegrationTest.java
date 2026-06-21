@@ -42,7 +42,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * so tests do not depend on ML Kit runtime output.
  */
 @RunWith(AndroidJUnit4.class)
-public class Module6Phase6D_OcrUiInstrumentedTest {
+public class OcrUiIntegrationTest {
 
     private static final String FIXTURE_BASELINE = "Landscape_1.jpg";
     private static final String STUB_OCR_TEXT = "STUB-OCR-RE420";

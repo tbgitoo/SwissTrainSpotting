@@ -15,7 +15,7 @@ import com.tb.swisstrainspotting.imageprocess.ImagePreprocessor;
  * Phase A: core tensor contract tests for {@link ImagePreprocessor}.
  */
 @RunWith(AndroidJUnit4.class)
-public class ImagePreprocessorTensorContractInstrumentedTest {
+public class ImagePreprocessorTensorContractTest {
 
     private static final float[] MEAN = {0.485f, 0.456f, 0.406f};
     private static final float[] STD = {0.229f, 0.224f, 0.225f};

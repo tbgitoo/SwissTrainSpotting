@@ -36,7 +36,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * Phase 5A Step 3: end-to-end integration from Bitmap through UI result display.
  */
 @RunWith(AndroidJUnit4.class)
-public class Phase5AStep3InstrumentedTest {
+public class ImageClassificationEndToEndTest {
 
     private static final String METRO_FLON_ASSET = "metro_flon.png";
     private static final long UI_RESULT_TIMEOUT_MS = 60_000L;
