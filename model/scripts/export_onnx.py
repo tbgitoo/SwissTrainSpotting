@@ -1,3 +1,19 @@
+"""Export a trained checkpoint to ONNX with matching labels and metadata artifacts.
+
+Loads <prefix>_best_model.pt from checkpoints and exports a static-graph ONNX model
+with fixed input/output names ("input", "output"), shape [1,3,224,224], opset 17,
+no dynamic axes, and logits-only output (no softmax in the graph).
+
+Writes one artifact family consisting of:
+  - {prefix}.onnx
+  - {prefix}_labels.json
+  - {prefix}_model_metadata.json
+
+Labels follow lexicographic class index order consistent with training and verification.
+Metadata records the preprocessing contract, tensor layout, and normalization expected
+by the Android pipeline. Final validation is delegated to verify_onnx.py.
+"""
+
 from __future__ import annotations
 
 import argparse
@@ -22,6 +38,12 @@ def parse_args() -> argparse.Namespace:
 
 
 def build_model(num_classes: int) -> nn.Module:
+    """Create MobileNetV2 with the same architecture as in train.py but without pretrained weights.
+
+    The classifier head is sized to num_classes (loaded state_dict must match).
+    This function shares structure with train.build_model but is separate because trained checkpoint
+    carries its own class_to_idx and we don't need ImageNet weights for export.
+    """
     model = mobilenet_v2(weights=None)
     in_features = model.classifier[1].in_features
     model.classifier[1] = nn.Linear(in_features, num_classes)

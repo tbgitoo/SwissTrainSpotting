@@ -1,0 +1,92 @@
+Task: review Python docstrings in ./scripts and add or refine only the missing, high-value ones.
+
+Working directory
+- current working directory is the Python root
+- Python scripts are in:
+  ./scripts
+
+Read first
+- AGENTS.md
+- ./plans/module_04/implementation_plan.md
+- ../plans/01_architecture.md
+
+Goal
+Add or refine concise, high-value Python docstrings in the main Python scripts, following the same principle as on the Android side:
+
+- do NOT document everything
+- do add documentation where a future developer would otherwise miss important context from the plans
+- focus on responsibilities, contracts, artifact conventions, profile usage, and non-obvious workflow assumptions
+
+Important intent
+The goal is NOT to restate obvious code.
+The goal is to capture the knowledge that is clear from the implementation plans and architecture, but not reliably inferable from code alone.
+
+Focus especially on
+- training/export workflow responsibilities
+- profile-driven behavior
+- artifact naming conventions and relationships
+- preprocessing contract assumptions shared with Android
+- ONNX export / verification expectations
+- distinction between reusable workflow logic and one-off script wiring
+- non-obvious assumptions around metadata, labels, tensor shape/layout, and artifact families
+
+Scope
+Inspect Python files under:
+- ./scripts
+
+Only document where useful:
+- module docstrings for important scripts
+- public functions that are important for training/export/verification/profile handling
+- important classes if any exist
+- only non-trivial helpers if they carry important workflow meaning
+
+Do NOT
+- add docstrings to every trivial helper
+- restate what is already obvious from the function name and body
+- add decorative or tutorial-style prose
+- change logic
+- change signatures
+- change imports unless strictly required by docstring edits
+- reformat files unnecessarily
+- rename functions, files, or variables
+- create new files
+- modify files outside ./scripts
+
+Cleanup rule
+- If a target module/function already has a docstring, improve or simplify it rather than stacking more on top
+- There must be at most one module docstring per file
+- Remove duplicate or redundant docstrings if present
+- Reduce phase-history wording if it does not help a future developer
+
+Style
+- concise
+- technical
+- maintainer-oriented
+- grounded in code + plans
+- no fluff
+- no boilerplate AI tone
+- use normal Python docstring style consistently within each file
+- prefer short, information-dense docstrings
+
+Decision rule
+For each Python file in ./scripts:
+1. Identify whether the file is a key script in the training/export/verification workflow.
+2. If yes, ensure the file has a useful module docstring.
+3. Inspect public functions/classes.
+4. Add or improve docstrings only where:
+   - the behavior is integration-relevant
+   - the function participates in profile handling, export, verification, preprocessing alignment, or artifact generation
+   - a future developer would benefit from plan-level context
+5. Leave trivial or obvious functions undocumented if a docstring would add little value.
+
+Deliverable
+- modify only files under ./scripts
+- docstrings only
+- no logic changes
+
+Final response
+At the end, summarize:
+- which files were updated
+- which module docstrings were added or refined
+- which important functions/classes received docstrings
+- whether any redundant docstrings were removed

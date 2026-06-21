@@ -1,3 +1,14 @@
+"""Validate dataset classes and image counts against a profile before training.
+
+Checks:
+  - raw_root directory exists
+  - number of class subdirectories meets the profile minimum
+  - each class has at least min_images_per_class images (only .jpg/.jpeg counted)
+  - class IDs are printed in lexicographic order (same as train.py's class_to_idx order)
+
+Does not modify filesystem — purely a pre-flight check. Also estimates train/val split sizes.
+"""
+
 from __future__ import annotations
 
 import argparse

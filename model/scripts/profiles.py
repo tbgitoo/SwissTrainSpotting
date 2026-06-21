@@ -1,3 +1,12 @@
+"""Central profile registry and filesystem conventions for all Module 4 scripts.
+
+All training, export, and verification scripts resolve dataset and artifact paths
+through this module rather than hardcoding them locally. Supported profiles are
+declared in PROFILE_REGISTRY and define raw data roots, validation manifests, and
+artifact naming prefixes. Class identity is derived only from immediate subdirectory
+names under raw_root.
+"""
+
 from __future__ import annotations
 
 from dataclasses import dataclass

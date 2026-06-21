@@ -1,3 +1,15 @@
+"""Validate exported ONNX artifacts against the architecture contract and metadata.
+
+Checks:
+  - onnx.checker passes, opset == 17
+  - exactly one input "input" (shape [1,3,224,224]) and one output "output"
+  - labels.json class count matches metadata num_classes
+  - preprocessing contract fields in metadata are correct
+  - ONNX Runtime produces valid logits from a real image via shared preprocessing
+
+Optionally writes a tensor-head fixture JSON for Android-side verification.
+"""
+
 from __future__ import annotations
 
 import argparse

@@ -1,3 +1,10 @@
+"""Create a deterministic validation split manifest for a dataset profile.
+
+Split is manifest-based: writes <prefix>_val_manifest.json with entries sorted by class_id and path.
+Raw files are never moved, renamed, or mutated — only referenced via repo-relative paths stored in the manifest.
+train.py reads this manifest to partition data at train time without touching raw files.
+"""
+
 from __future__ import annotations
 
 import argparse

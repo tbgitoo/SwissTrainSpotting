@@ -80,20 +80,19 @@ Add concise documentation where it is most useful.
 
 ---
 
-### Phase 7B — Structural review
-Review whether the current layout is good enough as-is.
+###Phase 7B — Structural review
 
-Produce:
-- `plans/module_07/structural_review_checklist.md`
+Review whether the current layout clearly reflects functional responsibilities and remains understandable for future work.
 
-Checklist should contain:
-- short summary of current structure
-- main findings
-- proposal for improved organization, if worthwhile
-- manual cleanup steps, if a refactor is judged useful
-- explicit sign-off: reviewed only / manually applied / partially applied
+Improvements focus on:
 
-**Default assumption:** keep current structure unless manual cleanup clearly adds value.
+- aligning Java packages with coherent functional units (e.g. preprocessing, inference, OCR, UI)
+- regrouping tests by module/phase with consistent, behavior-oriented naming
+- updating existing plans conceptually to a v2 state to reflect the current, refactored structure
+
+Changes are applied through custom prompts, or if necessary manually in Android Studio where they improve clarity.
+
+Default assumption: keep current structure unless cleanup clearly adds value.
 
 ---
 

@@ -1,3 +1,12 @@
+"""MobileNetV2 transfer learning: freeze backbone, train classifier head only.
+
+Train only the classifier head of a MobileNetV2 initialized with ImageNet1K_V1 weights. Preprocessing is
+resize-only to 224x224 with ImageNet normalization (RGB, NCHW, float32), matching the
+Android contract exactly. Labels are ordered lexicographically by class folder name across
+all scripts (profile -> list_class_dirs -> class_to_idx). Saves the best-validation epoch
+checkpoint as <prefix>_best_model.pt which export_onnx.py loads and verify_onnx.py verifies.
+"""
+
 from __future__ import annotations
 
 import argparse
@@ -22,6 +31,12 @@ NUM_WORKERS = 0
 
 
 class ImagePathDataset(Dataset):
+    """Load images from paths + class indices, applying the preprocessing contract.
+
+    Preprocessing: resize to 224x224 (stretch), RGB, ImageNet normalize, NCHW, float32.
+    This must match Android's Module 3 preprocessing exactly.
+    """
+
     def __init__(self, items: list[tuple[Path, int]], transform) -> None:
         self.items = items
         self.transform = transform
@@ -89,6 +104,11 @@ def build_splits(profile_name: str) -> tuple[list[tuple[Path, int]], list[tuple[
 
 
 def build_model(num_classes: int) -> nn.Module:
+    """Create MobileNetV2 with ImageNet1K_V1 pretrained weights, frozen backbone.
+
+    Only the classifier head's `nn.Linear` is unfrozen (requires_grad=True set on its params).
+    This implements the transfer-learning policy: backbone stays fixed, only head trains.
+    """
     model = mobilenet_v2(weights=MobileNet_V2_Weights.IMAGENET1K_V1)
     for parameter in model.parameters():
         parameter.requires_grad = False
@@ -98,6 +118,10 @@ def build_model(num_classes: int) -> nn.Module:
 
 
 def evaluate(model: nn.Module, loader: DataLoader, criterion: nn.Module, device: torch.device) -> tuple[float, float]:
+    """Compute mean loss and accuracy over a dataloader.
+
+    Sums weighted loss (by batch size) to avoid per-batch averaging bias when batches differ in size.
+    """
     model.eval()
     total_loss = 0.0
     total = 0
