@@ -1,0 +1,66 @@
+Task: split one mixed-phase Android instrumented test class into two phase-aligned test classes within module 03.
+
+This is a targeted round-2 cleanup.
+Do not perform any unrelated refactoring.
+
+Context
+- The class to split is:
+  app/src/androidTest/java/com/tb/swisstrainspotting/module03/phaseA/ImagePreprocessorInstrumentedTest.java
+- This class currently contains tests belonging to:
+  - module 03 phase A
+  - module 03 phase B
+- The split is already decided. This is a mechanical file split, not a reclassification task.
+
+Required split
+
+1. Create:
+   app/src/androidTest/java/com/tb/swisstrainspotting/module03/phaseA/ImagePreprocessorTensorContractInstrumentedTest.java
+
+   This file must contain only these test methods:
+   - tensorLength_is150528
+   - uniformRgb_1_2_3_producesExpectedChannels
+   - singlePixel_mapsToCorrectNchwIndex
+   - nullBitmap_throws
+
+   Rationale:
+   These tests validate the core tensor contract of ImagePreprocessor:
+   tensor length, channel normalization/layout, index mapping, and null-input contract.
+
+2. Create:
+   app/src/androidTest/java/com/tb/swisstrainspotting/module03/phaseB/ImagePreprocessorResizeAndSpatialInstrumentedTest.java
+
+   This file must contain only these test methods:
+   - resize_stretchesNon224UniformImage
+   - quadrantSpatialSanity
+
+   Rationale:
+   These tests validate resize behavior and preservation of spatial structure.
+
+Rules
+- Do NOT change test logic.
+- Do NOT change assertions.
+- Do NOT change method names.
+- Do NOT change helper behavior.
+- Keep the split minimal and mechanical.
+- It is acceptable, and preferred here, to duplicate small helper methods/constants into both new classes if needed:
+  - normalize(...)
+  - index(...)
+  - createUniformBitmap(...)
+  - MEAN
+  - STD
+  - EPSILON
+- Do NOT introduce inheritance, abstract base classes, or a shared utility abstraction for this split.
+- Keep each new test file self-contained.
+- Update package declarations and imports as needed.
+- Remove the old file:
+  app/src/androidTest/java/com/tb/swisstrainspotting/module03/phaseA/ImagePreprocessorInstrumentedTest.java
+  only after the two replacement classes are created successfully.
+
+Deliverable
+- only the targeted split above
+- no unrelated file changes
+
+Final response
+- list created files
+- list removed file
+- explicitly mention that helper methods/constants were duplicated intentionally to keep the files self-contained
