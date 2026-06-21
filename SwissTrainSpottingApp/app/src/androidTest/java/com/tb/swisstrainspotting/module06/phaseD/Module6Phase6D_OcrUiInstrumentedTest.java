@@ -1,4 +1,4 @@
-package com.tb.swisstrainspotting;
+package com.tb.swisstrainspotting.module06.phaseD;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -16,6 +16,11 @@ import androidx.core.content.FileProvider;
 import androidx.test.core.app.ActivityScenario;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
+
+import com.tb.swisstrainspotting.ImageClassificationActivity;
+import com.tb.swisstrainspotting.OcrAnalyzer;
+import com.tb.swisstrainspotting.OcrResult;
+import com.tb.swisstrainspotting.R;
 
 import org.junit.After;
 import org.junit.Test;

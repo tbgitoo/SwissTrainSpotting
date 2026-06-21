@@ -1,0 +1,79 @@
+Task: generate a Markdown package placement plan for the main Android source classes, without modifying any code.
+
+Context
+- Project: SwissTrainSpotting Android app
+- Current issue: many or most main source classes are still flat under the root Java package:
+  com.tb.swisstrainspotting
+- I want a semantic package cleanup plan, not a module/phase-based structure.
+- The module structure used for tests/reporting must NOT drive the main package structure.
+- I want Cursor to determine / confirm the best semantic package placement for each class.
+
+Architectural intent
+- Keep package structure minimal, semantically meaningful, and reusable.
+- Target package families are along these lines:
+  - com.tb.swisstrainspotting.ui
+  - com.tb.swisstrainspotting.ocr
+  - com.tb.swisstrainspotting.onnx
+  - com.tb.swisstrainspotting.imageprocess
+- Additional packages are allowed only if clearly justified by actual class responsibilities, and should remain minimal (for example config, model, or util if truly needed).
+- Activities should remain in a central application-oriented package (typically ui), because they are the app-specific orchestration layer and not intended to be reusable components.
+
+Hard constraints
+- DO NOT move files.
+- DO NOT edit code.
+- DO NOT rename classes.
+- DO NOT refactor architecture.
+- DO NOT invent new abstractions or layers unless there is a very strong reason.
+- DO NOT organize main code by moduleXX or phaseY.
+- Keep the package taxonomy small and pragmatic: not much more, not much less.
+
+What to inspect
+- Inspect the main Android source tree (not androidTest) and enumerate all classes currently under:
+  app/src/main/java/com/tb/swisstrainspotting
+  including subpackages if they already exist.
+- Determine the best semantic package placement for each class based on its actual responsibility and coupling.
+
+Required output
+Create a Markdown file at:
+
+plans/module_07/main_package_reorg_plan.md
+
+The document must contain these sections:
+
+# Main package reorganization plan
+
+## 1. Proposed target package structure
+List the target package structure you recommend, briefly explaining the role of each package.
+
+## 2. Class-by-class placement table
+For every main source class, provide:
+- class name
+- current package/path
+- proposed package
+- rationale (one short line)
+- note if ambiguous
+
+Use one entry per class. Be complete.
+
+## 3. Classes that should remain close to the application root / UI layer
+List Activities and other app-heart orchestration classes that should remain central and should NOT be treated as reusable library-style components.
+
+## 4. Ambiguities / manual decisions
+List classes whose placement is genuinely ambiguous, and explain the competing options briefly.
+
+## 5. Suggested manual execution order
+Provide a short, practical order in which I should manually move packages/classes in Android Studio to minimize breakage.
+
+Important quality bar
+- Be conservative.
+- Prefer obvious semantic groupings over theoretical purity.
+- The goal is a human-executable package placement plan, not an auto-refactor.
+- If two classes are tightly coupled, mention that.
+- If a class is Android-lifecycle-heavy, note that it should stay near ui/app orchestration.
+- Avoid package proliferation.
+
+Final instruction
+Only create/update the Markdown file:
+plans/module_07/main_package_reorg_plan.md
+
+Do not make any code changes anywhere in the repository.

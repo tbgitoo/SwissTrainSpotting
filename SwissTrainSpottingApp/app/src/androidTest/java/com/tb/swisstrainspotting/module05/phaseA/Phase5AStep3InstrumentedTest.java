@@ -1,4 +1,4 @@
-package com.tb.swisstrainspotting;
+package com.tb.swisstrainspotting.module05.phaseA;
 
 import static org.junit.Assert.*;
 
@@ -13,6 +13,13 @@ import androidx.core.content.FileProvider;
 import androidx.test.core.app.ActivityScenario;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
+
+import com.tb.swisstrainspotting.ClassificationResult;
+import com.tb.swisstrainspotting.ImageClassificationActivity;
+import com.tb.swisstrainspotting.ImagePreprocessor;
+import com.tb.swisstrainspotting.ModelConfig;
+import com.tb.swisstrainspotting.OnnxClassifier;
+import com.tb.swisstrainspotting.R;
 
 import org.junit.After;
 import org.junit.Before;

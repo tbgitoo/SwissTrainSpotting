@@ -371,7 +371,7 @@ public class ImageClassificationActivity extends AppCompatActivity {
         });
     }
 
-    void applyOcrResult(OcrResult result) {
+    public void applyOcrResult(OcrResult result) {
         if (result == null || result.isEmpty()) {
             lastOcrResult = null;
             if (llOcrSection != null) {

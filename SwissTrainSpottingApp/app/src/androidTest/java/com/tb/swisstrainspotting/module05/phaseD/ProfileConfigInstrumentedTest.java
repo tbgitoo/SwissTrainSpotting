@@ -1,4 +1,4 @@
-package com.tb.swisstrainspotting;
+package com.tb.swisstrainspotting.module05.phaseD;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -9,6 +9,9 @@ import android.content.Context;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
+
+import com.tb.swisstrainspotting.ProfileConfig;
+import com.tb.swisstrainspotting.RoutedResultFormatter;
 
 import org.json.JSONException;
 import org.junit.Before;

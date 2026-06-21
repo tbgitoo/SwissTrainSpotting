@@ -64,8 +64,8 @@ public final class RoutedResultFormatter {
         return genericLine + "\n" + conditionalLine;
     }
 
-    static String formatConditionalLine(Context context, ProfileConfig profileConfig,
-                                        String specializedLabel, float confidencePercent) {
+    public static String formatConditionalLine(Context context, ProfileConfig profileConfig,
+                                               String specializedLabel, float confidencePercent) {
         String outOfScopePrefix = profileConfig != null ? profileConfig.getOutOfScopePrefix() : "";
         String domainDisplayName = profileConfig != null ? profileConfig.getDomainDisplayName() : "";
         return context.getString(

@@ -1,0 +1,4 @@
+test_class, modules_found, phases_found, chosen_module, chosen_phase, note
+ImageClassificationPhaseDTest, 02+05, D, UNKNOWN, UNKNOWN, Case 3 — cross-module (mapped to module_02 Phase D for EXIF/display and module_05 Phase D for routing logic). Left in place at root due to ambiguity. Split into class-level or file-level files will be needed per module in a later round.
+ImagePreprocessorInstrumentedTest, 03, A+B, 03, A, Case 2 — mapped to phases A and B within same module. Moved to module03/phaseA (earliest) for round 1; class split needed in round 2.
+Phase5AStep1Test, 05, A+B, 05, A, Case 2 — mapped to phases A and B within same module (outer class = Phase A tests, inner LabelLoaderHymenopteraTest nested class = Phase B tests). Moved to module05/phaseA (earliest) for round 1; class split needed in round 2.

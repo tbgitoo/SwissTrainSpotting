@@ -1,4 +1,4 @@
-package com.tb.swisstrainspotting;
+package com.tb.swisstrainspotting.module03.phaseA;
 
 import android.graphics.Bitmap;
 
@@ -8,6 +8,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import static org.junit.Assert.*;
+
+import com.tb.swisstrainspotting.ImagePreprocessor;
 
 @RunWith(AndroidJUnit4.class)
 public class ImagePreprocessorInstrumentedTest {

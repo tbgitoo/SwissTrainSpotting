@@ -1,4 +1,4 @@
-package com.tb.swisstrainspotting;
+package com.tb.swisstrainspotting.module05.phaseA;
 
 import static org.junit.Assert.*;
 
@@ -6,6 +6,12 @@ import android.content.Context;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
+
+import com.tb.swisstrainspotting.ClassificationResult;
+import com.tb.swisstrainspotting.LabelLoader;
+import com.tb.swisstrainspotting.LogitsParser;
+import com.tb.swisstrainspotting.ModelConfig;
+import com.tb.swisstrainspotting.OnnxClassifier;
 
 import org.junit.Before;
 import org.junit.Test;
