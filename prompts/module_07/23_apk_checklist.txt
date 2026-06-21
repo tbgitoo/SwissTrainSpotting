@@ -1,0 +1,49 @@
+Task: create a markdown checklist describing how to manually build an installable APK for this Android project using Android Studio as the primary workflow.
+
+IMPORTANT: This is a documentation-only task. Do NOT modify any project files, Gradle files, signing configs, or keystore files.
+
+Working directory
+- Android project root
+
+Read first
+- AGENTS.md
+- app/build.gradle
+
+Goal
+Produce a concise markdown file:
+
+  plans/module_07/apk_checklist.md
+
+The checklist must describe how a developer can manually produce and install an APK.
+
+Critical constraints
+- DO NOT create or modify any keystore
+- DO NOT expose any local filesystem paths
+- DO NOT reference user-specific directories
+- DO NOT include secrets or credentials
+- DO NOT change build.gradle
+- DO NOT automate anything
+- DO NOT run builds
+- DO NOT introduce CI/CD or Play Store publishing
+- The document must be repository-safe and shareable
+
+Content requirements
+
+1. Build options overview
+- explain difference between debug APK and release APK
+- clearly state that debug APK is installable and sufficient for testing/review (recommended path)
+
+2. Primary method: Android Studio GUI (required section)
+- describe menu navigation:
+  Build → Build Bundle(s) / APK(s) → Build APK(s)
+- describe how to locate the built APK via the Android Studio notification (“Locate”)
+- emphasize that this is the simplest and safest method
+
+3. Alternative method: Gradle CLI (optional)
+- include:
+  ./gradlew assembleDebug
+  ./gradlew assembleRelease
+- keep short and clearly secondary to Android Studio
+
+4. Output location (generic only)
+- describe typical structure:
