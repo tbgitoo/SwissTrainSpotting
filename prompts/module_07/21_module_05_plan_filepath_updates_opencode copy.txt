@@ -1,0 +1,89 @@
+Task: review plans/module_05/implementation_plan.md and update only outdated literal file/class/resource references caused by Android-side refactoring.
+
+Working directory
+- current working directory is the Android root
+
+Read first
+- AGENTS.md
+- plans/module_05/implementation_plan.md
+
+Also inspect the current repository structure as needed, especially:
+- app/src/main/java/
+- app/src/main/res/
+- app/src/main/AndroidManifest.xml
+
+Goal
+Check whether plans/module_05/implementation_plan.md contains any outdated literal references after the Android refactoring.
+
+Important intent
+This is a path/reference correction task only.
+The implementation logic, phase logic, testing logic, and historical narrative must remain unchanged.
+
+Allowed changes
+Only update references of these kinds if they are now wrong in the repository:
+- file paths
+- package-qualified class locations
+- class names if they were renamed
+- resource file names / resource locations
+- manifest path references
+- example prompt snippets, but only where they mention outdated paths/class names/resource names
+
+Examples of acceptable edits
+- outdated Java file paths
+- outdated package names
+- outdated drawable/raw resource names
+- outdated activity registration references if the class location changed
+
+Do NOT
+- do not rewrite the module purpose
+- do not change workflow steps unless a literal path/class/resource reference inside them is wrong
+- do not rewrite testing strategy
+- do not rewrite risks
+- do not modernize language
+- do not add “v2” wording inside the document unless needed as part of the filename itself
+- do not clean style
+- do not shorten or expand sections
+- do not add new files or requirements beyond the required v2 output file if changes are needed
+- do not touch any other plan file
+- do not change anything that is still correct
+- do not make speculative changes
+
+Decision rule
+For each explicit path/class/resource reference in plans/module_05/implementation_plan.md:
+1. Check whether it still matches the current repository.
+2. If it is still correct, leave it unchanged.
+3. If it is outdated, update it to the exact current reference.
+4. If a statement is conceptual rather than a literal path/reference, leave it unchanged.
+
+Special caution
+- MainActivity and ImageClassificationActivity may still intentionally remain in the root package. Do not change their plan references unless the real repository shows otherwise.
+- If the plan mentions a placeholder image/resource that has been renamed or moved, update only that literal resource reference.
+- If no literal references need updating, make no file changes at all.
+- This is an a posteriori file path fix, so that if re-run according to this plan, the files would be created at the location where they currently are, so even in create file instructions, the paths need to be updated.
+- Similarly, check whether new file paths, are associated with updated java packages.
+
+Output behavior
+- If NO updates are needed:
+  - do not modify any file
+  - do not create implementation_plan_v2.md
+  - final response must explicitly say that no outdated references were found and no changes were made
+
+- If updates ARE needed:
+  - create:
+    plans/module_05/implementation_plan_v2.md
+  - copy the original content and change only the outdated literal references
+  - do not modify the original plans/module_05/implementation_plan.md
+  - do not make any other edits beyond the minimal necessary reference corrections
+
+Deliverable
+- either no file change at all
+- or exactly one new file:
+  plans/module_05/implementation_plan_v2.md
+
+Final response
+- state clearly whether updates were needed or not
+- if no updates were needed, say so explicitly
+- if updates were needed, list each corrected reference briefly and give the path of the new v2 file
+
+Special precautions
+- If uncertain whether a reference is outdated, leave it unchanged and report that uncertainty instead of editing.
