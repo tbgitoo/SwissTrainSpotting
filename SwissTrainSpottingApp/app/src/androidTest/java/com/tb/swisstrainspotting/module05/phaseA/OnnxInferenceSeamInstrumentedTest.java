@@ -21,10 +21,10 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * Phase 5A Step 1: tests + scaffolding for the ONNX inference seam.
+ * Phase 5A: tests for the ONNX inference seam.
  */
 @RunWith(AndroidJUnit4.class)
-public class Phase5AStep1Test {
+public class OnnxInferenceSeamInstrumentedTest {
 
     private Context appContext;
 
@@ -117,55 +117,5 @@ public class Phase5AStep1Test {
 
         assertEquals("Only class available is 0", 0, result.getClassIndex());
         assertEquals("Single-element softmax confidence should be 1.0", 1.0f, result.getConfidence(), 1e-6);
-    }
-
-    /**
-     * Unit tests for loading and resolving Hymenoptera model labels via LabelLoader.
-     *
-     * <p>Two label formats are covered: the built-in JSON path from the profile,
-     * and an explicit plain-text-style resolution (via the same {@code loadLabels}
-     * entry point). These tests prove that profile-based loading is NOT limited to
-     * ImageNet's plain-text labels.
-     */
-    public static class LabelLoaderHymenopteraTest {
-
-        @Test
-        public void loadJsonLabels_hymenoptera_returnsTwoLabels() throws IOException {
-            List<String> labels = LabelLoader.loadLabels(appContext(), "hymenoptera_labels.json");
-
-            assertNotNull("labels must not be null", labels);
-            assertEquals(2, labels.size());
-            assertFalse(labels.isEmpty());
-        }
-
-        @Test
-        public void loadJsonLabels_hymenoptera_labelsCorrect() throws IOException {
-            List<String> labels = LabelLoader.loadLabels(appContext(), "hymenoptera_labels.json");
-
-            assertEquals("ants", labels.get(0));
-            assertEquals("bees", labels.get(1));
-        }
-
-        @Test
-        public void loadJsonLabels_hymenoptera_notEqualImagenetCount() {
-            try {
-                List<String> imagenet = LabelLoader.loadDefaultLabels(appContext());
-                List<String> hymenoptera = LabelLoader.loadLabels(appContext(), "hymenoptera_labels.json");
-
-                assertNotEquals("Hymenoptera labels count must differ from ImageNet",
-                        imagenet.size(), hymenoptera.size());
-            } catch (IOException e) {
-                fail("Should not throw for existing label files: " + e.getMessage());
-            }
-        }
-
-        @Test(expected = IOException.class)
-        public void loadJsonLabels_nonexistentFile_throws() throws IOException {
-            LabelLoader.loadLabels(appContext(), "nonexistent_labels.json");
-        }
-
-        private Context appContext() {
-            return androidx.test.platform.app.InstrumentationRegistry.getInstrumentation().getTargetContext();
-        }
     }
 }

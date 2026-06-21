@@ -1,4 +1,4 @@
-package com.tb.swisstrainspotting.module03.phaseA;
+package com.tb.swisstrainspotting.module03.phaseB;
 
 import android.graphics.Bitmap;
 
@@ -12,7 +12,7 @@ import static org.junit.Assert.*;
 import com.tb.swisstrainspotting.imageprocess.ImagePreprocessor;
 
 @RunWith(AndroidJUnit4.class)
-public class ImagePreprocessorInstrumentedTest {
+public class ImagePreprocessorResizeAndSpatialInstrumentedTest {
 
     // Helper: compute the expected normalized value for a given channel value [0,255]
     private static float normalize(int rawChannel, int channelIndex) {
@@ -41,99 +41,14 @@ public class ImagePreprocessorInstrumentedTest {
     private static final float[] STD = {0.229f, 0.224f, 0.225f};
     private static final float EPSILON = 1e-4f;
 
-    // Test 1: tensorLength_is150528
-    @Test
-    public void tensorLength_is150528() {
-        Bitmap bitmap = createUniformBitmap(128, 64, 32,
-                ImagePreprocessor.INPUT_WIDTH,
-                ImagePreprocessor.INPUT_HEIGHT);
-        float[] result = ImagePreprocessor.preprocess(bitmap);
-        assertEquals("tensor length must be 3 × "
-                        + ImagePreprocessor.INPUT_WIDTH
-                        + " × "
-                        + ImagePreprocessor.INPUT_HEIGHT
-                , ImagePreprocessor.TENSOR_LENGTH, result.length);
-    }
 
-    // Test 2: uniformRgb_1_2_3_producesExpectedChannels
-    @Test
-    public void uniformRgb_1_2_3_producesExpectedChannels() {
-        Bitmap bitmap = createUniformBitmap(1, 2, 3, 224, 224);
-        float[] result = ImagePreprocessor.preprocess(bitmap);
-
-        // All positions share the same source color => each channel plane is uniform
-        float expectedR = normalize(1, 0);
-        float expectedG = normalize(2, 1);
-        float expectedB = normalize(3, 2);
-
-        // Check first position of each plane and last of each plane
-        int rPlaneStart = index(0, 0, 0);    // 0
-        int gPlaneStart = index(1, 0, 0);    // 50176
-        int bPlaneStart = index(2, 0, 0);    // 100352
-
-        assertEquals("R plane at start", expectedR, result[rPlaneStart], EPSILON);
-        assertEquals("R plane at end",   expectedR, result[rPlaneStart + 50175], EPSILON);
-
-        assertEquals("G plane at start", expectedG, result[gPlaneStart], EPSILON);
-        assertEquals("G plane at end",   expectedG, result[gPlaneStart + 50175], EPSILON);
-
-        assertEquals("B plane at start", expectedB, result[bPlaneStart], EPSILON);
-        assertEquals("B plane at end",   expectedB, result[bPlaneStart + 50175], EPSILON);
-    }
-
-    // Test 3: singlePixel_mapsToCorrectNchwIndex
-    @Test
-    public void singlePixel_mapsToCorrectNchwIndex() {
-        int w = 224;
-        int h = 224;
-        Bitmap bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
-        // Fill with black (R=0, G=0, B=0)
-        int[] pixels = new int[w * h];
-        for (int i = 0; i < pixels.length; i++) {
-            pixels[i] = 0xFF000000; // A=255, R=0, G=0, B=0
-        }
-        bitmap.setPixels(pixels, 0, w, 0, 0, w, h);
-
-        // Set single red pixel at (x=20, y=10)
-        pixels[10 * w + 20] = 0xFF_FF_00_00; // R=255, G=0, B=0
-        bitmap.setPixels(new int[]{pixels[10 * w + 20]}, 0, 1, 20, 10, 1, 1);
-
-        float[] result = ImagePreprocessor.preprocess(bitmap);
-
-        int rIndex = index(0, 10, 20); // channel=R
-        int gIndex = index(1, 10, 20); // channel=G
-        int bIndex = index(2, 10, 20); // channel=B
-
-        float expectedR = normalize(255, 0);
-        float expectedG = normalize(0, 1);
-        float expectedB = normalize(0, 2);
-
-        assertEquals("Red at (x=20, y=10)", expectedR, result[rIndex], EPSILON);
-        assertEquals("Green at (x=20, y=10)", expectedG, result[gIndex], EPSILON);
-        assertEquals("Blue at (x=20, y=10)", expectedB, result[bIndex], EPSILON);
-
-        // Green channel at black (0,0) should equal normalize(0, 1) which equals expectedG
-        int gAtBlack = index(1, 0, 0);
-        assertEquals("Green at black pixel (0,0)", expectedG, result[gAtBlack], EPSILON);
-
-        // Far-away location must differ from the red pixel in the R channel
-        int rFar = index(0, 200, 200);
-        assertNotEquals("R value far away should differ from red pixel",
-                expectedR, result[rFar], EPSILON);
-    }
-
-    // Test 4: nullBitmap_throws
-    @Test(expected = IllegalArgumentException.class)
-    public void nullBitmap_throws() {
-        ImagePreprocessor.preprocess(null);
-    }
 
     // ========================================================================
-    // Module 3 §7 — additional secondary validation tests (Prompt 3)
+    // Module 3B — additional secondary validation tests (Prompt 3)
     // ========================================================================
 
     /**
-     * Test 5: resize_stretchesNon224UniformImage
+     * Test 1: resize_stretchesNon224UniformImage
      *
      * Create a 100×50 synthetic ARGB_8888 bitmap, fill every pixel with
      * uniform RGB(128,128,128), run preprocess(), and assert that the full
@@ -179,7 +94,7 @@ public class ImagePreprocessorInstrumentedTest {
     }
 
     /**
-     * Test 6: quadrantSpatialSanity
+     * Test 2: quadrantSpatialSanity
      *
      * Create a 224×224 synthetic ARGB_8888 bitmap where the top-left quadrant
      * (x=0…111, y=0…111) is pure red RGB(255,0,0) and all remaining pixels

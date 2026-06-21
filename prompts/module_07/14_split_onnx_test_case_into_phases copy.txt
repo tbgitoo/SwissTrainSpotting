@@ -1,0 +1,80 @@
+Task: split one mixed-phase Android instrumented test class into two phase-aligned test classes within module 05.
+
+This is a targeted round-2 cleanup.
+Do not perform any unrelated refactoring.
+
+Context
+- The class to split is:
+  app/src/androidTest/java/com/tb/swisstrainspotting/module05/phaseA/Phase5AStep1Test.java
+- This class currently contains tests belonging to:
+  - module 05 phase A
+  - module 05 phase B
+- The split is already decided. This is a mechanical file split, not a reclassification task.
+- The current phase-B tests are inside the nested static class:
+  LabelLoaderHymenopteraTest
+
+Required split
+
+1. Create:
+   app/src/androidTest/java/com/tb/swisstrainspotting/module05/phaseA/OnnxInferenceSeamInstrumentedTest.java
+
+   This file must contain only these phase-A test methods:
+   - labelLoader_imagenet_loads1000Labels
+   - labelLoader_throwsOnMissingFile
+   - onnxClassifier_rejectsWrongInputLength
+   - onnxClassifier_rejectsNullContext
+   - onnxClassifier_rejectsCallsAfterClose
+   - modelAndLabelsAssetsExist
+   - logitsParser_argmax_withLargeClassCount
+   - logitsParser_singleElement_returnsClassZeroWithConfidenceOne
+
+   It may keep the setup needed for these tests:
+   - private Context appContext;
+   - @Before setUp()
+
+   Rationale:
+   These tests validate the baseline ONNX inference seam:
+   default ImageNet labels, model/asset presence, classifier input/state contracts,
+   and logits parsing behavior.
+
+2. Create:
+   app/src/androidTest/java/com/tb/swisstrainspotting/module05/phaseB/HymenopteraLabelLoaderInstrumentedTest.java
+
+   This file must contain only these phase-B test methods, currently inside the nested class:
+   - loadJsonLabels_hymenoptera_returnsTwoLabels
+   - loadJsonLabels_hymenoptera_labelsCorrect
+   - loadJsonLabels_hymenoptera_notEqualImagenetCount
+   - loadJsonLabels_nonexistentFile_throws
+
+   This file should become a normal top-level test class, not a nested class.
+
+   It is acceptable to keep a small local helper such as:
+   - private Context appContext()
+   or an equivalent minimal setup mechanism.
+
+   Rationale:
+   These tests validate Hymenoptera-specific label loading behavior and therefore belong to module 05 phase B.
+
+Rules
+- Do NOT change test logic.
+- Do NOT change assertions.
+- Do NOT change method names.
+- Do NOT change helper behavior.
+- Keep the split minimal and mechanical.
+- It is acceptable, and preferred here, to duplicate small setup/helper code if needed to keep the files self-contained.
+- Do NOT introduce inheritance, abstract base classes, or a shared utility abstraction for this split.
+- Remove the nested LabelLoaderHymenopteraTest from the phase-A file.
+- Update package declarations and imports as needed.
+- Remove the old file:
+  app/src/androidTest/java/com/tb/swisstrainspotting/module05/phaseA/Phase5AStep1Test.java
+  only after the two replacement classes are created successfully.
+
+Deliverable
+- only the targeted split above
+- no unrelated file changes
+
+Final response
+- list created files
+- list removed file
+- explicitly mention that the former nested phase-B class was extracted into its own top-level test file
+- explicitly mention whether setup/helper code was duplicated intentionally to keep the files self-contained
