@@ -35,7 +35,7 @@ public class RoutedClassificationOutputTest {
     private static final String FIXTURE_EXIF_90 = "Landscape_6.jpg";
 
     @Test
-    public void routedDirectResult_isPresentedWithoutConditionalFraming() throws IOException {
+    public void directRoute_noConditionalFraming() throws IOException {
         Intent intent = createIntentWithFixture(FIXTURE_BASELINE);
 
         try (ActivityScenario<ImageClassificationActivity> scenario = ActivityScenario.launch(intent)) {
@@ -60,7 +60,7 @@ public class RoutedClassificationOutputTest {
 
 
     @Test
-    public void routedConditionalResult_surfacesGenericAndHypotheticalSpecializedText() throws Exception {
+    public void conditionalResult_genericTextDisplayed() throws Exception {
         Intent intent = createIntentWithFixture(FIXTURE_BASELINE);
         Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
         ProfileConfig hymenopteraConfig = ProfileConfig.load(appContext, "hymenoptera");
@@ -88,7 +88,7 @@ public class RoutedClassificationOutputTest {
 
 
     @Test
-    public void routedConditionalResult_swissTrainsProfile_usesTrainDomainWording() throws Exception {
+    public void conditionalResult_swissTrains_profileTextDisplayed() throws Exception {
         Intent intent = createIntentWithFixture(FIXTURE_BASELINE);
         Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
         ProfileConfig swissTrainsConfig = ProfileConfig.load(appContext, "swiss_trains");

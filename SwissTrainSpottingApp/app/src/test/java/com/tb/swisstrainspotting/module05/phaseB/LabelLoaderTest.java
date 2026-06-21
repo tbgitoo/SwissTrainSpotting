@@ -9,6 +9,8 @@ import java.io.IOException;
 
 public class LabelLoaderTest {
 
+
+
     @Test(expected = IllegalArgumentException.class)
     public void loadLabels_nullContext_throws() throws IOException {
         LabelLoader.loadLabels(null, "imagenet_classes.txt");

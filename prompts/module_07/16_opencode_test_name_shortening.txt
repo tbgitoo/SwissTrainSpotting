@@ -1,0 +1,85 @@
+Task: shorten overly long Android instrumented test method names for better readability in the Android Studio test runner.
+
+This is a rename-only cleanup task.
+Do not modify test logic, assertions, class names, packages, helper methods, or unit tests.
+
+Scope
+- Apply this task ONLY to Android instrumented tests under:
+  app/src/androidTest/java/com/tb/swisstrainspotting and subfolders
+- Do NOT modify anything under:
+  app/src/test/java/com/tb/swisstrainspotting
+- Do NOT touch main source code under app/src/main
+
+Hard constraints
+- ONLY rename methods annotated with @Test.
+- Do NOT rename:
+  - class names
+  - file names
+  - package names
+  - helper methods
+  - setup/teardown methods (@Before, @After, etc.)
+  - private utility methods
+  - fields
+  - constants
+- Do NOT change method bodies.
+- Do NOT change assertions.
+- Do NOT change imports unless strictly required by the rename operation.
+- Do NOT reorder tests.
+- Do NOT move files.
+- Do NOT create or delete files.
+- Do NOT perform any refactoring beyond renaming eligible @Test methods.
+- Do NOT touch unit tests in app/src/test at all.
+
+Goal
+Shorten only those @Test method names that are clearly too long for practical readability in the Android Studio test runner, while preserving the semantic core of what the test proves.
+
+Naming intent
+- Optimize for test runner readability.
+- Put the key asserted behavior early in the name.
+- Prefer compact names of the form:
+  - thing_behavior
+  - condition_expectedOutcome
+- Avoid storytelling / fixture history in the method name unless essential.
+- Avoid repeating information already provided by the class name.
+- Do NOT overcompress into vague or cryptic names.
+- Do NOT use abbreviations unless they are already standard and obvious in context.
+
+Decision rule
+For each @Test method in androidTest:
+1. If the current name is already short, clear, and runner-readable, keep it unchanged.
+2. If the current name is overly long or likely truncated in the runner, shorten it.
+3. Preserve the actual meaning of the test.
+4. Do not rename methods merely for stylistic perfection; rename only where the change brings real readability benefit.
+
+Examples of desired shortening style
+- previewShowsDrawableAfterLoadingBaselineFixture
+  -> imageLoaded_previewShowsDrawable
+- previewShowsExifCorrectedDimensionsForLandscape6
+  -> exifCorrection_appliedToPreview
+- metroFlon_pipeline_bitmapPreprocessInferenceAndParse
+  -> pipeline_producesValidClassification
+- activity_displaysClassificationResultAfterImageLoad
+  -> classificationResult_displayedInUi
+
+Examples of methods likely already fine and usually not worth renaming
+- tensorLength_is150528
+- nullBitmap_throws
+- quadrantSpatialSanity
+
+Important restriction
+- Since test methods are not called by production code, renaming @Test methods is allowed here.
+- However, do NOT rename any method that is not directly annotated with @Test.
+- Nested helper methods or setup methods must remain untouched.
+
+Deliverable
+- Apply the method renames directly in the Android instrumented test source files only.
+- At the end, provide a summary listing:
+  - file/class
+  - old method name
+  - new method name
+
+Quality bar
+- Be conservative.
+- Rename only what is obviously too long or runner-unfriendly.
+- Prefer fewer, high-value renames over broad churn.
+- This is readability cleanup only, not redesign.

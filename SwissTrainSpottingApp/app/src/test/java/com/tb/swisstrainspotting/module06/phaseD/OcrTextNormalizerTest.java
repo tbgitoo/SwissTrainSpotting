@@ -15,7 +15,7 @@ import java.util.List;
 /**
  * Phase 6D: JVM unit tests for {@link OcrTextNormalizer}.
  */
-public class Module6Phase6D_OcrTextNormalizerUnitTest {
+public class OcrTextNormalizerTest {
 
     @Test
     public void normalize_nullInput_returnsEmpty() {

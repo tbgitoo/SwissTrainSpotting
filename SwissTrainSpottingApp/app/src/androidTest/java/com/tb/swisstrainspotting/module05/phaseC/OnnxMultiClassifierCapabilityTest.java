@@ -127,7 +127,7 @@ public class OnnxMultiClassifierCapabilityTest {
      * Assert classifier A produces consistent results across runs with no cross-contamination.
      */
     @Test
-    public void isolation_repeatabilityAcrossClassifiers() {
+    public void isolation_consistentAcrossA_B_AOrder() {
         float[] sharedInput = new float[ModelConfig.INPUT_ELEMENT_COUNT];
         Arrays.fill(sharedInput, 0.5f);
 
@@ -161,7 +161,7 @@ public class OnnxMultiClassifierCapabilityTest {
      * Assert classifier B produces consistent results across runs with no cross-contamination.
      */
     @Test
-    public void isolation_repeatabyAcrossClassifiers_BFirst() {
+    public void isolation_consistentAcrossB_A_BOrder() {
         float[] sharedInput = new float[ModelConfig.INPUT_ELEMENT_COUNT];
 
         // Classifier B first round
@@ -197,7 +197,7 @@ public class OnnxMultiClassifierCapabilityTest {
      * Close one classifier and verify the other remains operational.
      */
     @Test
-    public void lifecycle_closeOneClassifier_otherStillWorks() throws IOException, JSONException {
+    public void lifecycle_closeOne_otherStillWorks() throws IOException, JSONException {
         float[] sharedInput = new float[ModelConfig.INPUT_ELEMENT_COUNT];
 
         // Both should work initially

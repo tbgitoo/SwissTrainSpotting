@@ -61,7 +61,7 @@ public class ImageClassificationEndToEndTest {
     }
 
     @Test
-    public void metroFlon_pipeline_bitmapPreprocessInferenceAndParse() throws IOException {
+    public void pipeline_validatesBitmapToResult() throws IOException {
         Bitmap bitmap = decodeTestAsset(METRO_FLON_ASSET);
         assertNotNull("metro_flon.png must decode to a Bitmap", bitmap);
 
@@ -82,7 +82,7 @@ public class ImageClassificationEndToEndTest {
     }
 
     @Test
-    public void activity_displaysClassificationResultAfterImageLoad() throws Exception {
+    public void ui_displaysClassificationResult() throws Exception {
         Uri imageUri = copyTestAssetToAppCache(METRO_FLON_ASSET);
         Intent intent = new Intent(appContext, ImageClassificationActivity.class);
         intent.putExtra(ImageClassificationActivity.EXTRA_PICKER_RESULT_URI, imageUri.toString());

@@ -35,7 +35,7 @@ public class ImagePreviewDisplayTest {
     private static final String FIXTURE_EXIF_90 = "Landscape_6.jpg";
 
     @Test
-    public void previewShowsDrawableAfterLoadingBaselineFixture() throws IOException {
+    public void imageLoaded_previewShowsDrawable() throws IOException {
         Intent intent = createIntentWithFixture(FIXTURE_BASELINE);
 
         try (ActivityScenario<ImageClassificationActivity> scenario = ActivityScenario.launch(intent)) {
@@ -48,7 +48,7 @@ public class ImagePreviewDisplayTest {
     }
 
     @Test
-    public void previewShowsExifCorrectedDimensionsForLandscape6() throws IOException {
+    public void exifRotation_correctedToPortraitAsWidth() throws IOException {
         Context testContext = InstrumentationRegistry.getInstrumentation().getContext();
         Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
         copyFixtureToAppCache(testContext, appContext, FIXTURE_EXIF_90);

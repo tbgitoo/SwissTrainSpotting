@@ -7,7 +7,7 @@ import com.tb.swisstrainspotting.onnx.LogitsParser;
 
 import org.junit.Test;
 
-public class LogitsParserHymenopteraTest {
+public class LogitsParserProfileTest {
 
     @Test
     public void parse_withTwoClasses_findsArgmax() {
