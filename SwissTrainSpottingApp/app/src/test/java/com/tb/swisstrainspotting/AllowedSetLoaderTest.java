@@ -2,6 +2,8 @@ package com.tb.swisstrainspotting;
 
 import static org.junit.Assert.*;
 
+import com.tb.swisstrainspotting.onnx.AllowedSetLoader;
+
 import org.junit.Test;
 
 public class AllowedSetLoaderTest {

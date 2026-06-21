@@ -2,6 +2,8 @@ package com.tb.swisstrainspotting;
 
 import static org.junit.Assert.assertEquals;
 
+import com.tb.swisstrainspotting.ui.ProfileConfig;
+
 import org.junit.Test;
 
 public class ProfileConfigTest {

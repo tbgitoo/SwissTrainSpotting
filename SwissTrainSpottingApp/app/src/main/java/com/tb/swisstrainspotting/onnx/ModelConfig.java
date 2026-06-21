@@ -1,4 +1,4 @@
-package com.tb.swisstrainspotting;
+package com.tb.swisstrainspotting.onnx;
 
 import com.tb.swisstrainspotting.imageprocess.ImagePreprocessor;
 

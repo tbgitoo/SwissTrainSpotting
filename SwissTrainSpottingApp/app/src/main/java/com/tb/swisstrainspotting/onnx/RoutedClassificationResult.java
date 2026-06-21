@@ -1,7 +1,6 @@
-package com.tb.swisstrainspotting;
+package com.tb.swisstrainspotting.onnx;
 
-import com.tb.swisstrainspotting.onnx.ClassificationResult;
-import com.tb.swisstrainspotting.onnx.RoutingMode;
+import com.tb.swisstrainspotting.ui.RoutedResultFormatter;
 
 /**
  * Holds both classifier outputs alongside the routing decision that determines how to present them.

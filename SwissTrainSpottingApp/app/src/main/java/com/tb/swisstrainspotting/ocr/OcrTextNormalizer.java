@@ -62,7 +62,7 @@ public final class OcrTextNormalizer {
     /**
      * Collapse runs of whitespace characters to a single ASCII space.
      */
-    static String collapseWhitespace(String input) {
+    public static String collapseWhitespace(String input) {
         // Use simple regex for readability; the alternative is manual iteration which adds ~20 lines.
         return input.replaceAll("\\s+", " ");
     }

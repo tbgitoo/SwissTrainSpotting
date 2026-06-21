@@ -26,6 +26,14 @@ import com.tb.swisstrainspotting.imageprocess.ImagePreprocessor;
 import com.tb.swisstrainspotting.ocr.MlKitOcrAnalyzer;
 import com.tb.swisstrainspotting.ocr.OcrAnalyzer;
 import com.tb.swisstrainspotting.ocr.OcrResult;
+import com.tb.swisstrainspotting.onnx.AllowedSetLoader;
+import com.tb.swisstrainspotting.onnx.ClassificationRouter;
+import com.tb.swisstrainspotting.onnx.ModelProfile;
+import com.tb.swisstrainspotting.onnx.OnnxClassifier;
+import com.tb.swisstrainspotting.onnx.RoutedClassificationResult;
+import com.tb.swisstrainspotting.ui.AcquisitionMode;
+import com.tb.swisstrainspotting.ui.ProfileConfig;
+import com.tb.swisstrainspotting.ui.RoutedResultFormatter;
 
 import java.io.File;
 import java.io.FileNotFoundException;

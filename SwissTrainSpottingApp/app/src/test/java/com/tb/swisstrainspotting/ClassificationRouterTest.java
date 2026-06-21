@@ -5,6 +5,9 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import com.tb.swisstrainspotting.onnx.ClassificationResult;
+import com.tb.swisstrainspotting.onnx.ClassificationRouter;
+import com.tb.swisstrainspotting.onnx.ModelConfig;
+import com.tb.swisstrainspotting.onnx.RoutedClassificationResult;
 import com.tb.swisstrainspotting.onnx.RoutingMode;
 
 import org.junit.Test;

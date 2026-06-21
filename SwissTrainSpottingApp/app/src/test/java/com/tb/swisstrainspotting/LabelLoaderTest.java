@@ -1,5 +1,8 @@
 package com.tb.swisstrainspotting;
 
+import com.tb.swisstrainspotting.onnx.LabelLoader;
+import com.tb.swisstrainspotting.onnx.ModelProfile;
+
 import org.junit.Test;
 
 import java.io.IOException;

@@ -1,5 +1,7 @@
 package com.tb.swisstrainspotting;
 
+import com.tb.swisstrainspotting.onnx.LabelLoader;
+
 import java.io.IOException;
 
 /**

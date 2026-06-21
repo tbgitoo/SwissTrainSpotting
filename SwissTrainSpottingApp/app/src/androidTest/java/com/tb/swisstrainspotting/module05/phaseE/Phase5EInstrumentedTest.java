@@ -10,10 +10,10 @@ import android.content.Context;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
 
-import com.tb.swisstrainspotting.AllowedSetLoader;
+import com.tb.swisstrainspotting.onnx.AllowedSetLoader;
 import com.tb.swisstrainspotting.onnx.ClassificationResult;
-import com.tb.swisstrainspotting.ClassificationRouter;
-import com.tb.swisstrainspotting.RoutedClassificationResult;
+import com.tb.swisstrainspotting.onnx.ClassificationRouter;
+import com.tb.swisstrainspotting.onnx.RoutedClassificationResult;
 import com.tb.swisstrainspotting.onnx.RoutingMode;
 
 import org.junit.Before;

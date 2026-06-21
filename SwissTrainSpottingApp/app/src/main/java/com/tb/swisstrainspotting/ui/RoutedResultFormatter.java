@@ -1,8 +1,10 @@
-package com.tb.swisstrainspotting;
+package com.tb.swisstrainspotting.ui;
 
 import android.content.Context;
 
+import com.tb.swisstrainspotting.R;
 import com.tb.swisstrainspotting.onnx.ClassificationResult;
+import com.tb.swisstrainspotting.onnx.RoutedClassificationResult;
 import com.tb.swisstrainspotting.onnx.RoutingMode;
 
 /**

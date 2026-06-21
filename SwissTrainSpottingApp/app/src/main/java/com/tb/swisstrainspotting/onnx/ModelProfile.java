@@ -1,6 +1,6 @@
-package com.tb.swisstrainspotting;
+package com.tb.swisstrainspotting.onnx;
 
-import com.tb.swisstrainspotting.onnx.ClassificationResult;
+import com.tb.swisstrainspotting.ui.ProfileConfig;
 
 import org.json.JSONArray;
 import org.json.JSONException;

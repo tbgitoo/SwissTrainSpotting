@@ -1,7 +1,6 @@
-package com.tb.swisstrainspotting;
+package com.tb.swisstrainspotting.onnx;
 
-import com.tb.swisstrainspotting.onnx.ClassificationResult;
-import com.tb.swisstrainspotting.onnx.RoutingMode;
+import com.tb.swisstrainspotting.ImageClassificationActivity;
 
 import java.util.HashSet;
 import java.util.Set;

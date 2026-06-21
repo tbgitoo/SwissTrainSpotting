@@ -1,10 +1,9 @@
-package com.tb.swisstrainspotting;
+package com.tb.swisstrainspotting.onnx;
 
 import android.content.Context;
 
+import com.tb.swisstrainspotting.ImageClassificationActivity;
 import com.tb.swisstrainspotting.imageprocess.ImagePreprocessor;
-import com.tb.swisstrainspotting.onnx.ClassificationResult;
-import com.tb.swisstrainspotting.onnx.LogitsParser;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

@@ -10,8 +10,8 @@ import android.content.Context;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
 
-import com.tb.swisstrainspotting.ProfileConfig;
-import com.tb.swisstrainspotting.RoutedResultFormatter;
+import com.tb.swisstrainspotting.ui.ProfileConfig;
+import com.tb.swisstrainspotting.ui.RoutedResultFormatter;
 
 import org.json.JSONException;
 import org.junit.Before;

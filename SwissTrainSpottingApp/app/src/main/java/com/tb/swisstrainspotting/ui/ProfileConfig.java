@@ -1,6 +1,9 @@
-package com.tb.swisstrainspotting;
+package com.tb.swisstrainspotting.ui;
 
 import android.content.Context;
+
+import com.tb.swisstrainspotting.onnx.ModelProfile;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
