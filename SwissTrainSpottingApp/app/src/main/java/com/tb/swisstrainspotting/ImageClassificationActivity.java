@@ -22,6 +22,8 @@ import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.exifinterface.media.ExifInterface;
 
+import com.tb.swisstrainspotting.imageprocess.ImagePreprocessor;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;

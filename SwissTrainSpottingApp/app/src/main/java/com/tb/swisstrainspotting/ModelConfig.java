@@ -1,5 +1,7 @@
 package com.tb.swisstrainspotting;
 
+import com.tb.swisstrainspotting.imageprocess.ImagePreprocessor;
+
 /**
  * Constants for the Phase 5A generic MobileNetV2 reference model only.
  *

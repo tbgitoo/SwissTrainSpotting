@@ -1,7 +1,9 @@
-package com.tb.swisstrainspotting;
+package com.tb.swisstrainspotting.imageprocess;
 
 import android.graphics.Bitmap;
 import android.graphics.Color;
+
+import com.tb.swisstrainspotting.ImageClassificationActivity;
 
 /**
  * Converts an upright Bitmap into the planar NCHW {@code float[]} tensor expected by ONNX models.

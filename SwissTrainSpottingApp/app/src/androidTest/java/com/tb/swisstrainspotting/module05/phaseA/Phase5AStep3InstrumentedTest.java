@@ -16,7 +16,7 @@ import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.tb.swisstrainspotting.ClassificationResult;
 import com.tb.swisstrainspotting.ImageClassificationActivity;
-import com.tb.swisstrainspotting.ImagePreprocessor;
+import com.tb.swisstrainspotting.imageprocess.ImagePreprocessor;
 import com.tb.swisstrainspotting.ModelConfig;
 import com.tb.swisstrainspotting.OnnxClassifier;
 import com.tb.swisstrainspotting.R;
