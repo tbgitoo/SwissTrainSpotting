@@ -1,5 +1,7 @@
 package com.tb.swisstrainspotting;
 
+import com.tb.swisstrainspotting.onnx.ClassificationResult;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;

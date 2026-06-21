@@ -1,4 +1,4 @@
-package com.tb.swisstrainspotting;
+package com.tb.swisstrainspotting.onnx;
 
 /**
  * Presentation mode for a routed classification result in Phase 5D.

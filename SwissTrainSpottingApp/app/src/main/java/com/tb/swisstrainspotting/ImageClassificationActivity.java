@@ -23,6 +23,9 @@ import androidx.core.content.FileProvider;
 import androidx.exifinterface.media.ExifInterface;
 
 import com.tb.swisstrainspotting.imageprocess.ImagePreprocessor;
+import com.tb.swisstrainspotting.ocr.MlKitOcrAnalyzer;
+import com.tb.swisstrainspotting.ocr.OcrAnalyzer;
+import com.tb.swisstrainspotting.ocr.OcrResult;
 
 import java.io.File;
 import java.io.FileNotFoundException;

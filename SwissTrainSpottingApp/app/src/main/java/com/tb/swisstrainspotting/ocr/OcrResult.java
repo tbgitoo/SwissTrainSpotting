@@ -1,4 +1,4 @@
-package com.tb.swisstrainspotting;
+package com.tb.swisstrainspotting.ocr;
 
 /**
  * Immutable holder for OCR text from the auxiliary image-pass (Module 6).

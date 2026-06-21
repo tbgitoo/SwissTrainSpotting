@@ -1,4 +1,4 @@
-package com.tb.swisstrainspotting;
+package com.tb.swisstrainspotting.ocr;
 
 import android.graphics.Bitmap;
 

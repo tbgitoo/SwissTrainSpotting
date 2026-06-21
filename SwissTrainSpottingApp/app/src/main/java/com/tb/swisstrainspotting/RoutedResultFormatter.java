@@ -2,6 +2,9 @@ package com.tb.swisstrainspotting;
 
 import android.content.Context;
 
+import com.tb.swisstrainspotting.onnx.ClassificationResult;
+import com.tb.swisstrainspotting.onnx.RoutingMode;
+
 /**
  * Formats a {@link RoutedClassificationResult} into user-facing strings using Android string resources.
  *

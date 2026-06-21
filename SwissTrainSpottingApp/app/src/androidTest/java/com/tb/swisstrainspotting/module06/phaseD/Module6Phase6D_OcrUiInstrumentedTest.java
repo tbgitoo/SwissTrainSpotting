@@ -18,8 +18,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.tb.swisstrainspotting.ImageClassificationActivity;
-import com.tb.swisstrainspotting.OcrAnalyzer;
-import com.tb.swisstrainspotting.OcrResult;
+import com.tb.swisstrainspotting.ocr.OcrAnalyzer;
+import com.tb.swisstrainspotting.ocr.OcrResult;
 import com.tb.swisstrainspotting.R;
 
 import org.junit.After;

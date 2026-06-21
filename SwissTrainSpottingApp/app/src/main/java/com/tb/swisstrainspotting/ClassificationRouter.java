@@ -1,5 +1,8 @@
 package com.tb.swisstrainspotting;
 
+import com.tb.swisstrainspotting.onnx.ClassificationResult;
+import com.tb.swisstrainspotting.onnx.RoutingMode;
+
 import java.util.HashSet;
 import java.util.Set;
 

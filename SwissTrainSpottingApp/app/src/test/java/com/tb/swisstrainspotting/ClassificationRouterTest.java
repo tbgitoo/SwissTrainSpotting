@@ -4,6 +4,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
+import com.tb.swisstrainspotting.onnx.ClassificationResult;
+import com.tb.swisstrainspotting.onnx.RoutingMode;
+
 import org.junit.Test;
 
 public class ClassificationRouterTest {

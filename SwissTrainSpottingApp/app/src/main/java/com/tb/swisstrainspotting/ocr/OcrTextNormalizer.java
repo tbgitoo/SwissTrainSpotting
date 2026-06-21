@@ -1,4 +1,4 @@
-package com.tb.swisstrainspotting;
+package com.tb.swisstrainspotting.ocr;
 
 import com.google.mlkit.vision.text.Text;
 

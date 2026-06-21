@@ -1,4 +1,6 @@
-package com.tb.swisstrainspotting;
+package com.tb.swisstrainspotting.onnx;
+
+import com.tb.swisstrainspotting.RoutedClassificationResult;
 
 /**
  * Immutable, single-label classification output from one ONNX inference pass.

@@ -5,6 +5,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.google.mlkit.vision.text.Text;
+import com.tb.swisstrainspotting.ocr.OcrTextNormalizer;
 
 import org.junit.Test;
 

@@ -7,7 +7,7 @@ import android.content.Context;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
 
-import com.tb.swisstrainspotting.ClassificationResult;
+import com.tb.swisstrainspotting.onnx.ClassificationResult;
 import com.tb.swisstrainspotting.LabelLoader;
 import com.tb.swisstrainspotting.ModelConfig;
 import com.tb.swisstrainspotting.ModelProfile;

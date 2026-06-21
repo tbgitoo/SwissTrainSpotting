@@ -8,6 +8,9 @@ import java.util.List;
 
 import static org.junit.Assert.*;
 
+import com.tb.swisstrainspotting.onnx.ClassificationResult;
+import com.tb.swisstrainspotting.onnx.LogitsParser;
+
 /**
  * JVM unit tests for LogitsParser (pure Java helper).
  */

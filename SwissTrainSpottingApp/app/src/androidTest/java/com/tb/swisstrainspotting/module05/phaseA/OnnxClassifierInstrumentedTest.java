@@ -10,7 +10,7 @@ import androidx.test.platform.app.InstrumentationRegistry;
 import com.tb.swisstrainspotting.LabelLoader;
 import com.tb.swisstrainspotting.OnnxClassifier;
 import com.tb.swisstrainspotting.ModelConfig;
-import com.tb.swisstrainspotting.ClassificationResult;
+import com.tb.swisstrainspotting.onnx.ClassificationResult;
 
 
 import org.junit.After;

@@ -2,6 +2,9 @@ package com.tb.swisstrainspotting;
 
 import static org.junit.Assert.*;
 
+import com.tb.swisstrainspotting.onnx.ClassificationResult;
+import com.tb.swisstrainspotting.onnx.LogitsParser;
+
 import org.junit.Test;
 
 public class LogitsParserHymenopteraTest {

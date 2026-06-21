@@ -14,7 +14,7 @@ import androidx.test.core.app.ActivityScenario;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
 
-import com.tb.swisstrainspotting.ClassificationResult;
+import com.tb.swisstrainspotting.onnx.ClassificationResult;
 import com.tb.swisstrainspotting.ImageClassificationActivity;
 import com.tb.swisstrainspotting.imageprocess.ImagePreprocessor;
 import com.tb.swisstrainspotting.ModelConfig;
