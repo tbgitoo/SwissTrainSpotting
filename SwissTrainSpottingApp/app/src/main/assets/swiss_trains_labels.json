@@ -4,36 +4,106 @@
   "classes": [
     {
       "index": 0,
+      "id": "ICE",
+      "display_name": "ICE"
+    },
+    {
+      "index": 1,
       "id": "bls",
       "display_name": "bls"
     },
     {
-      "index": 1,
+      "index": 2,
+      "id": "bombardier",
+      "display_name": "bombardier"
+    },
+    {
+      "index": 3,
       "id": "dpz",
       "display_name": "dpz"
     },
     {
-      "index": 2,
-      "id": "eurofima",
-      "display_name": "eurofima"
+      "index": 4,
+      "id": "eurocity",
+      "display_name": "eurocity"
     },
     {
-      "index": 3,
+      "index": 5,
+      "id": "ew3",
+      "display_name": "ew3"
+    },
+    {
+      "index": 6,
+      "id": "ew4",
+      "display_name": "ew4"
+    },
+    {
+      "index": 7,
+      "id": "flirt_1",
+      "display_name": "flirt_1"
+    },
+    {
+      "index": 8,
+      "id": "giruno",
+      "display_name": "giruno"
+    },
+    {
+      "index": 9,
       "id": "ic2000",
       "display_name": "ic2000"
     },
     {
-      "index": 4,
+      "index": 10,
+      "id": "ic2000_refit",
+      "display_name": "ic2000_refit"
+    },
+    {
+      "index": 11,
+      "id": "ic_db",
+      "display_name": "ic_db"
+    },
+    {
+      "index": 12,
       "id": "icn",
       "display_name": "icn"
     },
     {
-      "index": 5,
+      "index": 13,
+      "id": "mav",
+      "display_name": "mav"
+    },
+    {
+      "index": 14,
+      "id": "re_420",
+      "display_name": "re_420"
+    },
+    {
+      "index": 15,
+      "id": "re_460",
+      "display_name": "re_460"
+    },
+    {
+      "index": 16,
       "id": "regio_express",
       "display_name": "regio_express"
     },
     {
-      "index": 6,
+      "index": 17,
+      "id": "regio_express_refit",
+      "display_name": "regio_express_refit"
+    },
+    {
+      "index": 18,
+      "id": "sob_interregio",
+      "display_name": "sob_interregio"
+    },
+    {
+      "index": 19,
+      "id": "sob_regional",
+      "display_name": "sob_regional"
+    },
+    {
+      "index": 20,
       "id": "tl_metro",
       "display_name": "tl_metro"
     }
