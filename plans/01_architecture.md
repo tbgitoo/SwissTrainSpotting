@@ -1,6 +1,6 @@
 # SwissTrainSpotting — Architecture & Implementation Plan
 
-**Status:** Conservative v2  
+**Status:** Implemented 
 **Target stack:** Java + XML Android app, Python transfer learning, ONNX Runtime on-device, ML Kit OCR (optional)  
 **Scope:** Local-only, no backend, no persistence, minimal permissions
 
@@ -95,7 +95,7 @@ Note: OCR is not part of the critical path and may be skipped.
 - Output:
   - validated end-to-end behavior
   - documented code (JavaDoc / Python docstrings)
-  - reviewed project structure (proposal level)
+  - reviewed project structure (proposal level, no formal sign-off)
   - installable APK
 - Milestone: Application runs end-to-end on device and can be packaged and reused
 
@@ -112,6 +112,7 @@ SwissTrainSpotting/
 ├── model/
 │   ├── data/raw/<class>/
 │   ├── scripts/
+│   ├── plans/
 │   └── export/
 │       ├── hymenoptera.onnx
 │       ├── hymenoptera_labels.json
@@ -121,6 +122,7 @@ SwissTrainSpotting/
 │       └── swiss_trains_model_metadata.json
 │
 └── SwissTrainSpottingApp/
+    ├── plans/
     └── app/src/main/
         ├── assets/
         │   ├── mobilenetv2.onnx
@@ -191,7 +193,7 @@ Critical requirements:
 4. Train model (Module 4)
 5. Inference (Module 5)
 6. OCR (Module 6, optional)
-7. Finalize Testing (Module 7)
+7. Finalize Documentation, Packaging, Usage Testing (Module 7)
 
 ---
 
